@@ -1,0 +1,77 @@
+pipeline {
+    agent any
+
+    environment {
+        NODE_VERSION = "22.12.0"
+        PNPM_VERSION = "10.4.1"
+        IMAGE_NAME = "react-app"
+        CONTAINER_NAME = "react-container"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git'
+            }
+        }
+
+        stage('Setup Node & Install Dependencies') {
+            steps {
+                script {
+                    sh "curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -"
+                    sh "apt-get install -y nodejs"
+                    sh "npm install -g pnpm@${PNPM_VERSION}"
+                    sh "pnpm install"
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'pnpm run build'
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
+                script {
+                    sh "docker build -t ${IMAGE_NAME}:latest ."
+                    sh "docker tag ${IMAGE_NAME}:latest ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+                    sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    // ✅ 컨테이너가 있으면 삭제하고 새로 실행
+                    sh "docker stop ${CONTAINER_NAME} || true"
+                    sh "docker rm ${CONTAINER_NAME} || true"
+                    sh "docker run -d --name ${CONTAINER_NAME} -p 80:80 ${IMAGE_NAME}:latest"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment Successful!'
+        }
+        failure {
+            echo '❌ Deployment Failed! Debugging Info:'
+
+            // 🔍 컨테이너 상태 확인
+            sh "docker ps -a"
+
+            // 🔍 컨테이너 로그 확인 (최신 100줄)
+            sh "docker logs --tail=100 ${CONTAINER_NAME} || true"
+
+            // 🔍 사용 중인 포트 확인
+            sh "netstat -tulnp || true"
+
+            // 🔍 현재 실행 중인 프로세스 확인
+            sh "ps aux || true"
+        }
+    }
+}
