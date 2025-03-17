@@ -43,8 +43,8 @@ pipeline {
             steps {
                 script {
                     sh """
-                    sudo apt-get update && sudo apt-get install -y nodejs
-                    sudo npm install -g pnpm@${PNPM_VERSION}
+                    apt-get update && apt-get install -y nodejs
+                    npm install -g pnpm@${PNPM_VERSION}
                     cd ${CLONE_DIR} && pnpm install
                     """
                 }
