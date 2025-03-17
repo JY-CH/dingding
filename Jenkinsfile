@@ -17,7 +17,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'GitLab-dlawoduf15-AccessToken', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                    withCredentials([usernamePassword(credentialsId: 'dlawoduf15', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
                         def repo_url = REPO_URL.replace("https://", "https://${env.GIT_USER}:${env.GIT_TOKEN}@")
 
                         if (fileExists("${CLONE_DIR}/.git")) {
