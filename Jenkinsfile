@@ -18,21 +18,22 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dlawoduf15', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
-                        def repo_url = REPO_URL.replace("https://", "https://${env.GIT_USER}:${env.GIT_TOKEN}@")
+                        sh """
+                        export GIT_USER=\${GIT_USER}
+                        export GIT_TOKEN=\${GIT_TOKEN}
 
-                        if (fileExists("${CLONE_DIR}/.git")) {
+                        if [ -d "${CLONE_DIR}/.git" ]; then
                             echo "✅ 기존 폴더 존재: ${CLONE_DIR}, pull 수행"
-                            sh """
                             cd ${CLONE_DIR}
-                            git remote set-url origin ${repo_url}
+                            git remote set-url origin https://\${GIT_USER}:\${GIT_TOKEN}@lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git
                             git fetch origin
                             git checkout ${BRANCH}
                             git pull origin ${BRANCH}
-                            """
-                        } else {
+                        else
                             echo "🚀 폴더가 없으므로 git clone 수행"
-                            sh "git clone --depth=1 -b ${BRANCH} ${repo_url} ${CLONE_DIR}"
-                        }
+                            git clone --depth=1 -b ${BRANCH} https://\${GIT_USER}:\${GIT_TOKEN}@lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git ${CLONE_DIR}
+                        fi
+                        """
                     }
                 }
             }
@@ -41,26 +42,29 @@ pipeline {
         stage('Setup Node & Install Dependencies') {
             steps {
                 script {
-                    sh "curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -"
-                    sh "apt-get update && apt-get install -y nodejs"
-                    sh "npm install -g pnpm@${PNPM_VERSION}"
-                    sh "cd frontend && pnpm install"
+                    sh """
+                    sudo apt-get update && sudo apt-get install -y nodejs
+                    sudo npm install -g pnpm@${PNPM_VERSION}
+                    cd ${CLONE_DIR} && pnpm install
+                    """
                 }
             }
         }
 
         stage('Build') {
             steps {
-                sh 'cd frontend && pnpm run build'
+                sh "cd ${CLONE_DIR} && pnpm run build"
             }
         }
 
         stage('Docker Build & Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'DockerHub-Credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh "docker login -u ${DOCKER_USER} -p ${DOCKER_PASS} ${DOCKER_REGISTRY}"
-                    sh "docker build -t ${IMAGE_NAME}:latest ."
-                    sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+                    sh """
+                    docker login -u ${DOCKER_USER} -p ${DOCKER_PASS} ${DOCKER_REGISTRY}
+                    docker build -t ${IMAGE_NAME}:latest .
+                    docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
+                    """
                 }
             }
         }
@@ -68,11 +72,26 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    sh "docker stop ${CONTAINER_NAME} || true"
-                    sh "docker rm ${CONTAINER_NAME} || true"
-                    sh "docker run -d --name ${CONTAINER_NAME} -p ${APP_PORT}:80 ${IMAGE_NAME}:latest"
+                    sh """
+                    docker stop ${CONTAINER_NAME} || true
+                    docker rm ${CONTAINER_NAME} || true
+                    docker run -d --name ${CONTAINER_NAME} -p ${APP_PORT}:80 ${IMAGE_NAME}:latest
+                    """
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Deployment Successful!'
+        }
+        failure {
+            echo '❌ Deployment Failed! Debugging Info:'
+            sh "docker ps -a || true"
+            sh "docker logs --tail=100 ${CONTAINER_NAME} || true"
+            sh "netstat -tulnp || true"
+            sh "ps aux || true"
         }
     }
 }
