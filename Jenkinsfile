@@ -6,19 +6,28 @@ pipeline {
         PNPM_VERSION = "10.4.1"
         IMAGE_NAME = "react-app"
         CONTAINER_NAME = "react-container"
+        REPO_URL = "https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git"
+        BRANCH = "frontend"
+        CLONE_DIR = "workspace/frontend"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // 기존 방식은 현재 디렉토리에 클론을 시도하는데, 이 방식은 문제가 될 수 있습니다.
-                // checkout 명령어를 사용하면 Jenkins가 알아서 관리합니다.
-                checkout scm
-                
-                // frontend 브랜치로 이동
                 script {
-                    sh "git checkout frontend || git checkout -b frontend origin/frontend"
-                    sh "git pull origin frontend"
+                    if (fileExists("${CLONE_DIR}/.git")) {
+                        echo "✅ 기존 폴더 존재: ${CLONE_DIR}, pull 수행"
+                        sh """
+                        cd ${CLONE_DIR}
+                        git reset --hard
+                        git pull origin ${BRANCH}
+                        """
+                    } else {
+                        echo "🚀 폴더가 없으므로 git clone 수행"
+                        sh """
+                        git clone -b ${BRANCH} ${REPO_URL} ${CLONE_DIR}
+                        """
+                    }
                 }
             }
         }
