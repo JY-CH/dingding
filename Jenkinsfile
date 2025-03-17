@@ -15,18 +15,22 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    if (fileExists("${CLONE_DIR}/.git")) {
-                        echo "✅ 기존 폴더 존재: ${CLONE_DIR}, pull 수행"
-                        sh """
-                        cd ${CLONE_DIR}
-                        git reset --hard
-                        git pull origin ${BRANCH}
-                        """
-                    } else {
-                        echo "🚀 폴더가 없으므로 git clone 수행"
-                        sh """
-                        git clone -b ${BRANCH} ${REPO_URL} ${CLONE_DIR}
-                        """
+                    withCredentials([usernamePassword(credentialsId: 'GitLab-dlawoduf15-AccessToken')]) {
+                        def repo_url = REPO_URL.replace("https://", "https://${GIT_USER}:${GIT_TOKEN}@")
+
+                        if (fileExists("${CLONE_DIR}/.git")) {
+                            echo "✅ 기존 폴더 존재: ${CLONE_DIR}, pull 수행"
+                            sh """
+                            cd ${CLONE_DIR}
+                            git reset --hard
+                            git pull ${repo_url} ${BRANCH}
+                            """
+                        } else {
+                            echo "🚀 폴더가 없으므로 git clone 수행"
+                            sh """
+                            git clone -b ${BRANCH} ${repo_url} ${CLONE_DIR}
+                            """
+                        }
                     }
                 }
             }
@@ -39,7 +43,6 @@ pipeline {
                     sh "apt-get update && apt-get install -y nodejs || true"
                     sh "npm install -g pnpm@${PNPM_VERSION} || npm install -g pnpm"
                     
-                    // 프론트엔드 디렉토리로 이동 (필요한 경우)
                     sh "cd frontend && pnpm install || pnpm install"
                 }
             }
@@ -47,7 +50,6 @@ pipeline {
 
         stage('Build') {
             steps {
-                // 프론트엔드 디렉토리에서 빌드
                 sh 'cd frontend && pnpm run build || pnpm run build'
             }
         }
@@ -75,7 +77,7 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment Successful!'
+            echo '✅ Deployment Successful!'
         }
         failure {
             echo '❌ Deployment Failed! Debugging Info:'
