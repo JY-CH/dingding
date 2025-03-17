@@ -8,7 +8,7 @@ pipeline {
         CONTAINER_NAME = "react-container"
         REPO_URL = "https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git"
         BRANCH = "frontend"
-        CLONE_DIR = "workspace/frontend"
+        CLONE_DIR = "frontend"
     }
 
     stages {
