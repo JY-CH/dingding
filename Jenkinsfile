@@ -2,78 +2,56 @@ pipeline {
     agent any
 
     environment {
-        NODE_VERSION = "22.12.0"
-        PNPM_VERSION = "10.4.1"
-        IMAGE_NAME = "frontend-app"
-        CONTAINER_NAME = "frontend-container"
-        REPO_URL = "https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git"
-        BRANCH = "frontend"
-        CLONE_DIR = "frontend"
-        DOCKER_REGISTRY = "registry.gitlab.com/s12-ai-image-sub1/S12P21D105"
+        IMAGE_NAME = "frontend-app"   // docker-compose.yml의 nginx.image와 동일하게
+        CONTAINER_NAME = "nginx"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'dlawoduf15')]) {
-                        def repo_url = REPO_URL.replace("https://", "https://${GIT_USER}:${GIT_TOKEN}@")
-
-                        if (fileExists("${CLONE_DIR}/.git")) {
-                            echo "✅ 기존 폴더 존재: ${CLONE_DIR}, pull 수행"
-                            sh """
-                            cd ${CLONE_DIR}
-                            git reset --hard
-                            git pull ${repo_url} ${BRANCH}
-                            """
-                        } else {
-                            echo "🚀 폴더가 없으므로 git clone 수행"
-                            sh """
-                            git clone -b ${BRANCH} ${repo_url} ${CLONE_DIR}
-                            """
-                        }
-                    }
-                }
+                git branch: 'frontend', url: 'https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git', credentialsId: 'dlawoduf15'
             }
         }
 
-        stage('Setup Node & Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    sh "curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - || true"
-                    sh "apt-get update && apt-get install -y nodejs || true"
-                    sh "npm install -g pnpm@${PNPM_VERSION} || npm install -g pnpm"
-                    
-                    sh "cd frontend && pnpm install || pnpm install"
-                }
-            }
-        }
+                    def startTime = System.currentTimeMillis()
 
-        stage('Build') {
-            steps {
-                sh 'cd frontend && pnpm run build || pnpm run build'
-            }
-        }
-
-        stage('Docker Build & Push') {
-            steps {
-                script {
-                    sh "docker build -t ${IMAGE_NAME}:latest ."
-                    sh "docker tag ${IMAGE_NAME}:latest ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest || true"
-                    sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest || true"
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    sh "docker stop ${CONTAINER_NAME} || true"
-                    sh "docker rm ${CONTAINER_NAME} || true"
                     sh """
-                    docker run -d --name ${CONTAINER_NAME} --network ci_network \
-                        -p 3000:80 ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
+                    docker build -t ${IMAGE_NAME} .
                     """
+
+                    def endTime = System.currentTimeMillis()
+                    def duration = (endTime - startTime) / 1000 
+                    echo "🚀 프론트 빌드 완료: ${duration}초 소요"
+                }
+            }
+        }
+
+        stage('Deploy (Nginx Only)') {
+            steps {
+                sshagent(['ubuntu-ssh-key']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@i12d202.p.ssafy.io << 'EOF'
+                    
+                    cd /home/ubuntu
+
+                    echo "🛑 기존 nginx 컨테이너 중단 & 삭제"
+                    docker-compose stop nginx || true
+                    docker-compose rm -f nginx || true
+
+                    echo "🗑️ 불필요한 Docker 이미지 및 볼륨 삭제"
+                    docker rmi $(docker images -f "dangling=true" -q) || true
+                    docker volume prune -f
+
+                    echo "🚀 nginx 컨테이너 다시 실행"
+                    docker-compose up -d --build nginx
+
+                    echo "✅ nginx + 프론트엔드 배포 완료! 현재 컨테이너 상태:"
+                    docker ps -a
+                    
+                    '''
                 }
             }
         }
@@ -84,11 +62,7 @@ pipeline {
             echo '✅ Deployment Successful!'
         }
         failure {
-            echo '❌ Deployment Failed! Debugging Info:'
-            sh "docker ps -a || true"
-            sh "docker logs --tail=100 ${CONTAINER_NAME} || true"
-            sh "netstat -tulnp || true"
-            sh "ps aux || true"
+            echo '❌ Deployment Failed.'
         }
     }
 }
