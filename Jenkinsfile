@@ -2,10 +2,11 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "frontend-app"   // docker-compose.yml의 nginx.image와 동일하게
-        REGISTRY = "yimjaeyeol/frontend-app"  // Docker Hub 푸시할 경로
+        IMAGE_NAME = "frontend-app"
         CONTAINER_NAME = "nginx"
-        GIT_CREDENTIALS = credentials('dlawoduf15')  // Jenkins Credentials ID
+        GIT_CREDENTIALS = credentials('dlawoduf15')  // GitLab Credentials
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')  // Docker Hub Credentials
+        DOCKER_HUB_ID = "yimjaeyeol"  // Docker Hub 아이디
     }
 
     stages {
@@ -37,12 +38,15 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    sh """
+                    sh '''
                     echo "📦 Docker Hub 로그인 및 이미지 푸시"
-                    docker tag ${IMAGE_NAME} ${REGISTRY}:latest
-                    docker login -u 도커허브아이디 -p 도커허브비밀번호
-                    docker push ${REGISTRY}:latest
-                    """
+                    echo "${DOCKER_HUB_CREDENTIALS_PSW}" | docker login -u "${DOCKER_HUB_CREDENTIALS_USR}" --password-stdin
+
+                    docker tag frontend-app ${DOCKER_HUB_ID}/frontend-app:latest
+                    docker push ${DOCKER_HUB_ID}/frontend-app:latest
+
+                    docker logout
+                    '''
                 }
             }
         }
@@ -55,16 +59,12 @@ pipeline {
                     
                     cd /home/ubuntu/j12d105
 
-                    echo "🔐 GitLab Access Token을 .env 파일에 저장"
-                    echo "GIT_CREDENTIALS=${GIT_CREDENTIALS}" > .env
-
                     echo "🛑 기존 nginx 컨테이너 중단 & 삭제"
                     docker-compose stop nginx || true
                     docker-compose rm -f nginx || true
 
-                    echo "🗑️ 불필요한 Docker 이미지 및 볼륨 삭제"
-                    docker rmi $(docker images -f "dangling=true" -q) || true
-                    docker volume prune -f
+                    echo "🚀 최신 프론트엔드 이미지 가져오기"
+                    docker pull ${DOCKER_HUB_ID}/frontend-app:latest
 
                     echo "🚀 nginx 컨테이너 다시 실행"
                     docker-compose up -d --build nginx
