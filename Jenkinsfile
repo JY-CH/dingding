@@ -4,52 +4,39 @@ pipeline {
     environment {
         NODE_VERSION = "22.12.0"
         PNPM_VERSION = "10.4.1"
-        IMAGE_NAME = "frontend-app"
-        CONTAINER_NAME = "frontend-container"
+        IMAGE_NAME = "react-app"
+        CONTAINER_NAME = "react-container"
         REPO_URL = "https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git"
         BRANCH = "frontend"
         CLONE_DIR = "frontend"
-        DOCKER_REGISTRY = "registry.gitlab.com/s12-ai-image-sub1/S12P21D105"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'GitLab-dlawoduf15-AccessToken')]) {
-                        def repo_url = REPO_URL.replace("https://", "https://${GIT_USER}:${GIT_TOKEN}@")
-
-                        if (fileExists("${CLONE_DIR}/.git")) {
-                            echo "✅ 기존 폴더 존재: ${CLONE_DIR}, pull 수행"
-                            sh """
-                            cd ${CLONE_DIR}
-                            git reset --hard
-                            git pull ${repo_url} ${BRANCH}
-                            """
-                        } else {
-                            echo "🚀 폴더가 없으므로 git clone 수행"
-                            sh """
-                            git clone -b ${BRANCH} ${repo_url} ${CLONE_DIR}
-                            """
-                        }
-                    }
-                }
+                // 리액트 프로젝트의 브랜치를 체크아웃합니다
+                git branch: 'frontend', url: 'https://lab.ssafy.com/hoonixox/grimtalkfront.git', credentialsId: 'dlawoduf15'
             }
         }
 
-        stage('Setup Node & Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    sh "curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - || true"
-                    sh "apt-get update && apt-get install -y nodejs || true"
-                    sh "npm install -g pnpm@${PNPM_VERSION} || npm install -g pnpm"
-                    
-                    sh "cd frontend && pnpm install || pnpm install"
+                    // Docker 이미지를 빌드합니다.
+                    def startTime = System.currentTimeMillis()
+
+                    sh """
+                    docker build -t ${IMAGE_NAME} .
+                    """
+
+                    def endTime = System.currentTimeMillis()
+                    def duration = (endTime - startTime) / 1000
+                    echo "🚀 프론트 빌드 완료: ${duration}초 소요"
                 }
             }
         }
 
-        stage('Build') {
+        stage('Deploy (Nginx and SSL)') {
             steps {
                 sh 'cd frontend && pnpm run build || pnpm run build'
             }
@@ -70,10 +57,7 @@ pipeline {
                 script {
                     sh "docker stop ${CONTAINER_NAME} || true"
                     sh "docker rm ${CONTAINER_NAME} || true"
-                    sh """
-                    docker run -d --name ${CONTAINER_NAME} --network ci_network \
-                        -p 3000:80 ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
-                    """
+                    sh "docker run -d --name ${CONTAINER_NAME} -p 80:80 ${IMAGE_NAME}:latest"
                 }
             }
         }
@@ -84,11 +68,7 @@ pipeline {
             echo '✅ Deployment Successful!'
         }
         failure {
-            echo '❌ Deployment Failed! Debugging Info:'
-            sh "docker ps -a || true"
-            sh "docker logs --tail=100 ${CONTAINER_NAME} || true"
-            sh "netstat -tulnp || true"
-            sh "ps aux || true"
+            echo '❌ Deployment Failed.'
         }
     }
 }
