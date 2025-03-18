@@ -33,7 +33,7 @@ pipeline {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@i12d202.p.ssafy.io << 'EOF'
+                    ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io << 'EOF'
                     
                     cd /home/ubuntu
 
