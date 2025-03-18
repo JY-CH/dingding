@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "frontend-app"   // docker-compose.yml의 nginx.image와 동일하게
+        REGISTRY = "yimjaeyeol/frontend-app"  // Docker Hub 푸시할 경로
         CONTAINER_NAME = "nginx"
         GIT_CREDENTIALS = credentials('dlawoduf15')  // Jenkins Credentials ID
     }
@@ -29,6 +30,19 @@ pipeline {
                     def endTime = System.currentTimeMillis()
                     def duration = (endTime - startTime) / 1000 
                     echo "🚀 프론트 빌드 완료: ${duration}초 소요"
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                script {
+                    sh """
+                    echo "📦 Docker Hub 로그인 및 이미지 푸시"
+                    docker tag ${IMAGE_NAME} ${REGISTRY}:latest
+                    docker login -u 도커허브아이디 -p 도커허브비밀번호
+                    docker push ${REGISTRY}:latest
+                    """
                 }
             }
         }
