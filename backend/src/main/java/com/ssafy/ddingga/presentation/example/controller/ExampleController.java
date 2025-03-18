@@ -22,7 +22,7 @@ public class ExampleController {
 
     @Operation(summary = "예제 등록", description = "예제를 등록합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "정상 등록")
+            @ApiResponse(responseCode = "201", description = "정상 등록되었습니다!")
     })
     @PostMapping("")
     public ResponseEntity<Void> createExample(
