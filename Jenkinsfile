@@ -4,11 +4,12 @@ pipeline {
     environment {
         NODE_VERSION = "22.12.0"
         PNPM_VERSION = "10.4.1"
-        IMAGE_NAME = "react-app"
-        CONTAINER_NAME = "react-container"
+        IMAGE_NAME = "frontend-app"
+        CONTAINER_NAME = "frontend-container"
         REPO_URL = "https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git"
         BRANCH = "frontend"
         CLONE_DIR = "frontend"
+        DOCKER_REGISTRY = "registry.gitlab.com/s12-ai-image-sub1/S12P21D105"
     }
 
     stages {
@@ -69,7 +70,10 @@ pipeline {
                 script {
                     sh "docker stop ${CONTAINER_NAME} || true"
                     sh "docker rm ${CONTAINER_NAME} || true"
-                    sh "docker run -d --name ${CONTAINER_NAME} -p 80:80 ${IMAGE_NAME}:latest"
+                    sh """
+                    docker run -d --name ${CONTAINER_NAME} --network ci_network \
+                        -p 3000:80 ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
+                    """
                 }
             }
         }
