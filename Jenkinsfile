@@ -4,6 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "frontend-app"   // docker-compose.yml의 nginx.image와 동일하게
         CONTAINER_NAME = "nginx"
+        GIT_CREDENTIALS = credentials('dlawoduf15')  // Jenkins Credentials ID
     }
 
     stages {
