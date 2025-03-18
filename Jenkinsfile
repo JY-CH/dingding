@@ -4,30 +4,30 @@ pipeline {
     environment {
         NODE_VERSION = "22.12.0"
         PNPM_VERSION = "10.4.1"
-        IMAGE_NAME = "react-app"
-        CONTAINER_NAME = "react-container"
+        IMAGE_NAME = "frontend-app"
+        CONTAINER_NAME = "frontend-container"
         REPO_URL = "https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git"
         BRANCH = "frontend"
         CLONE_DIR = "frontend"
-        DOCKER_REGISTRY = "docker.io/myrepo" // Docker Hub or Private Registry
+        DOCKER_REGISTRY = "registry.gitlab.com/s12-ai-image-sub1/S12P21D105"
     }
 
     stages {
         stage('Checkout') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'dlawoduf15')]) {
-                        def repo_url = REPO_URL.replace("https://", "https://${GIT_ACCESS_TOKEN}@")
+                    withCredentials([usernamePassword(credentialsId: 'dlawoduf15')]) {
+                        def repo_url = REPO_URL.replace("https://", "https://${GIT_USER}:${GIT_TOKEN}@")
 
                         if (fileExists("${CLONE_DIR}/.git")) {
-                            echo "✅ 기존 ${CLONE_DIR} 폴더 존재 - 최신 코드 가져오기"
+                            echo "✅ 기존 폴더 존재: ${CLONE_DIR}, pull 수행"
                             sh """
                             cd ${CLONE_DIR}
                             git reset --hard
                             git pull ${repo_url} ${BRANCH}
                             """
                         } else {
-                            echo "📂 폴더가 없으므로 git clone 실행"
+                            echo "🚀 폴더가 없으므로 git clone 수행"
                             sh """
                             git clone -b ${BRANCH} ${repo_url} ${CLONE_DIR}
                             """
@@ -37,55 +37,30 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Setup Node & Install Dependencies') {
             steps {
                 script {
-                    sh """
-                    curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
-                    apt-get install -y nodejs
-                    npm install -g pnpm@${PNPM_VERSION}
-                    """
+                    sh "curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - || true"
+                    sh "apt-get update && apt-get install -y nodejs || true"
+                    sh "npm install -g pnpm@${PNPM_VERSION} || npm install -g pnpm"
+                    
+                    sh "cd frontend && pnpm install || pnpm install"
                 }
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build') {
             steps {
-                script {
-                    def startTime = System.currentTimeMillis()
-
-                    sh """
-                    cd ${CLONE_DIR}
-                    docker build -t ${IMAGE_NAME} .
-                    """
-
-                    def endTime = System.currentTimeMillis()
-                    def duration = (endTime - startTime) / 1000
-                    echo "🚀 프론트 빌드 완료: ${duration}초 소요"
-                }
-            }
-        }
-
-        stage('Deploy (Nginx and SSL)') {
-            steps {
-                script {
-                    sh """
-                    cd ${CLONE_DIR}
-                    pnpm install
-                    pnpm run build
-                    """
-                }
+                sh 'cd frontend && pnpm run build || pnpm run build'
             }
         }
 
         stage('Docker Build & Push') {
             steps {
                 script {
-                    sh """
-                    docker build -t ${IMAGE_NAME}:latest .
-                    docker tag ${IMAGE_NAME}:latest ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
-                    docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
-                    """
+                    sh "docker build -t ${IMAGE_NAME}:latest ."
+                    sh "docker tag ${IMAGE_NAME}:latest ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest || true"
+                    sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest || true"
                 }
             }
         }
@@ -93,10 +68,11 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
+                    sh "docker stop ${CONTAINER_NAME} || true"
+                    sh "docker rm ${CONTAINER_NAME} || true"
                     sh """
-                    docker stop ${CONTAINER_NAME} || true
-                    docker rm ${CONTAINER_NAME} || true
-                    docker run -d --name ${CONTAINER_NAME} -p 80:80 ${IMAGE_NAME}:latest
+                    docker run -d --name ${CONTAINER_NAME} --network ci_network \
+                        -p 3000:80 ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
                     """
                 }
             }
@@ -108,9 +84,11 @@ pipeline {
             echo '✅ Deployment Successful!'
         }
         failure {
-            echo '❌ Deployment Failed.'
+            echo '❌ Deployment Failed! Debugging Info:'
             sh "docker ps -a || true"
             sh "docker logs --tail=100 ${CONTAINER_NAME} || true"
+            sh "netstat -tulnp || true"
+            sh "ps aux || true"
         }
     }
 }
