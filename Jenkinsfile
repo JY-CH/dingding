@@ -20,6 +20,9 @@ pipeline {
                     def startTime = System.currentTimeMillis()
 
                     sh """
+                    echo "🔐 GitLab Access Token을 .env 파일에 저장"
+                    echo "GIT_CREDENTIALS=${GIT_CREDENTIALS}" > .env
+
                     docker build -t ${IMAGE_NAME} .
                     """
 
@@ -36,7 +39,10 @@ pipeline {
                     sh '''
                     ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io << 'EOF'
                     
-                    cd /home/ubuntu
+                    cd /home/ubuntu/j12d105
+
+                    echo "🔐 GitLab Access Token을 .env 파일에 저장"
+                    echo "GIT_CREDENTIALS=${GIT_CREDENTIALS}" > .env
 
                     echo "🛑 기존 nginx 컨테이너 중단 & 삭제"
                     docker-compose stop nginx || true
@@ -52,6 +58,7 @@ pipeline {
                     echo "✅ nginx + 프론트엔드 배포 완료! 현재 컨테이너 상태:"
                     docker ps -a
                     
+                    EOF
                     '''
                 }
             }
