@@ -6,7 +6,7 @@ pipeline {
         CONTAINER_NAME = "nginx"
         GIT_CREDENTIALS = credentials('dlawoduf15')  // GitLab Credentials
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')  // Docker Hub Credentials
-        DOCKER_HUB_ID = "yimjaeyeol"  // Docker Hub 아이디
+        DOCKER_HUB_ID = "jaeyeolyim"  // Docker Hub 아이디
     }
 
     stages {
