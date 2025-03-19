@@ -3,7 +3,7 @@ import HomePage from './pages/HomePage';
 import DetailPage from './pages/DetailPage';
 import EditPage from './pages/EditPage';
 import NotFoundPage from './pages/NotFoundPage';
-import DashboardPage from './pages/DashBoardPage';
+import DashboardPage from './pages/DashboardPage';
 import './index.css';
 
 function App() {
