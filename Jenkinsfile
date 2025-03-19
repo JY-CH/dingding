@@ -56,7 +56,7 @@ pipeline {
                 }
                 sshagent(['ubuntu-ssh-key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io << 'EOF'
+                    ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                     
                     echo "🛑 기존 백엔드 컨테이너 삭제"
                     docker stop backend || true
@@ -86,7 +86,8 @@ pipeline {
                     echo "✅ 백엔드 배포 완료! 현재 컨테이너 상태:"
                     docker ps -a
 
-                    EOF
+                    exit 0
+                EOF
                     '''
                 }
                 script {
