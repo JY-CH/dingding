@@ -28,9 +28,19 @@ pipeline {
                     chmod +x backend/gradlew
                     cd backend
                     ./gradlew clean build --exclude-task test
+
                     echo "🚀 빌드된 JAR 파일 확인"
                     ls -lh build/libs/
                     '''
+
+                    # Docker 빌드 시 backend 폴더를 컨텍스트로 지정
+                    sh '''
+                    echo "🚀 Docker 빌드 컨텍스트 확인"
+                    ls -lh backend/build/libs/
+
+                    docker build -t backend-server -f backend/Dockerfile backend/
+                    '''
+
                     sh "docker build -t backend-server -f Dockerfile ."
                     def endTime = System.currentTimeMillis()
                     def duration = (endTime - startTime) / 1000
