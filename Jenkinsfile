@@ -81,7 +81,7 @@ pipeline {
                     cat $ENV_FILE  # ✅ 환경 변수 확인
 
                     echo "🚀 백엔드 컨테이너 실행"
-                    docker-compose up -d --build backend
+                    cd /home/ubuntu/j12d105 && docker-compose up -d --build
 
                     echo "✅ 백엔드 배포 완료! 현재 컨테이너 상태:"
                     docker ps -a
