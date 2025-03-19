@@ -26,12 +26,14 @@ pipeline {
                 script {
                     def startTime = System.currentTimeMillis()
 
-                    sh """
-                    echo "🔐 GitLab Access Token을 .env 파일에 저장"
-                    echo "GIT_CREDENTIALS=${GIT_CREDENTIALS}" > .env
+                    withCredentials([string(credentialsId: 'dlawoduf15', variable: 'GIT_TOKEN')]) {
+                        sh """
+                        echo "🔐 GitLab Access Token을 .env 파일에 저장"
+                        echo "GIT_CREDENTIALS=\$GIT_TOKEN" > .env
 
-                    docker build -t ${IMAGE_NAME} .
-                    """
+                        docker build -t ${IMAGE_NAME} .
+                        """
+                    }
 
                     def endTime = System.currentTimeMillis()
                     def duration = (endTime - startTime) / 1000 
@@ -40,12 +42,13 @@ pipeline {
             }
         }
 
+
         stage('Push to Docker Hub') {
             steps {
-                script {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
                     echo "📦 Docker Hub 로그인 및 이미지 푸시"
-                    echo "${DOCKER_HUB_CREDENTIALS_PSW}" | docker login -u "${DOCKER_HUB_CREDENTIALS_USR}" --password-stdin
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
                     docker tag frontend-app ${DOCKER_HUB_ID}/frontend-app:latest
                     docker push ${DOCKER_HUB_ID}/frontend-app:latest
@@ -55,6 +58,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Deploy (Nginx Only)') {
             steps {
