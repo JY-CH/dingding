@@ -5,12 +5,15 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 # Copy package.json and install dependencies
+# Copy project files
+
+COPY frontend/tsconfig.json ./tsconfig.json
+COPY frontend/ .  
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 
 RUN npm install -g pnpm && pnpm install
 
-# Copy project files
-COPY . .
+
 
 # Build the project
 RUN pnpm run build
