@@ -56,7 +56,7 @@ pipeline {
                 }
                 sshagent(['ubuntu-ssh-key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@i12d202.p.ssafy.io << 'EOF'
+                    ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io << 'EOF'
                     
                     echo "🛑 기존 백엔드 컨테이너 삭제"
                     docker stop backend || true
@@ -66,7 +66,7 @@ pipeline {
                     docker volume prune -f || true
 
                     echo "📄 .env 파일 생성 (없으면 만들고, 있으면 유지)"
-                    ENV_FILE="/home/ubuntu/backend-server.env"
+                    ENV_FILE="/home/ubuntu/j12d105/backend/backend-server.env"
                     if [ ! -f "$ENV_FILE" ]; then
                         echo "DB_HOST=db.example.com" > $ENV_FILE
                         echo "DB_PORT=3306" >> $ENV_FILE
