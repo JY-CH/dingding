@@ -26,7 +26,7 @@ pipeline {
                 script {
                     def startTime = System.currentTimeMillis()
 
-                    withCredentials([string(credentialsId: 'dlawoduf15', variable: 'GIT_TOKEN')]) {
+                    withCredentials([string(credentialsId: 'GitLab-SecretText-Accesstoken', variable: 'GIT_TOKEN')]) {
                         sh """
                         echo "🔐 GitLab Access Token을 .env 파일에 저장"
                         echo "GIT_CREDENTIALS=\$GIT_TOKEN" > .env
