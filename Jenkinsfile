@@ -28,8 +28,6 @@ pipeline {
 
                     withCredentials([string(credentialsId: 'GitLab-SecretText-Accesstoken', variable: 'GIT_TOKEN')]) {
                         sh """
-                        echo "🔍 현재 Jenkins 작업 폴더 구조 확인"
-                        ls -alR
                         echo "🔐 GitLab Access Token을 .env 파일에 저장"
                         echo "GIT_CREDENTIALS=\$GIT_TOKEN" > .env
 
