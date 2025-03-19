@@ -67,7 +67,7 @@ public class JwtServiceImpl implements JwtService {
             Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())     // 서명 키 설정
                     .build()
-                    .parseClaimsJwt(token);     // 토큰 파싱
+                    .parseClaimsJws(token);     // 토큰 파싱
             return true;    // 파싱 성공 시 유효한 토큰(true)
         } catch (Exception e) {
             return false;   // 파싱 실패 시 유효하지 않은 토큰(false)
@@ -86,7 +86,7 @@ public class JwtServiceImpl implements JwtService {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
-                .parseClaimsJwt(token)
+                .parseClaimsJws(token)
                 .getBody();
         // Claims 에서 subject(사용자 ID)추출
         return claims.getSubject();
