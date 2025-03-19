@@ -6,14 +6,14 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class UserCreateResponseDto {
+public class SignUpResponseDto {
     private String userId;
     private String username;
     private String accessToken;
     private String refreshToken;
 
-    public static UserCreateResponseDto from(User user, String accessToken) {
-        return UserCreateResponseDto.builder()
+    public static SignUpResponseDto from(User user, String accessToken) {
+        return SignUpResponseDto.builder()
                 .userId(user.getUserId())
                 .username(user.getUsername())
                 .accessToken(accessToken)
