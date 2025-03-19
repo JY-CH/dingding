@@ -37,7 +37,7 @@ pipeline {
                     echo "🚀 Docker 빌드 컨텍스트 확인"
                     ls -lh backend/build/libs/
 
-                    docker build -t backend-server -f backend/Dockerfile backend/
+                    docker build -t backend-server -f Dockerfile backend/
                     '''
 
                     sh "docker build -t backend-server -f Dockerfile ."
