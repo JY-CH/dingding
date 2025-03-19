@@ -33,7 +33,6 @@ pipeline {
                     ls -lh build/libs/
                     '''
 
-                    # Docker 빌드 시 backend 폴더를 컨텍스트로 지정
                     sh '''
                     echo "🚀 Docker 빌드 컨텍스트 확인"
                     ls -lh backend/build/libs/
