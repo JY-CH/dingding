@@ -60,8 +60,7 @@ pipeline {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io << 'EOF'
-                    
+                    ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io << EOF
                     cd /home/ubuntu/j12d105
 
                     echo "🛑 기존 nginx 컨테이너 중단 & 삭제"
@@ -76,12 +75,12 @@ pipeline {
 
                     echo "✅ nginx + 프론트엔드 배포 완료! 현재 컨테이너 상태:"
                     docker ps -a
-                    
                     EOF
                     '''
                 }
             }
         }
+
     }
 
     post {
