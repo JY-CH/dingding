@@ -12,7 +12,7 @@ pipeline {
                 script {
                     echo "🚀 코드 체크아웃 시작!"
                 }
-                git branch: 'backend', url: 'https://lab.ssafy.com/your_project/backend.git', credentialsId: 'gitlab-credentials'
+                git branch: 'backend', url: 'https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git', credentialsId: 'dlawoduf15'
                 script {
                     echo "✅ 코드 체크아웃 완료!"
                 }
