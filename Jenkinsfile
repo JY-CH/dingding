@@ -37,16 +37,16 @@ pipeline {
                     echo "🚀 Docker 빌드 컨텍스트 확인"
                     ls -lh backend/build/libs/
 
-                    docker build -t backend-server -f Dockerfile backend/
+                    docker build -t backend-server -f Dockerfile .
                     '''
 
-                    sh "docker build -t backend-server -f Dockerfile ."
                     def endTime = System.currentTimeMillis()
                     def duration = (endTime - startTime) / 1000
                     echo "✅ 백엔드 빌드 완료! (${duration}초 소요)"
                 }
             }
         }
+
 
         stage('Build Docker Image') {
             steps {
