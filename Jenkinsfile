@@ -41,7 +41,7 @@ pipeline {
                 script {
                     echo "🚀 Docker 이미지 빌드 시작!"
                     def startTime = System.currentTimeMillis()
-                    sh "docker build -t ${IMAGE_NAME} -f backend/Dockerfile ./backend"
+                    sh "docker build -t ${IMAGE_NAME} -f Dockerfile ./backend"
                     def endTime = System.currentTimeMillis()
                     def duration = (endTime - startTime) / 1000
                     echo "✅ Docker 이미지 빌드 완료! (${duration}초 소요)"
