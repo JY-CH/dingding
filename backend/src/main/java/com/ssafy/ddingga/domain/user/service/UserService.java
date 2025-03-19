@@ -1,9 +1,9 @@
 package com.ssafy.ddingga.domain.user.service;
 
-import com.ssafy.ddingga.facade.user.dto.UserCreateRequestDto;
-import com.ssafy.ddingga.facade.user.dto.UserCreateResponseDto;
+import com.ssafy.ddingga.facade.user.dto.SignUpRequestDto;
+import com.ssafy.ddingga.facade.user.dto.SignUpResponseDto;
 
 public interface UserService {
-    UserCreateResponseDto signUp(UserCreateRequestDto request);
+    SignUpResponseDto signUp(SignUpRequestDto request);
 
 }
