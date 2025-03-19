@@ -33,7 +33,8 @@ pipeline {
                         echo "🔐 GitLab Access Token을 .env 파일에 저장"
                         echo "GIT_CREDENTIALS=\$GIT_TOKEN" > .env
 
-                        docker build -t ${IMAGE_NAME} ./frontend
+                        echo "🚀 Docker Image 빌드 시작"
+                        docker build -t ${IMAGE_NAME} .
                         """
                     }
 
