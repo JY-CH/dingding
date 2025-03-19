@@ -1,15 +1,15 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/ddingga?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
     username: root
-    url: jdbc:mysql://localhost:3306/ddingga?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
-    password: root
+    password: password
   application:
     name: ddingga
   jpa:
     properties:
       hibernate:
-        format_sql: 'true'
-    show-sql: 'true'
+        format_sql: "true"
+    show-sql: "true"
     hibernate:
       ddl-auto: update
