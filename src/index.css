@@ -2,14 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+/* body {
   margin: 0;
   display: flex;
   justify-self: center;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-}
+} */
 /* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
