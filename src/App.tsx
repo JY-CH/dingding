@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import DetailPage from './pages/DetailPage';
 import EditPage from './pages/EditPage';
 import NotFoundPage from './pages/NotFoundPage';
+import DashboardPage from './pages/DashBoardPage';
 import './index.css';
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/detail/:id" element={<DetailPage />} />
         <Route path="/edit/:id" element={<EditPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
