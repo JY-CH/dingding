@@ -60,26 +60,29 @@ pipeline {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io << EOF
-                    cd /home/ubuntu/j12d105
+                    ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
+                        cd /home/ubuntu/j12d105
 
-                    echo "🛑 기존 nginx 컨테이너 중단 & 삭제"
-                    docker-compose stop nginx || true
-                    docker-compose rm -f nginx || true
+                        echo "🛑 기존 nginx 컨테이너 중단 & 삭제"
+                        docker-compose stop nginx || true
+                        docker-compose rm -f nginx || true
 
-                    echo "🚀 최신 프론트엔드 이미지 가져오기"
-                    docker pull ${DOCKER_HUB_ID}/frontend-app:latest
+                        echo "🚀 최신 프론트엔드 이미지 가져오기"
+                        docker pull ${DOCKER_HUB_ID}/frontend-app:latest
 
-                    echo "🚀 nginx 컨테이너 다시 실행"
-                    docker-compose up -d --build nginx
+                        echo "🚀 nginx 컨테이너 다시 실행"
+                        docker-compose up -d --build nginx
 
-                    echo "✅ nginx + 프론트엔드 배포 완료! 현재 컨테이너 상태:"
-                    docker ps -a
+                        echo "✅ nginx + 프론트엔드 배포 완료! 현재 컨테이너 상태:"
+                        docker ps -a
+
+                        exit 0
                     EOF
                     '''
                 }
             }
         }
+
 
     }
 
