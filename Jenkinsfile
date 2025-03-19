@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        COMPOSE_FILE_PATH = "/home/ubuntu/docker-compose.yml"
+        COMPOSE_FILE_PATH = "/home/ubuntu/j12d105/docker-compose.yml"
         IMAGE_NAME = "backend-server"
     }
 
@@ -41,7 +41,7 @@ pipeline {
                 script {
                     echo "🚀 Docker 이미지 빌드 시작!"
                     def startTime = System.currentTimeMillis()
-                    sh "docker build -t ${IMAGE_NAME} -f Dockerfile ."
+                    sh "docker build -t ${IMAGE_NAME} -f backend/Dockerfile ./backend"
                     def endTime = System.currentTimeMillis()
                     def duration = (endTime - startTime) / 1000
                     echo "✅ Docker 이미지 빌드 완료! (${duration}초 소요)"
@@ -65,23 +65,11 @@ pipeline {
                     echo "🗑️ 불필요한 Docker 볼륨 정리"
                     docker volume prune -f || true
 
-                    echo "📄 .env 파일 생성 (없으면 만들고, 있으면 유지)"
-                    ENV_FILE="/home/ubuntu/j12d105/backend/backend-server.env"
-                    if [ ! -f "$ENV_FILE" ]; then
-                        echo "DB_HOST=db.example.com" > $ENV_FILE
-                        echo "DB_PORT=3306" >> $ENV_FILE
-                        echo "DB_USER=admin" >> $ENV_FILE
-                        echo "DB_PASSWORD=secret" >> $ENV_FILE
-                        echo "✅ .env 파일 생성 완료"
-                    else
-                        echo "✅ 기존 .env 파일 유지"
-                    fi
-
-                    echo "🚀 backend-server.env 내용 확인"
-                    cat $ENV_FILE  # ✅ 환경 변수 확인
-
-                    echo "🚀 백엔드 컨테이너 실행"
-                    cd /home/ubuntu/j12d105 && docker-compose up -d --build
+                    echo "🚀 .env 파일이 필요하지 않으므로 생성하지 않음"
+                    
+                    echo "🚀 백엔드 컨테이너 실행 (DB 없이도 실행 가능)"
+                    cd /home/ubuntu/j12d105
+                    docker-compose up -d --build
 
                     echo "✅ 백엔드 배포 완료! 현재 컨테이너 상태:"
                     docker ps -a
