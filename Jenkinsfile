@@ -15,6 +15,11 @@ pipeline {
                 git branch: 'frontend', url: 'https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git', credentialsId: 'dlawoduf15'
             }
         }
+        stage('Check Git') {
+            steps {
+                sh 'git --version || echo "⚠️ Git을 찾을 수 없습니다."'
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
