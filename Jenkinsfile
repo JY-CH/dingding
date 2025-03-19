@@ -9,13 +9,20 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                script {
+                    echo "🚀 코드 체크아웃 시작!"
+                }
                 git branch: 'backend', url: 'https://lab.ssafy.com/your_project/backend.git', credentialsId: 'gitlab-credentials'
+                script {
+                    echo "✅ 코드 체크아웃 완료!"
+                }
             }
         }
 
         stage('Build JAR') {
             steps {
                 script {
+                    echo "🚀 백엔드 빌드 시작!"
                     def startTime = System.currentTimeMillis()
                     sh '''
                     chmod +x backend/gradlew
@@ -24,7 +31,7 @@ pipeline {
                     '''
                     def endTime = System.currentTimeMillis()
                     def duration = (endTime - startTime) / 1000
-                    echo "🚀 백엔드 빌드 완료: ${duration}초 소요"
+                    echo "✅ 백엔드 빌드 완료! (${duration}초 소요)"
                 }
             }
         }
@@ -32,33 +39,46 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    echo "🚀 Docker 이미지 빌드 시작!"
                     def startTime = System.currentTimeMillis()
                     sh "docker build -t ${IMAGE_NAME} -f Dockerfile ."
                     def endTime = System.currentTimeMillis()
                     def duration = (endTime - startTime) / 1000
-                    echo "🚀 Docker 이미지 빌드 완료: ${duration}초 소요"
+                    echo "✅ Docker 이미지 빌드 완료! (${duration}초 소요)"
                 }
             }
         }
 
         stage('Deploy (Backend Only)') {
             steps {
+                script {
+                    echo "🚀 백엔드 배포 시작!"
+                }
                 sshagent(['ubuntu-ssh-key']) {
                     sh '''
                     ssh -o StrictHostKeyChecking=no ubuntu@i12d202.p.ssafy.io << 'EOF'
-                
-                    cd /home/ubuntu
-
+                    
                     echo "🛑 기존 백엔드 컨테이너 삭제"
                     docker stop backend || true
                     docker rm backend || true
 
-                    echo "🗑️ 불필요한 Docker 이미지 및 볼륨 삭제"
-                    docker rmi $(docker images -f "dangling=true" -q) || true
-                    docker volume prune -f
+                    echo "🗑️ 불필요한 Docker 볼륨 정리"
+                    docker volume prune -f || true
+
+                    echo "📄 .env 파일 생성 (없으면 만들고, 있으면 유지)"
+                    ENV_FILE="/home/ubuntu/backend-server.env"
+                    if [ ! -f "$ENV_FILE" ]; then
+                        echo "DB_HOST=db.example.com" > $ENV_FILE
+                        echo "DB_PORT=3306" >> $ENV_FILE
+                        echo "DB_USER=admin" >> $ENV_FILE
+                        echo "DB_PASSWORD=secret" >> $ENV_FILE
+                        echo "✅ .env 파일 생성 완료"
+                    else
+                        echo "✅ 기존 .env 파일 유지"
+                    fi
 
                     echo "🚀 backend-server.env 내용 확인"
-                    cat /home/ubuntu/backend-server.env  # ✅ 환경 변수 확인
+                    cat $ENV_FILE  # ✅ 환경 변수 확인
 
                     echo "🚀 백엔드 컨테이너 실행"
                     docker-compose up -d --build backend
@@ -69,16 +89,19 @@ pipeline {
                     EOF
                     '''
                 }
+                script {
+                    echo "✅ 백엔드 배포 완료!"
+                }
             }
         }
     }
 
     post {
         success {
-            echo '✅ Backend Deployment Successful!'
+            echo "🎉 전체 파이프라인 완료! ✅ Backend Deployment Successful!"
         }
         failure {
-            echo '❌ Backend Deployment Failed.'
+            echo "🔥 배포 실패! ❌ Backend Deployment Failed."
         }
     }
 }
