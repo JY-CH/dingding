@@ -1,10 +1,7 @@
 FROM openjdk:17-jdk-slim
 
-# JAR 파일 변수 설정
-ARG JAR_FILE=backend/build/libs/*.jar
-
-# 애플리케이션 JAR 복사
-COPY ${JAR_FILE} app.jar
+# JAR 파일 복사 (변수 제거)
+COPY backend/build/libs/*.jar app.jar
 
 # 실행 명령어
 ENTRYPOINT ["java", "-jar", "/app.jar"]
