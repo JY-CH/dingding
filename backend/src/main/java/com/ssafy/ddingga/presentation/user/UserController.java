@@ -127,4 +127,35 @@ public class UserController {
                 .body(tokenResponse);
     }
 
+    @Operation(summary = "로그아웃", description = "사용자 로그아웃 처리 및 JWT 토큰 무효화")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<LogoutResponseDto> logout (
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+
+        // Bearer 접두사 제거
+        String token = authorizationHeader.replace(jwtProperties.getTokenPrefix(), "");
+
+        // 로그아웃 처리
+        LogoutResponseDto response = userFacadeService.logout(token);
+
+        // 리프레시 토큰 쿠키 제거
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .maxAge(0) // 쿠키 즉시 만료
+                .path("/api/auth")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(response);
+
+    }
+
+
 }
