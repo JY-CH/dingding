@@ -14,6 +14,10 @@ pipeline {
             steps {
                 git branch: 'frontend', url: 'https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git', credentialsId: 'dlawoduf15'
             }
+            script {
+                echo "현재 체크아웃 브랜치 확인"
+                sh 'git branch'
+            }
         }
         stage('Check Git') {
             steps {
