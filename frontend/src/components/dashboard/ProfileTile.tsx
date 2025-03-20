@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import ProfileEditModal from './ProfileEditModal';
 
 interface ProfileTileProps {
   name: string;
@@ -15,6 +16,9 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
   profileImageUrl,
   backgroundImageUrl,
 }) => {
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="w-full bg-white rounded-lg shadow-md overflow-hidden">
       {/* 배경 이미지와 내용을 함께 포함하는 컨테이너 */}
@@ -58,12 +62,23 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
 
           {/* 내 정보 수정 버튼 */}
           <div className="flex justify-end mt-4">
-            <button className="w-28 h-8 bg-[#F5F1E8] text-gray-700 text-sm font-bold rounded-md shadow hover:bg-gray-200">
+            <button
+              className="w-28 h-8 bg-[#F5F1E8] text-gray-700 text-sm font-bold rounded-md shadow hover:bg-gray-200"
+              onClick={() => setIsModalOpen(true)}
+            >
               내 정보 수정
             </button>
           </div>
         </div>
       </div>
+      {/* 모달 추가 */}
+      <ProfileEditModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        name={name}
+        email={email}
+        profileImageUrl={profileImageUrl}
+      />
     </div>
   );
 };
