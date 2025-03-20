@@ -18,7 +18,7 @@ pipeline {
             steps {
                 script {
                     echo "🚀 FastAPI용 Docker 이미지 빌드 시작!"
-                    sh "docker build -t ${DOCKER_HUB_ID}/${IMAGE_NAME}:latest -f fastapi/Dockerfile ."
+                    sh "docker build -t ${DOCKER_HUB_ID}/${IMAGE_NAME}:latest -f Dockerfile ."
                 }
             }
         }
