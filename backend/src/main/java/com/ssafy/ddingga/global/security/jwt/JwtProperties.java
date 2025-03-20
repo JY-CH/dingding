@@ -36,5 +36,5 @@ public class JwtProperties {
      * 예 : "Authorization"
      * 클라이언트가 토큰을 전달할 때 사용하는 헤더
      */
-    private String headerPrefix;
+    private String headerString;
 }

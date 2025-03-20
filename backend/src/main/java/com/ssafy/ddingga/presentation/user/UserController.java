@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class UserConroller {
+public class UserController {
 
     private final UserFacadeService userFacadeService;
 

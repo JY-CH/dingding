@@ -12,11 +12,12 @@ public class SignUpResponseDto {
     private String accessToken;
     private String refreshToken;
 
-    public static SignUpResponseDto from(User user, String accessToken) {
+    public static SignUpResponseDto from(User user, TokenResponseDto tokens) {
         return SignUpResponseDto.builder()
                 .userId(user.getUserId())
                 .username(user.getUsername())
-                .accessToken(accessToken)
+                .accessToken(tokens.getAccessToken())
+                .refreshToken(tokens.getRefreshToken())
                 .build();
     }
 }

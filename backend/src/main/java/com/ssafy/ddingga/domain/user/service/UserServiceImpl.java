@@ -5,12 +5,14 @@ import com.ssafy.ddingga.domain.user.entity.User;
 import com.ssafy.ddingga.domain.user.repository.UserRepository;
 import com.ssafy.ddingga.facade.user.dto.SignUpRequestDto;
 import com.ssafy.ddingga.facade.user.dto.SignUpResponseDto;
+import com.ssafy.ddingga.facade.user.dto.TokenResponseDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 
 /**
  * 사용자 관련 서비스 구현체
@@ -37,6 +39,21 @@ public class UserServiceImpl implements UserService {
      */
     private final JwtService jwtService;
 
+    // // 프로필 이미지 URL 배열
+    // private static final String[] PROFILE_IMAGES = {
+    //     "https://example.com/profile1.jpg",
+    //     "https://example.com/profile2.jpg",
+    //     "https://example.com/profile3.jpg",
+    //     "https://example.com/profile4.jpg",
+    //     "https://example.com/profile5.jpg"
+    // };
+
+    // // 무작위 프로필 이미지 선택 메서드
+    // private String getRandomProfileImage() {
+    //     Random random = new Random();
+    //     return PROFILE_IMAGES[random.nextInt(PROFILE_IMAGES.length)];
+    // }
+
     /**
      * 회원가입 처리 메서드
      *
@@ -56,7 +73,8 @@ public class UserServiceImpl implements UserService {
                 .userId(request.getUserId())                        // 사용자 ID
                 .password(passwordEncoder.encode(request.getPassword()))    // 비밀번호 암호화
                 .username(request.getUserName())                    // 사용자 이름
-                .profileImage(request.getProfileImage())            // 프로필 이미지
+                .profileImage("profileimg")                        // 임시 프로필 이미지
+                // .profileImage(getRandomProfileImage())  // 무작위 프로필 이미지 설정
                 .createAt(LocalDateTime.now())                      // 생성 시간
                 .isDeleted(false)                                   // 삭제 여부
                 .build();
@@ -65,10 +83,10 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
 
         // JWT 토큰 생성
-        String token = jwtService.createToken(savedUser);
+        TokenResponseDto tokens = jwtService.issueToken(savedUser);
 
         // 응답 DTO 생성
-        return SignUpResponseDto.from(savedUser, token);
+        return SignUpResponseDto.from(savedUser, tokens);
 
     }
 }
