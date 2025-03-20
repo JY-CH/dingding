@@ -15,7 +15,7 @@ public class UserFacadeServiceImpl implements UserFacadeService {
     private final UserService userService;
     private final JwtService jwtService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserFacadeService userFacadeService;
+
 
     @Override
     public SignUpResponseDto signUp(SignUpRequestDto request) {
