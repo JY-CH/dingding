@@ -23,6 +23,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id; // userPk
+
+    @Column(unique = true)
     private String userId;  // user의 id
     private String password; // user 비밀번호
     private String username;    // user 닉네임(이름)

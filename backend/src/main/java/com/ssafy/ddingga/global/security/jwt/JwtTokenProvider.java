@@ -35,7 +35,7 @@ public class JwtTokenProvider {
         claims.put("username", user.getUsername());
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + jwtProperties.getAccessTokenExpiration());
+        Date validity = new Date(now.getTime() + jwtProperties.getAccessTokenExpiration()*1000);
 
         return Jwts.builder()
                 .setSubject(user.getUserId())

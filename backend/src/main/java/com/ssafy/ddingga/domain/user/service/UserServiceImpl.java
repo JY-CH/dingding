@@ -3,9 +3,6 @@ package com.ssafy.ddingga.domain.user.service;
 
 import com.ssafy.ddingga.domain.user.entity.User;
 import com.ssafy.ddingga.domain.user.repository.UserRepository;
-import com.ssafy.ddingga.facade.user.dto.SignUpRequestDto;
-import com.ssafy.ddingga.facade.user.dto.SignUpResponseDto;
-import com.ssafy.ddingga.facade.user.dto.TokenResponseDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,11 +31,6 @@ public class UserServiceImpl implements UserService {
      */
     private final PasswordEncoder passwordEncoder;
 
-    /**
-     * JWT 토큰 생성 및 검증을 위한 서비스
-     */
-    private final JwtService jwtService;
-
     // // 프로필 이미지 URL 배열
     // private static final String[] PROFILE_IMAGES = {
     //     "https://example.com/profile1.jpg",
@@ -54,25 +46,20 @@ public class UserServiceImpl implements UserService {
     //     return PROFILE_IMAGES[random.nextInt(PROFILE_IMAGES.length)];
     // }
 
-    /**
-     * 회원가입 처리 메서드
-     *
-     * @param request 회원가입 요청 데이터 (SignUpRequestDto)
-     * @return 회원가입 응답 데이터 (SignUpResponseDto)
-     * @throws RuntimeException 사용자 ID가 이미 존재하는 경우
-     */
+
     @Override
-    @Transactional  // 트랜잭션 관리
-    public SignUpResponseDto signUp(SignUpRequestDto request) {
+    @Transactional
+    public User registerUser(String userId, String password, String username){
+
         // 중복 검사
-        if (userRepository.existsByUserId(request.getUserId())) {
+        if (userRepository.existsByUserId(userId)) {
             throw new RuntimeException("이미 사용중인 아이디 입니다.");
         }
         // entity 생성
         User user =  User.builder()
-                .userId(request.getUserId())                        // 사용자 ID
-                .password(passwordEncoder.encode(request.getPassword()))    // 비밀번호 암호화
-                .username(request.getUserName())                    // 사용자 이름
+                .userId(userId)                        // 사용자 ID
+                .password(passwordEncoder.encode(password))    // 비밀번호 암호화
+                .username(username)                    // 사용자 이름
                 .profileImage("profileimg")                        // 임시 프로필 이미지
                 // .profileImage(getRandomProfileImage())  // 무작위 프로필 이미지 설정
                 .createAt(LocalDateTime.now())                      // 생성 시간
@@ -80,13 +67,21 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         // 저장
-        User savedUser = userRepository.save(user);
-
-        // JWT 토큰 생성
-        TokenResponseDto tokens = jwtService.issueToken(savedUser);
-
-        // 응답 DTO 생성
-        return SignUpResponseDto.from(savedUser, tokens);
-
+        return userRepository.save(user);
     }
+
+    @Override
+    public User authenticateUser(String userId, String password) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다,.."));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다");
+        }
+        if (user.getIsDeleted()) {
+            throw new RuntimeException("탈퇴한 계정입니다.");
+        }
+        return user;
+    }
+
 }
