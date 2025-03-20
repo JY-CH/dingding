@@ -13,12 +13,14 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'frontend', url: 'https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git', credentialsId: 'dlawoduf15'
-            }
-            script {  // ❌ steps {} 밖에 있어서 오류 발생
-                echo "현재 체크아웃 브랜치 확인"
-                sh 'git branch'
+                
+                script {  
+                    echo "현재 체크아웃 브랜치 확인"
+                    sh 'git branch'
+                }
             }
         }
+
         stage('Check Git') {
             steps {
                 sh 'git --version || echo "⚠️ Git을 찾을 수 없습니다."'
@@ -47,7 +49,6 @@ pipeline {
             }
         }
 
-
         stage('Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -63,7 +64,6 @@ pipeline {
                 }
             }
         }
-
 
         stage('Deploy (Nginx Only)') {
             steps {
@@ -91,8 +91,6 @@ pipeline {
                 }
             }
         }
-
-
     }
 
     post {
