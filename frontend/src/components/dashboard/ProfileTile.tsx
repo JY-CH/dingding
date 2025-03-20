@@ -4,46 +4,65 @@ interface ProfileTileProps {
   name: string;
   email: string;
   rank: string;
-  imageUrl: string;
+  profileImageUrl: string;
+  backgroundImageUrl: string;
 }
 
-const ProfileTile: React.FC<ProfileTileProps> = ({ name, email, rank, imageUrl }) => {
+const ProfileTile: React.FC<ProfileTileProps> = ({
+  name,
+  email,
+  rank,
+  profileImageUrl,
+  backgroundImageUrl,
+}) => {
   return (
-    <div className="bg-amber-50 rounded-lg p-6 shadow-md relative overflow-hidden">
-      {/* 배경 이미지 */}
-      <div className="absolute right-0 top-1/2 transform -translate-y-1/2 opacity-30 max-h-full">
-        {imageUrl ? (
-          <img src={imageUrl} alt="배경" className="h-full object-contain mix-blend-multiply" />
-        ) : (
-          <div className="w-full h-full bg-amber-100 flex items-center justify-center">
-            <span className="text-8xl text-amber-300">♪</span>
+    <div className="w-full bg-white rounded-lg shadow-md overflow-hidden">
+      {/* 배경 이미지와 내용을 함께 포함하는 컨테이너 */}
+      <div className="relative">
+        {/* 배경 이미지를 오른쪽에 배치 */}
+        <div className="absolute top-0 right-0 h-full">
+          <img
+            src={backgroundImageUrl}
+            alt="배경"
+            className="h-full w-auto object-contain object-right opacity-30"
+          />
+        </div>
+
+        {/* 내용 영역 */}
+        <div className="relative z-10 p-6">
+          {/* 내 프로필 타이틀 */}
+          <h2 className="text-black text-l font-extrabold mb-4">내 프로필</h2>
+
+          <div className="flex flex-col md:flex-row md:items-center">
+            {/* 프로필 이미지 */}
+            <img
+              src={profileImageUrl}
+              alt="프로필"
+              className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
+            />
+            {/* 유저 정보 */}
+            <div className="mt-4 md:mt-0 md:ml-6">
+              <h3 className="text-2xl font-bold tracking-wider">{name}</h3>
+              <p className="text-sm text-gray-500 mt-1">{email}</p>
+              <span className="w-6 h-6 rounded-full flex items-center justify-center mt-1">
+                🎸
+              </span>
+              <div className="flex items-center gap-2 mt-2 sm:mt-0">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center">
+                🏆
+              </div>
+              <span className="text-xl font-semibold">{rank}</span>
+            </div>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* 내 프로필 텍스트 */}
-      <div className="absolute left-6 top-4 text-gray-700 text-sm font-medium">내 프로필</div>
-
-      {/* 프로필 내용 */}
-      <div className="flex items-center gap-4 z-10 relative mt-4">
-        <img
-          src={imageUrl}
-          alt="프로필"
-          className="w-16 h-16 rounded-full border-2 border-gray-200 object-cover"
-        />
-        <div>
-          <h2 className="text-lg font-bold">{name}</h2>
-          <p className="text-gray-500 text-sm">{email}</p>
-          <div className="flex items-center mt-2">
-            <span className="text-amber-500 mr-2">♪</span>
-            <span className="text-amber-500 font-medium">{rank}</span>
+          {/* 내 정보 수정 버튼 */}
+          <div className="flex justify-end mt-4">
+            <button className="w-28 h-8 bg-[#F5F1E8] text-gray-700 text-sm font-bold rounded-md shadow hover:bg-gray-200">
+              내 정보 수정
+            </button>
           </div>
         </div>
-      </div>
-
-      {/* 수정 버튼 */}
-      <div className="absolute right-4 bottom-4 bg-white text-gray-600 px-3 py-1 rounded-full text-xs cursor-pointer hover:bg-gray-100 shadow-sm">
-        내 정보 수정
       </div>
     </div>
   );
