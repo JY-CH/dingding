@@ -47,40 +47,59 @@ pipeline {
             }
         }
 
-        stage('Deploy (Backend Only)') {
+                stage('Deploy (Backend & MySQL)') {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
-                    cd /home/ubuntu/j12d105
+                    withCredentials([
+                        string(credentialsId: 'MySQL-Root-Credentials', variable: 'MYSQL_ROOT_CRED'),
+                        string(credentialsId: 'MySQL-User-Credentials', variable: 'MYSQL_USER_CRED')
+                    ]) {
+                        script {
+                            def rootInfo = MYSQL_ROOT_CRED.split(':')
+                            def mysqlRootUser = rootInfo[0]
+                            def mysqlRootPass = rootInfo[1]
 
-                    echo "🛑 기존 백엔드 컨테이너 중단 & 삭제"
-                    docker-compose stop backend || true
-                    docker-compose rm -f backend || true
+                            def userInfo = MYSQL_USER_CRED.split(':')
+                            def mysqlUser = userInfo[0]
+                            def mysqlPass = userInfo[1]
 
-                    echo "🚀 최신 백엔드 이미지 가져오기"
-                    docker pull ${DOCKER_HUB_ID}/${IMAGE_NAME}:latest
+                            sh """
+                            ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
+                            cd /home/ubuntu/j12d105
 
-                    echo "🚀 백엔드 컨테이너 실행"
-                    docker-compose up -d backend
+                            echo "🛑 기존 백엔드 및 MySQL 컨테이너 중단 & 삭제"
+                            docker-compose down
 
-                    echo "✅ 백엔드 배포 완료! 현재 컨테이너 상태:"
-                    docker ps -a
+                            echo "🚀 최신 백엔드 이미지 가져오기"
+                            docker pull ${DOCKER_HUB_ID}/${IMAGE_NAME}:latest
 
-                    exit 0
-                    EOF
-                    '''
+                            echo "🚀 MySQL 환경 변수 설정 후 컨테이너 실행"
+                            export MYSQL_ROOT_USER="${mysqlRootUser}"
+                            export MYSQL_ROOT_PASSWORD="${mysqlRootPass}"
+                            export MYSQL_USER="${mysqlUser}"
+                            export MYSQL_PASSWORD="${mysqlPass}"
+                            docker-compose up -d
+
+                            echo "✅ 배포 완료! 현재 컨테이너 상태:"
+                            docker ps -a
+
+                            exit 0
+                            EOF
+                            """
+                        }
+                    }
                 }
             }
         }
+
     }
 
     post {
         success {
-            echo "✅ Backend Deployment Successful!"
+            echo "✅ Deployment Successful!"
         }
         failure {
-            echo "❌ Backend Deployment Failed."
+            echo "❌ Deployment Failed."
         }
     }
 }
