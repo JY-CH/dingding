@@ -14,7 +14,7 @@ pipeline {
             steps {
                 git branch: 'frontend', url: 'https://lab.ssafy.com/s12-ai-image-sub1/S12P21D105.git', credentialsId: 'dlawoduf15'
             }
-            script {
+            script {  // ❌ steps {} 밖에 있어서 오류 발생
                 echo "현재 체크아웃 브랜치 확인"
                 sh 'git branch'
             }
