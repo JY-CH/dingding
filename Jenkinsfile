@@ -47,8 +47,7 @@ pipeline {
             }
         }
 
-                
-        stage('Deploy (Backend & MySQL)') {
+        stage('Deploy (Backend-1, Backend-2, MySQL)') {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
                     withCredentials([
@@ -56,7 +55,6 @@ pipeline {
                     ]) {
                         script {
                             def rootInfo = MYSQL_ROOT_CRED.split(':')
-                            def mysqlRootUser = rootInfo[0]  // root
                             def mysqlRootPass = rootInfo[1]  // ssafyd105
 
                             sh """
@@ -67,10 +65,10 @@ pipeline {
                             docker-compose down
 
                             echo "🚀 최신 백엔드 이미지 가져오기"
-                            docker pull ${DOCKER_HUB_ID}/${IMAGE_NAME}:latest
+                            docker-compose pull backend-1 backend-2
 
                             echo "🚀 환경 변수 설정 후 컨테이너 실행"
-                            MYSQL_ROOT_PASSWORD="${mysqlRootPass}" docker-compose up -d
+                            MYSQL_ROOT_PASSWORD="${mysqlRootPass}" docker-compose up -d backend-1 backend-2 mysql
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
                             docker ps -a
@@ -83,7 +81,6 @@ pipeline {
                 }
             }
         }
-
     }
 
     post {
