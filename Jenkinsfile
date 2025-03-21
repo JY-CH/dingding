@@ -68,7 +68,7 @@ pipeline {
                             docker-compose pull backend-1 backend-2
 
                             echo "🚀 환경 변수 설정 후 컨테이너 실행"
-                            MYSQL_ROOT_PASSWORD="${mysqlRootPass}" docker-compose up -d backend-1 backend-2 mysql
+                            MYSQL_ROOT_PASSWORD="${mysqlRootPass}" docker-compose up -d
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
                             docker ps -a
