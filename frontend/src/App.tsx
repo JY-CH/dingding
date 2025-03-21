@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+
+import DashboardPage from './pages/dashboard/DashboardPage';
 import DetailPage from './pages/DetailPage';
 import EditPage from './pages/EditPage';
+import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
-import DashboardPage from './pages/DashboardPage';
 import './index.css';
 
 function App() {
