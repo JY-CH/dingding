@@ -44,13 +44,13 @@ pipeline {
                         cd /home/ubuntu/j12d105
 
                         echo "🛑 기존 FastAPI 컨테이너 중단 & 삭제"
-                        docker-compose down fastapi
+                        docker-compose down
 
                         echo "🚀 최신 FastAPI 이미지 가져오기"
                         docker pull ${DOCKER_HUB_ID}/${IMAGE_NAME}:latest
 
                         echo "🚀 FastAPI 컨테이너 실행"
-                        docker-compose up -d fastapi
+                        docker-compose up -d
 
                         echo "✅ FastAPI 배포 완료! 현재 컨테이너 상태:"
                         docker ps -a
