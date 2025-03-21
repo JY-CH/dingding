@@ -17,6 +17,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    echo "🚀 FastAPI 폴더 확인"
+                    sh "ls -al"
+                    sh "ls -al fastapi"
                     echo "🚀 FastAPI용 Docker 이미지 빌드 시작!"
                     sh "docker build -t ${DOCKER_HUB_ID}/${IMAGE_NAME}:latest -f Dockerfile ."
                 }

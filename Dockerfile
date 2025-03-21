@@ -9,7 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # ✅ 전체 프로젝트 복사
-COPY . /app  # 🚀 fastapi 폴더까지 포함하여 복사
+COPY . /app 
 
 # ✅ FastAPI 실행
 WORKDIR /app/fastapi  # ⚡ FastAPI 실행 위치 설정
