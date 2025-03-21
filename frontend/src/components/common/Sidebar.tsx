@@ -62,40 +62,44 @@ const Sidebar: React.FC = () => {
   return (
     <aside className={`
       fixed top-0 left-0 h-screen bg-[#1E1E1E]
-      transition-all duration-300 ease-in-out
+      transition-[width] duration-300 ease-in-out
       ${isExpanded ? 'w-64' : 'w-20'}
     `}>
       <div className="flex flex-col h-full">
         {/* 로그인/프로필 영역 */}
         <div className="p-4 border-b border-gray-800">
           {user.isLoggedIn ? (
-            <div className={`
-              flex items-center
-              ${isExpanded ? 'justify-start' : 'justify-center'}
-            `}>
-              <img 
-                src={user.profileImage} 
-                alt="Profile" 
-                className="w-10 h-10 rounded-full"
-              />
-              {isExpanded && (
-                <span className="ml-3 text-white text-sm font-medium">
+            <div className="flex items-center h-10">
+              <div className="w-10 h-10 flex-shrink-0">
+                <img 
+                  src={user.profileImage} 
+                  alt="Profile" 
+                  className="w-full h-full rounded-full"
+                />
+              </div>
+              <div className={`
+                overflow-hidden transition-all duration-300
+                ${isExpanded ? 'w-40 ml-3 opacity-100' : 'w-0 opacity-0'}
+              `}>
+                <span className="text-white text-sm font-medium whitespace-nowrap">
                   사용자님
                 </span>
-              )}
+              </div>
             </div>
           ) : (
-            <button
-              onClick={handleLogin}
-              className={`
-                w-full p-2 rounded
-                bg-amber-500 hover:bg-amber-600
-                text-white font-medium transition-colors
-                ${isExpanded ? 'text-sm' : 'text-[10px]'}
-              `}
-            >
-              {isExpanded ? '로그인' : '로그인'}
-            </button>
+            <div className="h-10 flex items-center justify-center">
+              <button
+                onClick={handleLogin}
+                className={`
+                  w-full h-8 rounded flex items-center justify-center
+                  bg-amber-500 hover:bg-amber-600
+                  text-white font-medium transition-colors
+                  ${isExpanded ? 'text-sm' : 'text-[10px]'}
+                `}
+              >
+                {isExpanded ? '로그인' : '로그인'}
+              </button>
+            </div>
           )}
         </div>
 
@@ -106,32 +110,36 @@ const Sidebar: React.FC = () => {
               key={index}
               onClick={() => handleItemClick(index, item.path)}
               className={`
-                w-full flex items-center px-5 py-3
-                ${isExpanded ? 'justify-start' : 'justify-center'}
+                w-full h-12 flex items-center px-5
                 ${activeItem === index 
                   ? 'bg-amber-500/20 text-amber-500' 
                   : 'text-gray-400 hover:bg-gray-800/40 hover:text-white'
                 }
               `}
             >
-              <svg 
-                className="w-6 h-6 transition-transform duration-200"
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d={item.icon}
-                />
-              </svg>
-              {isExpanded && (
-                <span className="ml-4 text-sm font-medium overflow-hidden whitespace-nowrap">
+              <div className="w-6 h-6 flex-shrink-0">
+                <svg 
+                  className="w-full h-full"
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d={item.icon}
+                  />
+                </svg>
+              </div>
+              <div className={`
+                overflow-hidden transition-all duration-300
+                ${isExpanded ? 'w-40 ml-4 opacity-100' : 'w-0 opacity-0'}
+              `}>
+                <span className="text-sm font-medium whitespace-nowrap">
                   {item.label}
                 </span>
-              )}
+              </div>
             </button>
           ))}
         </div>
@@ -142,12 +150,46 @@ const Sidebar: React.FC = () => {
           {user.isLoggedIn && (
             <button
               onClick={handleLogout}
-              className="w-full p-2 flex justify-center items-center rounded
+              className="w-full h-10 flex items-center justify-center rounded
                 text-gray-400 hover:text-white hover:bg-red-500/20
-                transition-colors duration-200"
+                transition-colors"
             >
+              <div className="w-6 h-6 flex-shrink-0">
+                <svg 
+                  className="w-full h-full"
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
+                  />
+                </svg>
+              </div>
+              <div className={`
+                overflow-hidden transition-all duration-300
+                ${isExpanded ? 'w-40 ml-2 opacity-100' : 'w-0 opacity-0'}
+              `}>
+                <span className="text-sm font-medium whitespace-nowrap">
+                  로그아웃
+                </span>
+              </div>
+            </button>
+          )}
+
+          {/* 토글 버튼 */}
+          <button 
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full h-10 flex items-center justify-center rounded
+              bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white
+              transition-colors"
+          >
+            <div className="w-6 h-6 flex-shrink-0">
               <svg 
-                className="w-6 h-6"
+                className={`w-full h-full transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -156,35 +198,10 @@ const Sidebar: React.FC = () => {
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
                   strokeWidth={2} 
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
+                  d="M9 5l7 7-7 7"
                 />
               </svg>
-              {isExpanded && (
-                <span className="ml-2 text-sm font-medium">로그아웃</span>
-              )}
-            </button>
-          )}
-
-          {/* 토글 버튼 */}
-          <button 
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full p-2 flex justify-center items-center rounded
-              bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white
-              transition-colors duration-200"
-          >
-            <svg 
-              className={`w-6 h-6 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            </div>
           </button>
         </div>
       </div>
