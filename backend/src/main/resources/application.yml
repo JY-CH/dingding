@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://mysql:3306/ddingga?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
@@ -13,3 +15,18 @@ spring:
     show-sql: "true"
     hibernate:
       ddl-auto: update
+jwt:
+  # JWT 토큰 생성 및 검증에 사용되는 비밀키
+  # 실제 운영 환경에서는 환경변수로 관리하는 것을 권장
+  secret: ${JWT_SECRET}
+  # Access Token 유효기간 (1시간)
+  # 짧은 시간으로 설정하여 보안성 강화
+  access-token-expiration: 86400
+  # Refresh Token 유효기간 (7일)
+  # Access Token보다 긴 시간으로 설정
+  refresh-token-expiration: 604800
+  # JWT 토큰 접두사
+  # Authorization 헤더에서 토큰을 식별하는데 사용
+  token-prefix: "Bearer "
+  # HTTP 요청 헤더에서 JWT 토큰을 전달하는 헤더 이름
+  header-string: "Authorization"
