@@ -38,9 +38,14 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
       }));
     }
   };
+  // 커스텀 레전드 타입 정의
+interface LegendPayloadItem {
+  value: string;
+  color: string;
+}
 
   // 커스텀 범례 컴포넌트
-  const renderLegend = ({ payload }: { payload: any[] }) => (
+  const renderLegend = ({ payload }: { payload: LegendPayloadItem[] }) => (
     <div className="flex items-center gap-4 text-xs">
       {payload.map((entry, index) => (
         <div

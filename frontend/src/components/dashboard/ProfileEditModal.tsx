@@ -13,7 +13,6 @@ interface ProfileModalProps {
 
 const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, name: initialName, email, profileImageUrl: initialProfileImage }) => {
   const [name, setName] = useState(initialName);
-  const [_setEmail] = useState(email); // 사용되지 않으므로 _setEmail로 변경
   const [profileImage, setProfileImage] = useState(initialProfileImage);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
