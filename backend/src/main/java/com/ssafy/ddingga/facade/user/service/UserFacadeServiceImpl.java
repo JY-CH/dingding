@@ -5,6 +5,7 @@ import com.ssafy.ddingga.domain.user.entity.User;
 import com.ssafy.ddingga.domain.user.service.JwtService;
 import com.ssafy.ddingga.domain.user.service.UserService;
 import com.ssafy.ddingga.facade.user.dto.*;
+import com.ssafy.ddingga.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 public class UserFacadeServiceImpl implements UserFacadeService {
     private final UserService userService;
     private final JwtService jwtService;
+    private final JwtTokenProvider jwtTokenProvider;
+
 
     @Override
     public SignUpResponseDto signUp(SignUpRequestDto request) {
@@ -41,6 +44,24 @@ public class UserFacadeServiceImpl implements UserFacadeService {
                 .build();
     }
 
+    /**
+     * 사용자 로그아웃 처리
+     * 1. 엑세스 토큰에서 사용자 정보 추출
+     * 2. 사용자의 리프레시 토큰을 무효화
+     * 3. 로그아웃 겅공 응답 반환
+     */
+    @Override
+    public LogoutResponseDto logout(String accessToken) {
+        // 토큰에서 사용자 정보 추출
+        String userId = jwtTokenProvider.getUserId(accessToken);
+
+        // 로그아웃 기능 호출
+        jwtService.invalidateRefreshToken(userId);
+
+        return LogoutResponseDto.builder()
+                .message("로그아웃이 완료되었습니다.")
+                .build();
+    }
 
     @Override
     public TokenResponseDto refreshToken(String refreshToken) {

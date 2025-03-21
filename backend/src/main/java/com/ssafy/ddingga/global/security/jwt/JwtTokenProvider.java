@@ -30,15 +30,13 @@ public class JwtTokenProvider {
      * @return 생성된 JWT AccessToken
      */
     public String createAccessToken(User user) {
-        Claims claims = Jwts.claims().setSubject(user.getUserId());
-        claims.put("id", user.getId());
-        claims.put("username", user.getUsername());
-
         Date now = new Date();
         Date validity = new Date(now.getTime() + jwtProperties.getAccessTokenExpiration()*1000);
 
         return Jwts.builder()
                 .setSubject(user.getUserId())
+                .claim("id", user.getId())
+                .claim("username", user.getUsername())
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -68,9 +66,8 @@ public class JwtTokenProvider {
      * @return 사용자 ID
      */
     public String getUserId(String token) {
-        return Jwts.parserBuilder()
+        return Jwts.parser()
                 .setSigningKey(getSigningKey())
-                .build()
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
@@ -83,9 +80,8 @@ public class JwtTokenProvider {
      */
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
+            Jwts.parser()
                     .setSigningKey(getSigningKey())
-                    .build()
                     .parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {

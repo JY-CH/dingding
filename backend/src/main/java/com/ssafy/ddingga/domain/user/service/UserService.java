@@ -24,4 +24,5 @@ public interface UserService {
      * @return 인증된 사용자 엔티티
      */
     User authenticateUser(String UserId, String password);
+
 }

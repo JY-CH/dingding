@@ -90,4 +90,22 @@ public class JwtServiceImpl implements JwtService {
         return new TokenResponseDto(newAccessToken,newRefreshToken);
 
     }
+
+
+    @Override
+    @Transactional
+    public void invalidateRefreshToken(String userId) {
+        // 사용자 ID로 유저 객체 조회
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("사용자가 존재하지 않습니다"));
+
+        // 사용자의 리프레시토큰 조회
+        UserSocial userSocial = userSocialRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("사용자 인증 정보가 존재하지 않습니다"));
+
+        //리프레시 토큰 무효화(null로 설정)
+        userSocial.setRefreshToken(null);
+        userSocial.setTokenExpiryDate(null);
+        userSocialRepository.save(userSocial);
+    }
 }
