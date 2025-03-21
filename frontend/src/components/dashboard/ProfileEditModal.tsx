@@ -1,14 +1,22 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { X, Camera } from "lucide-react";
 
-const ProfileModal = ({ isOpen, onClose }) => {
-  const [name, setName] = useState("임재열");
-  const [email, setEmail] = useState("ding@ding.com");
-  const [profileImage, setProfileImage] = useState("src/assets/띵까띵까.png");
+interface ProfileModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  name: string;
+  email: string;
+  profileImageUrl: string;
+}
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, name: initialName, email, profileImageUrl: initialProfileImage }) => {
+  const [name, setName] = useState(initialName);
+  const [_setEmail] = useState(email); // 사용되지 않으므로 _setEmail로 변경
+  const [profileImage, setProfileImage] = useState(initialProfileImage);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setProfileImage(URL.createObjectURL(file));
     }
@@ -27,7 +35,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
         </button>
 
         {/* 타이틀 */}
-        <Dialog.Title className="text-xl font-bold text-center mb-6">내 정보 수정</Dialog.Title>
+        <Dialog.Title className="text-xl font-bold text-start mb-6">내 정보 수정</Dialog.Title>
 
         {/* 프로필 이미지 */}
         <div className="flex flex-col items-center mb-6">
@@ -37,8 +45,8 @@ const ProfileModal = ({ isOpen, onClose }) => {
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
             />
-            <label className="absolute bottom-0 right-0 bg-orange-950 text-white p-1 rounded-full cursor-pointer">
-              <Camera size={30} fill="#6A4E23"/>
+            <label className="absolute bottom-0 right-0 p-1 rounded-full cursor-pointer">
+              <Camera size={30} fill="#6A4E23" color="#FFFBF2" />
               <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
             </label>
           </div>
@@ -47,21 +55,30 @@ const ProfileModal = ({ isOpen, onClose }) => {
         {/* 입력 필드 */}
         <div className="space-y-6">
           <div>
-            <label className="text-gray-600 text-sm">이메일 주소</label>
+            <label className="text-[#6A4E23] text-sm font-bold">이메일 주소</label>
             <input
               type="text"
               value={email}
               disabled
-              className="w-full px-3 py-2 bg-transparent focus:outline-none border-b border-[#905D00]"
+              className="text-gray-400 font-semibold w-full px-3 py-2 bg-transparent focus:outline-none border-b border-[#905D00]"
             />
           </div>
           <div>
-            <label className="text-gray-600 text-sm">닉네임</label>
+            <label className="text-[#6A4E23] text-sm font-bold">닉네임</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 bg-transparent focus:outline-none border-b border-[#905D00]"
+              className="w-full font-bold px-3 py-2 bg-transparent focus:outline-none border-b border-[#905D00]"
+            />
+          </div>
+          <div>
+            <label className="text-[#6A4E23] text-sm font-bold">가입일</label>
+            <input
+              type="text"
+              value="2025.03.14"
+              disabled
+              className="text-gray-400 font-bold w-full px-3 py-2 bg-transparent focus:outline-none border-b border-[#905D00]"
             />
           </div>
         </div>
