@@ -110,31 +110,33 @@ const Sidebar: React.FC = () => {
               key={index}
               onClick={() => handleItemClick(index, item.path)}
               className={`
-                w-full h-12 flex items-center px-5
+                w-full h-12 flex items-center
                 ${activeItem === index 
                   ? 'bg-amber-500/20 text-amber-500' 
                   : 'text-gray-400 hover:bg-gray-800/40 hover:text-white'
                 }
               `}
             >
-              <div className="w-6 h-6 flex-shrink-0">
-                <svg 
-                  className="w-full h-full"
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d={item.icon}
-                  />
-                </svg>
+              <div className="w-20 flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6">
+                  <svg 
+                    className="w-full h-full"
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d={item.icon}
+                    />
+                  </svg>
+                </div>
               </div>
               <div className={`
                 overflow-hidden transition-all duration-300
-                ${isExpanded ? 'w-40 ml-4 opacity-100' : 'w-0 opacity-0'}
+                ${isExpanded ? 'w-40 opacity-100' : 'w-0 opacity-0'}
               `}>
                 <span className="text-sm font-medium whitespace-nowrap">
                   {item.label}
