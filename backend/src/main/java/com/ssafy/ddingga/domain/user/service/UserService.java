@@ -5,6 +5,7 @@ import com.ssafy.ddingga.facade.user.dto.LoginRequestDto;
 import com.ssafy.ddingga.facade.user.dto.LoginResponseDto;
 import com.ssafy.ddingga.facade.user.dto.SignUpRequestDto;
 import com.ssafy.ddingga.facade.user.dto.SignUpResponseDto;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
 
@@ -20,9 +21,18 @@ public interface UserService {
     /**
      * 사용자 인증 (도메인 로직)
      * @param UserId 사용자 ID
-     * @param password qlalfqjsgh
+     * @param password 비밀번호
      * @return 인증된 사용자 엔티티
      */
     User authenticateUser(String UserId, String password);
+
+    /**
+     * 사용자 정보 변경
+     * @param UserId 사용자 고유 ID
+     * @param username 변경할 사용자 이름 사용자 이름 (null인경우 기존 이름 유지)
+     * @param profileImage 변경할 프로필 이미지 파일 ((null인경우 기존 이름 유지)
+     * @return 정보가 수정된 사용자 엔티티
+     */
+    User updateUser(String UserId, String username, MultipartFile profileImage);
 
 }

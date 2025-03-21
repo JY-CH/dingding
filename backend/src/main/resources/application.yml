@@ -15,6 +15,16 @@ spring:
     show-sql: "true"
     hibernate:
       ddl-auto: update
+  # 파일 업로드를 위한 설정
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: true
+  # 파일 업로드 경로 설정
+  file:
+    upload-dir: ./uploads
+
 jwt:
   # JWT 토큰 생성 및 검증에 사용되는 비밀키
   # 실제 운영 환경에서는 환경변수로 관리하는 것을 권장

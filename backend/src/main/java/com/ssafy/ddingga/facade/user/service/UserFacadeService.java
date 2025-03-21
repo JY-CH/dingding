@@ -13,4 +13,12 @@ public interface UserFacadeService {
      * @return 로그아웃 결과
      */
     LogoutResponseDto logout(String accessToken);
+
+    /**
+     * 사용자 정보 수정을 처리하는 메서드
+     * @param userId 수정할 사용자의 아이디
+     * @param request 수정할 회원 정보가 담긴 DTO
+     * @return 수정된 회원정보 DTO
+     */
+    UserUpdateResponseDto updateUserInfo(String userId, UserUpdateRequestDto request);
 }
