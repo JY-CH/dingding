@@ -9,7 +9,7 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # ✅ 애플리케이션 코드 복사
-COPY . .
+COPY fastapi /app
 
 # ✅ FastAPI 실행 (포트 18000으로 변경)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "18000"]
