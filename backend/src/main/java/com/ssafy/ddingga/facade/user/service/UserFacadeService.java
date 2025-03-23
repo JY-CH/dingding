@@ -1,6 +1,7 @@
 package com.ssafy.ddingga.facade.user.service;
 
 import com.ssafy.ddingga.facade.user.dto.*;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserFacadeService {
     SignUpResponseDto signUp(SignUpRequestDto request);
