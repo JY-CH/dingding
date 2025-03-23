@@ -15,6 +15,18 @@ spring:
     show-sql: "true"
     hibernate:
       ddl-auto: update
+
+  # 레디스 설정 jedis 방식은 동기처리 lettuce 방식은 비동기 처리
+  redis:
+    host: localhost
+    port: 6379
+    password: your_redis_password (선택 사항)
+    lettuce:
+      pool:
+        max-active: 10
+        max-wait: 1000
+        max-idle: 10
+        min-idle: 1
 jwt:
   # JWT 토큰 생성 및 검증에 사용되는 비밀키
   # 실제 운영 환경에서는 환경변수로 관리하는 것을 권장

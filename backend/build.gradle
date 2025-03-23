@@ -51,6 +51,8 @@ dependencies {
 	// websocket 의존성 추가
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
+	// redis 의존성 추가
+	implementation 'org.springframework.data:spring-data-redis:2.6.0'
 }
 
 tasks.named('test') {
