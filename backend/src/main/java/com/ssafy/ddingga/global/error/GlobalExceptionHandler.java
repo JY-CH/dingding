@@ -1,8 +1,7 @@
 package com.ssafy.ddingga.global.error;
 
-
-
-import com.ssafy.ddingga.global.error.dto.ErrorResponse;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,9 +10,27 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import com.ssafy.ddingga.global.error.dto.ErrorResponse;
+import com.ssafy.ddingga.global.error.exception.DuplicateException;
+import com.ssafy.ddingga.global.error.exception.NotFoundException;
+
 @RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)  // 우선순위 추가
 public class GlobalExceptionHandler {
 
+
+    /**
+     * 기타 예외 처리 (500 Internal Server Error)
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        ErrorResponse response = new ErrorResponse(
+                "서버 내부 오류가 발생했습니다.",
+                "Internal Server Error",
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
     /**
      * 인증 관련 예외 처리 (401 Unauthorized)
      */
@@ -43,17 +60,14 @@ public class GlobalExceptionHandler {
     /**
      * 중복 데이터 예외 처리 (409 Conflict)
      */
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateException(RuntimeException e) {
-        if (e.getMessage().contains("이미 사용중인 아이디")) {
-            ErrorResponse response = new ErrorResponse(
-                    e.getMessage(),
-                    "Conflict",
-                    HttpStatus.CONFLICT.value()
-            );
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-        }
-        throw e; // 다른 RuntimeException은 기본 핸들러로 전달
+    @ExceptionHandler(DuplicateException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateException(DuplicateException e) {
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                "Conflict",
+                HttpStatus.CONFLICT.value()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     /**
@@ -72,17 +86,14 @@ public class GlobalExceptionHandler {
     /**
      * 리소스를 찾을 수 없는 예외 처리 (404 Not Found)
      */
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handleNotFoundException(RuntimeException e) {
-        if (e.getMessage().contains("사용자를 찾을 수 없습니다")) {
-            ErrorResponse response = new ErrorResponse(
-                    e.getMessage(),
-                    "Not Found",
-                    HttpStatus.NOT_FOUND.value()
-            );
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-        throw e; // 다른 RuntimeException은 기본 핸들러로 전달
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException e) {
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                "Not Found",
+                HttpStatus.NOT_FOUND.value()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     /**
@@ -98,16 +109,5 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(response);
     }
 
-    /**
-     * 기타 예외 처리 (500 Internal Server Error)
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        ErrorResponse response = new ErrorResponse(
-                "서버 내부 오류가 발생했습니다.",
-                "Internal Server Error",
-                HttpStatus.INTERNAL_SERVER_ERROR.value()
-        );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
+
 }

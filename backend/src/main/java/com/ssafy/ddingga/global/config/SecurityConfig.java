@@ -12,8 +12,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.ssafy.ddingga.global.security.jwt.JwtAuthenticationFilter;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 // config 파일입니다 선언 하는 아노테이션!
 @Configuration
 // WebSecurity 활성화 아노테이션
@@ -24,24 +22,20 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**","/swagger-ui.html", "/swagger-resources/**").permitAll()
-                        .requestMatchers("/api/auth/signup","/api/auth/login").permitAll() // 회원가입과 로그인 외 모든 동작에서 인증필요
+                        .requestMatchers(
+                            "/v3/api-docs/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html",
+                            "/swagger-resources/**",
+                            "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers("/api/auth/signup","/api/auth/login").permitAll()
                         .anyRequest().authenticated()
                 );
         http
                 .csrf((auth) -> auth.disable());
         http
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            if (request.getRequestURI().startsWith("/swagger-ui") || 
-                                request.getRequestURI().startsWith("/v3/api-docs") ||
-                                request.getRequestURI().startsWith("/swagger-resources")) {
-                                response.setStatus(HttpServletResponse.SC_OK);
-                            } else {
-                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            }
-                        }));
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));

@@ -41,42 +41,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             logger.debug("Authorization header: {}", request.getHeader("Authorization"));
             String token = extractJwtFromRequest(request);
 
-            if (!StringUtils.hasText(token)) {
-                logger.warn("JWT 토큰이 없습니다");
-                filterChain.doFilter(request, response);
-                return;
+            if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
+                String userId = jwtTokenProvider.getUserId(token);
+
+                userRepository.findByUserId(userId)
+                        .ifPresent(user -> {
+                            UsernamePasswordAuthenticationToken authentication =
+                                    new UsernamePasswordAuthenticationToken(
+                                            user,
+                                            null,
+                                            user.getAuthorities()
+                                    );
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                        });
             }
-
-            if (!jwtTokenProvider.validateToken(token)) {
-                logger.warn("유효하지 않은 JWT 토큰입니다");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
-
-            String userId = jwtTokenProvider.getUserId(token);
-            userRepository.findByUserId(userId)
-                    .ifPresentOrElse(
-                            user -> {
-                                UsernamePasswordAuthenticationToken authentication =
-                                        new UsernamePasswordAuthenticationToken(
-                                                user,
-                                                null,
-                                                user.getAuthorities()
-                                        );
-                                SecurityContextHolder.getContext().setAuthentication(authentication);
-                            },
-                            () -> {
-                                logger.warn("사용자를 찾을 수 없습니다: {}", userId);
-                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            }
-                    );
-
-            filterChain.doFilter(request, response);
         } catch (Exception e) {
-            logger.error("JWT 인증 처리 중 오류 발생: {}", e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            filterChain.doFilter(request, response);
+            logger.error("JWT 인증 처리 오류 중 발생: {}", e.getMessage());
         }
+        filterChain.doFilter(request, response);
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {

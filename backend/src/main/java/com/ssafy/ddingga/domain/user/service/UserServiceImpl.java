@@ -5,6 +5,7 @@ import com.ssafy.ddingga.domain.user.entity.User;
 import com.ssafy.ddingga.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +26,7 @@ import java.util.UUID;
  * 사용자 관련 서비스 구현체
  * 회원가입, 로그인 등의 사용자 관련 비즈니스 로직을 처리
  */
+@Slf4j //로그를 위한 어노테이션
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -41,7 +43,7 @@ public class UserServiceImpl implements UserService {
      */
     private final PasswordEncoder passwordEncoder;
 
-    @Value("{spring,file,upload-dir}")
+    @Value("${spring.file.upload-dir}")
     private String uploadDir;
 
 
@@ -74,7 +76,7 @@ public class UserServiceImpl implements UserService {
                 .userId(userId)                        // 사용자 ID
                 .password(passwordEncoder.encode(password))    // 비밀번호 암호화
                 .username(username)                    // 사용자 이름
-                .profileImage("profileimg")                        // 임시 프로필 이미지
+                .profileImage("profileImg")                        // 임시 프로필 이미지
                 // .profileImage(getRandomProfileImage())  // 무작위 프로필 이미지 설정
                 .createAt(LocalDateTime.now())                      // 생성 시간
                 .isDeleted(false)                                   // 삭제 여부
@@ -137,7 +139,7 @@ public class UserServiceImpl implements UserService {
                         Files.deleteIfExists(previousImage);
                     } catch (IOException e) {
                         // 이전 이미지 삭제 실패는 로그만 남기고 계속 진행
-                        System.out.println("이전 프로필 삭제 실패 : " + e.getMessage());
+                        log.error("이전 프로필 이미지 삭제 실패: {}", e.getMessage());
                     }
                 }
                 // 3-5. 새 이미지 경로 저장
