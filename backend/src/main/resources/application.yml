@@ -3,15 +3,16 @@ spring:
     active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysql:3306/ddingga?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
-    username: root
-    password: password
+    url: jdbc:mysql://mysql:3306/ddingga?createDatabaseIfNotExist=true&useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
   application:
     name: ddingga
   jpa:
     properties:
       hibernate:
         format_sql: "true"
+        dialect: org.hibernate.dialect.MySQLDialect
     show-sql: "true"
     hibernate:
       ddl-auto: update
@@ -27,6 +28,16 @@ spring:
         max-wait: 1000
         max-idle: 10
         min-idle: 1
+  # 파일 업로드를 위한 설정
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: true
+  # 파일 업로드 경로 설정
+  file:
+    upload-dir: ./uploads
+
 jwt:
   # JWT 토큰 생성 및 검증에 사용되는 비밀키
   # 실제 운영 환경에서는 환경변수로 관리하는 것을 권장
