@@ -38,32 +38,29 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public TokenResponseDto issueToken(User user, AuthProvider provider) {
-        try {
-            String accessToken = jwtTokenProvider.createAccessToken(user);
-            String refreshToken = jwtTokenProvider.createRefreshToken(user);
+        String accessToken = jwtTokenProvider.createAccessToken(user);
+        String refreshToken = jwtTokenProvider.createRefreshToken(user);
 
-            // refresh 토큰 만료시간 계산
-            LocalDateTime tokenExpiryDate = LocalDateTime.now()
-                    .plusSeconds(jwtProperties.getRefreshTokenExpiration());
+        // refresh 토큰 만료시간 계산
+        LocalDateTime tokenExpiryDate = LocalDateTime.now()
+                .plusSeconds(jwtProperties.getRefreshTokenExpiration());
 
-            // UserSocial 엔티티 생성 또는 업데이트
-            UserSocial userSocial = userSocialRepository.findByUser(user)
-                    .orElseGet(() -> UserSocial.builder()
-                            .user(user)
-                            .provider(provider)
-                            .providerId(provider == AuthProvider.LOCAL ? user.getUserId() : null)
-                            .build());
+        // 기존 소셜 정보 찾기
+        // 사용자가 이미 로그인 한 적이 있는지 확인한다는뜻
+        // 소셜로그인은 차후 구현할 예정이지만 확장성을 위해 컬럼존재
+        UserSocial userSocial = userSocialRepository.findByUser(user)
+                .orElse(UserSocial.builder()
+                        .user(user)
+                        .provider(provider)
+                        .providerId(provider == AuthProvider.LOCAL ? user.getUserId() : null)
+                        .build());
 
-            // 리프레시토큰 업데이트
-            userSocial.setRefreshToken(refreshToken);
-            userSocial.setTokenExpiryDate(tokenExpiryDate);
-            userSocialRepository.save(userSocial);
+        // 리프레시토큰 업데이트
+        userSocial.setRefreshToken(refreshToken);
+        userSocial.setTokenExpiryDate(tokenExpiryDate);
+        userSocialRepository.save(userSocial);
 
-            return new TokenResponseDto(accessToken, refreshToken);
-        } catch (Exception e) {
-            // 토큰 발급 실패 시에도 사용자 등록은 유지
-            return new TokenResponseDto(null, null);
-        }
+        return new TokenResponseDto(accessToken, refreshToken);
     }
 
     /**

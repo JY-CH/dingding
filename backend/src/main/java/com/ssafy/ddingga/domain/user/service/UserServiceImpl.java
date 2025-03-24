@@ -3,6 +3,7 @@ package com.ssafy.ddingga.domain.user.service;
 
 import com.ssafy.ddingga.domain.user.entity.User;
 import com.ssafy.ddingga.domain.user.repository.UserRepository;
+import com.ssafy.ddingga.global.error.exception.DuplicateException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +70,7 @@ public class UserServiceImpl implements UserService {
 
         // 중복 검사
         if (userRepository.existsByUserId(userId)) {
-            throw new RuntimeException("이미 사용중인 아이디 입니다.");
+            throw new DuplicateException("이미 사용중인 아이디 입니다.");
         }
         // entity 생성
         User user =  User.builder()
