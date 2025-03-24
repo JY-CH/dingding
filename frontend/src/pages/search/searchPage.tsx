@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
-// import HotContent from '@/components/search/HotContent';
+import HotContent from '@/components/search/HotContent';
 import SearchBar from '@/components/search/SearchBar';
 // import SearchResults from '@/components/search/SearchResults';
-import SearchSuggestions from '@/components/search/SearchSuggestions';
+// import SearchSuggestions from '@/components/search/SearchSuggestions';
 
 const SearchPage: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -14,11 +14,10 @@ const SearchPage: React.FC = () => {
 
       {query.trim() === '' ? (
         <>
-          <SearchSuggestions />
-          {/* <HotContent /> */}
+          <HotContent />
         </>
       ) : (
-        <SearchSuggestions />
+        <HotContent />
       )}
     </div>
   );

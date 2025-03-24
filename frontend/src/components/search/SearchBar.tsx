@@ -70,7 +70,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery }) => {
 
       {/* 검색어 드롭다운 - 세로로 길게 표시 */}
       {isFocused && recentSearches.length > 0 && (
-        <div className="absolute z-10 left-6 right-6 mt-1 bg-zinc-800 rounded-lg shadow-lg border border-zinc-700 overflow-hidden">
+        <div className="absolute z-20 left-6 right-6 mt-1 bg-zinc-800 rounded-lg shadow-lg border border-zinc-700 overflow-hidden">
           <div className="py-2">
             <div className="px-4 py-2">
               <h4 className="text-sm font-medium text-gray-300">최근 검색어</h4>
