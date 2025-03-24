@@ -75,7 +75,7 @@ pipeline {
                             echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env
                             echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
 
-                            docker-compose up -d
+                            MYSQL_USERNAME=${MYSQL_USERNAME} MYSQL_PASSWORD=${MYSQL_PASSWORD} REDIS_PASSWORD=${REDIS_PASSWORD} MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}  docker-compose up -d
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
                             docker ps -a
