@@ -1,13 +1,22 @@
 package com.ssafy.ddingga.facade.user.service;
 
 
+import org.springframework.stereotype.Service;
+
 import com.ssafy.ddingga.domain.user.entity.User;
 import com.ssafy.ddingga.domain.user.service.JwtService;
 import com.ssafy.ddingga.domain.user.service.UserService;
-import com.ssafy.ddingga.facade.user.dto.*;
+import com.ssafy.ddingga.facade.user.dto.LoginRequestDto;
+import com.ssafy.ddingga.facade.user.dto.LoginResponseDto;
+import com.ssafy.ddingga.facade.user.dto.LogoutResponseDto;
+import com.ssafy.ddingga.facade.user.dto.SignUpRequestDto;
+import com.ssafy.ddingga.facade.user.dto.SignUpResponseDto;
+import com.ssafy.ddingga.facade.user.dto.TokenResponseDto;
+import com.ssafy.ddingga.facade.user.dto.UserUpdateRequestDto;
+import com.ssafy.ddingga.facade.user.dto.UserUpdateResponseDto;
 import com.ssafy.ddingga.global.security.jwt.JwtTokenProvider;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -19,14 +28,18 @@ public class UserFacadeServiceImpl implements UserFacadeService {
 
     @Override
     public SignUpResponseDto signUp(SignUpRequestDto request) {
+        // user 엔티티만 생성
         User user = userService.registerUser(
                 request.getUserId(),
                 request.getPassword(),
                 request.getUserName()
         );
-        TokenResponseDto tokens = jwtService.issueToken(user);
 
-        return SignUpResponseDto.from(user,tokens);
+        // 토큰 없이 회원 가입 정보만 반환
+        return SignUpResponseDto.builder()
+                .userId(user.getUserId())
+                .username(user.getUsername())
+                .build();
     }
 
     @Override
