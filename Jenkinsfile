@@ -74,8 +74,8 @@ pipeline {
                             echo "🛑🛑🛑 MYSQL_USERNAME=${MYSQL_USERNAME} 🛑🛑🛑"
                             echo "🛑🛑🛑 MYSQL_PASSWORD=${MYSQL_PASSWORD} 🛑🛑🛑"
 
-                            MYSQL_USERNAME="${MYSQL_USERNAME}" \\
-                            MYSQL_PASSWORD="${MYSQL_PASSWORD}" \\
+                            MYSQL_USERNAME="${MYSQL_USERNAME}" 
+                            MYSQL_PASSWORD="${MYSQL_PASSWORD}" 
                             docker-compose up -d
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
