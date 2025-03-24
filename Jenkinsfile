@@ -70,6 +70,8 @@ pipeline {
                             docker-compose pull backend-1 backend-2
 
                             echo "🚀 환경 변수 설정 후 컨테이너 실행"
+                            echo "🛑🛑🛑MYSQL_ROOT_PASSWORD=${mysqlRootPass}🛑🛑🛑"
+                            echo "🛑🛑🛑MYSQL_USERNAME=${MYSQL_USERNAME}🛑🛑🛑"
                             export MYSQL_USERNAME="${MYSQL_USERNAME}"
                             export MYSQL_PASSWORD="${MYSQL_PASSWORD}"
                             MYSQL_ROOT_PASSWORD="${mysqlRootPass}" docker-compose up -d
