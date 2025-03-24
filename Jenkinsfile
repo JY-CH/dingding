@@ -57,7 +57,7 @@ pipeline {
                     ]) {
                         script {
                             sh """
-                            ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io << 'EOF'
+                            ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                             cd /home/ubuntu/j12d105
 
                             echo "🛑 기존 백엔드, MySQL, Redis 컨테이너 중단 & 삭제"
