@@ -1,5 +1,7 @@
 package com.ssafy.ddingga.global.error;
 
+import com.ssafy.ddingga.global.error.exception.UserAlreadyDeletedException;
+import com.ssafy.ddingga.global.error.exception.UserNotFoundException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -109,5 +111,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(response);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException e) {
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                "USER_NOT_FOUND",
+                HttpStatus.NOT_FOUND.value()
+
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+    @ExceptionHandler(UserAlreadyDeletedException.class)
+    public ResponseEntity<ErrorResponse> handleUserAlreadyDeletedException(UserAlreadyDeletedException e) {
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                "USER_ALREADY_DELETED",
+                HttpStatus.BAD_REQUEST.value()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
 }

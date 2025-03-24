@@ -1,7 +1,6 @@
 package com.ssafy.ddingga.facade.user.service;
 
 import com.ssafy.ddingga.facade.user.dto.*;
-import org.springframework.web.multipart.MultipartFile;
 
 public interface UserFacadeService {
     SignUpResponseDto signUp(SignUpRequestDto request);
@@ -22,4 +21,11 @@ public interface UserFacadeService {
      * @return 수정된 회원정보 DTO
      */
     UserUpdateResponseDto updateUserInfo(String userId, UserUpdateRequestDto request);
+
+    /**
+     * 회원 탈퇴 처리
+     * @param userId 탈퇴할 사용자의 ID
+     * @return 탈퇴 처리 결과 DTO
+     */
+    UserDeleteResponseDto deleteUser(String userId);
 }

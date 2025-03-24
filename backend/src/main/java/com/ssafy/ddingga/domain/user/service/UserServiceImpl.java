@@ -4,6 +4,8 @@ package com.ssafy.ddingga.domain.user.service;
 import com.ssafy.ddingga.domain.user.entity.User;
 import com.ssafy.ddingga.domain.user.repository.UserRepository;
 import com.ssafy.ddingga.global.error.exception.DuplicateException;
+import com.ssafy.ddingga.global.error.exception.UserAlreadyDeletedException;
+import com.ssafy.ddingga.global.error.exception.UserNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -155,7 +157,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User deleteUser(String userId) {
-        return null;
+
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+
+        if (user.getIsDeleted()) {
+            throw new UserAlreadyDeletedException("이미 탈퇴한 계정입니다.");
+        }
+
+        user.setIsDeleted(true);
+
+        return userRepository.save(user);
     }
 }

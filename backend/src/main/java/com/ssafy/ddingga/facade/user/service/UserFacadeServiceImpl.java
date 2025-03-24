@@ -1,19 +1,12 @@
 package com.ssafy.ddingga.facade.user.service;
 
 
+import com.ssafy.ddingga.facade.user.dto.*;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.ddingga.domain.user.entity.User;
 import com.ssafy.ddingga.domain.user.service.JwtService;
 import com.ssafy.ddingga.domain.user.service.UserService;
-import com.ssafy.ddingga.facade.user.dto.LoginRequestDto;
-import com.ssafy.ddingga.facade.user.dto.LoginResponseDto;
-import com.ssafy.ddingga.facade.user.dto.LogoutResponseDto;
-import com.ssafy.ddingga.facade.user.dto.SignUpRequestDto;
-import com.ssafy.ddingga.facade.user.dto.SignUpResponseDto;
-import com.ssafy.ddingga.facade.user.dto.TokenResponseDto;
-import com.ssafy.ddingga.facade.user.dto.UserUpdateRequestDto;
-import com.ssafy.ddingga.facade.user.dto.UserUpdateResponseDto;
 import com.ssafy.ddingga.global.security.jwt.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
@@ -32,7 +25,7 @@ public class UserFacadeServiceImpl implements UserFacadeService {
         User user = userService.registerUser(
                 request.getUserId(),
                 request.getPassword(),
-                request.getUserName()
+                request.getUsername()
         );
 
         // 토큰 없이 회원 가입 정보만 반환
@@ -94,4 +87,20 @@ public class UserFacadeServiceImpl implements UserFacadeService {
     public TokenResponseDto refreshToken(String refreshToken) {
         return jwtService.refreshToken(refreshToken);
     }
+
+
+    @Override
+    public UserDeleteResponseDto deleteUser(String userId) {
+        //회원 탈퇴 처리
+        User deletedUser = userService.deleteUser(userId);
+        //로그아웃과 동일하게 토큰 무효화 처리
+        jwtService.invalidateRefreshToken(userId);
+        // 응답 생성
+        return new UserDeleteResponseDto(
+                "회원탈퇴가 완료되었습니다.",
+                deletedUser.getUserId()
+        );
+    }
+
+
 }
