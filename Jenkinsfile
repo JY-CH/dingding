@@ -47,11 +47,6 @@ pipeline {
             }
         }
 
-                         ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
-                            cd /home/ubuntu/j12d105
-
-                            echo "🛑 기존 백엔드 및 MySQL 컨테이너 중단 & 삭제"
-                            docker-compose down
         stage('Deploy (Backend-1, Backend-2, MySQL)') {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
@@ -60,7 +55,7 @@ pipeline {
                         string(credentialsId: 'MySQL-Password', variable: 'MYSQL_PASSWORD')
                     ]) {
                         script {
-                            sh """
+                            sh '''
                             ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                             cd /home/ubuntu/j12d105
 
@@ -80,18 +75,14 @@ pipeline {
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
                             docker ps -a
-
-                            exit 0
                             EOF
-                            """
+                            '''
                         }
                     }
                 }
             }
         }
-
     }
-
     post {
         success {
             echo "✅ Deployment Successful!"
