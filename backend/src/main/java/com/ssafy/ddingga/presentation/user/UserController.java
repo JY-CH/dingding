@@ -69,20 +69,10 @@ public class UserController {
 
     })
     @PostMapping("/signup")
-    public ResponseEntity<SignUpResponseDto> SignUp(@RequestBody SignUpRequestDto request) {
+    public ResponseEntity<SignUpResponseDto> signUp(@RequestBody SignUpRequestDto request) {
         // 회원가입 로직 호출
         SignUpResponseDto response = userFacadeService.signUp(request);
-        // 리프레시 토큰을 쿠키에 설정
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", response.getRefreshToken())
-                .httpOnly(true)
-                .secure(true) // https 환경에서는 true로 설정
-                .sameSite("Strict")
-                .maxAge(Duration.ofSeconds(jwtProperties.getRefreshTokenExpiration()))
-                .path("/api/auth")
-                .build();
-
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(response);
     }
 
