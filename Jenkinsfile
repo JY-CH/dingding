@@ -75,7 +75,11 @@ pipeline {
                             echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env
                             echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
 
-                            MYSQL_USERNAME=${MYSQL_USERNAME} \ MYSQL_PASSWORD=${MYSQL_PASSWORD} \ REDIS_PASSWORD=${REDIS_PASSWORD} \ MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD} \  docker-compose up -d
+                            docker-compose down --remove-orphans
+                            MYSQL_USERNAME=${MYSQL_USERNAME} \
+                            MYSQL_PASSWORD=${MYSQL_PASSWORD} \
+                            REDIS_PASSWORD=${REDIS_PASSWORD} \
+                            docker-compose up -d --force-recreate
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
                             docker ps -a
