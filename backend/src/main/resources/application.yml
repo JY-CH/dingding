@@ -16,12 +16,12 @@ spring:
     show-sql: "true"
     hibernate:
       ddl-auto: update
-# 레디스 설정 jedis 방식은 동기처리 lettuce 방식은 비동기 처리
+  # 레디스 설정 jedis 방식은 동기처리 lettuce 방식은 비동기 처리
   data:
     redis:
       host: localhost
       port: 6379
-      password: your_redis_password  # 선택 사항
+      password: your_redis_password # 선택 사항
       client-type: lettuce
       lettuce:
         pool:
@@ -37,8 +37,7 @@ spring:
       enabled: true
   # 파일 업로드 경로 설정
   file:
-    upload-dir: /var/www/uploads  # 절대 경로 설정 추천
-
+    upload-dir: /var/www/uploads # 절대 경로 설정 추천
 
 jwt:
   # JWT 토큰 생성 및 검증에 사용되는 비밀키
@@ -55,3 +54,6 @@ jwt:
   token-prefix: "Bearer "
   # HTTP 요청 헤더에서 JWT 토큰을 전달하는 헤더 이름
   header-string: "Authorization"
+
+server:
+  port: 8090
