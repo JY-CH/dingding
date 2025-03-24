@@ -7,7 +7,7 @@ import DetailPage from './pages/DetailPage';
 import EditPage from './pages/EditPage';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
-import SearchPage from './pages/search/searchPage';
+import SearchPage from './pages/search/SearchPage';
 import './index.css';
 
 function App() {
