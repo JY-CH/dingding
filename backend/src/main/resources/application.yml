@@ -19,9 +19,9 @@ spring:
 
   # 레디스 설정 jedis 방식은 동기처리 lettuce 방식은 비동기 처리
   redis:
-    host: localhost
+    host: redis
     port: 6379
-    password: your_redis_password (선택 사항)
+    password: ${REDIS_PASSWORD}
     lettuce:
       pool:
         max-active: 10
@@ -36,7 +36,8 @@ spring:
       enabled: true
   # 파일 업로드 경로 설정
   file:
-    upload-dir: ./uploads
+    upload-dir: /var/www/uploads  # 절대 경로 설정 추천
+
 
 jwt:
   # JWT 토큰 생성 및 검증에 사용되는 비밀키
