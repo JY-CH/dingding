@@ -51,7 +51,9 @@ pipeline {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
                     withCredentials([
-                        string(credentialsId: 'MySQL-Root-Credentials', variable: 'MYSQL_ROOT_CRED')
+                        string(credentialsId: 'MySQL-Root-Credentials', variable: 'MYSQL_ROOT_CRED'),
+                        string(credentialsId: 'MySQL-Username', variable: 'MYSQL_USERNAME'),
+                        string(credentialsId: 'MySQL-Password', variable: 'MYSQL_PASSWORD')
                     ]) {
                         script {
                             def rootInfo = MYSQL_ROOT_CRED.split(':')
@@ -68,6 +70,8 @@ pipeline {
                             docker-compose pull backend-1 backend-2
 
                             echo "🚀 환경 변수 설정 후 컨테이너 실행"
+                            export MYSQL_USERNAME="${MYSQL_USERNAME}"
+                            export MYSQL_PASSWORD="${MYSQL_PASSWORD}"
                             MYSQL_ROOT_PASSWORD="${mysqlRootPass}" docker-compose up -d
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"

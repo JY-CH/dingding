@@ -4,8 +4,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://mysql:3306/ddingga?createDatabaseIfNotExist=true&useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
-    username: root
-    password: password
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
   application:
     name: ddingga
   jpa:
