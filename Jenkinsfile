@@ -53,7 +53,7 @@ pipeline {
                     withCredentials([
                         string(credentialsId: 'MySQL-Username', variable: 'MYSQL_USERNAME'),
                         string(credentialsId: 'MySQL-Password', variable: 'MYSQL_PASSWORD'),
-                        string(credentialsId: 'Redis-Password', variable: 'REDIS_PASSWORD')
+                        string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD')
                     ]) {
                         script {
                             sh '''
