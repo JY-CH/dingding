@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 
 import HotContent from '@/components/search/HotContent';
 import SearchBar from '@/components/search/SearchBar';
-// import SearchResults from '@/components/search/SearchResults';
-// import SearchSuggestions from '@/components/search/SearchSuggestions';
+import SearchResults from '@/components/search/SearchResults';
 
 const SearchPage: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -17,7 +16,7 @@ const SearchPage: React.FC = () => {
           <HotContent />
         </>
       ) : (
-        <HotContent />
+        <SearchResults />
       )}
     </div>
   );
