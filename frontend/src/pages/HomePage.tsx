@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+
 import { Link } from 'react-router-dom';
-import { useThingStore } from '../store/useThingStore';
+
 import Button from '../components/common/Button';
 import MainLayout from '../components/layout/MainLayout';
+import { useThingStore } from '../store/useThingStore';
 
 const HomePage: React.FC = () => {
   const { things, addThing } = useThingStore();
