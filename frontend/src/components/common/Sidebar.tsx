@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 
 interface User {
@@ -10,38 +11,38 @@ const Sidebar: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeItem, setActiveItem] = useState<number | null>(null);
   // 임시 유저 상태 (실제로는 전역 상태 관리나 context를 사용해야 함)
-  const [user, setUser] = useState<User>({ 
+  const [user, setUser] = useState<User>({
     isLoggedIn: false,
-    profileImage: 'https://via.placeholder.com/40'
+    profileImage: 'https://via.placeholder.com/40',
   });
   const navigate = useNavigate();
 
   const menuItems = [
-    { 
-      icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6", 
-      label: "메인", 
-      path: "/" 
+    {
+      icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+      label: '메인',
+      path: '/',
     },
-    { 
-      icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
-      label: "검색", 
-      path: "/search" 
+    {
+      icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
+      label: '검색',
+      path: '/search',
     },
-    { 
-      icon: "M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3", 
-      label: "기타 연주", 
-      path: "/play" 
+    {
+      icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3',
+      label: '기타 연주',
+      path: '/play',
     },
-    { 
-      icon: "M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z", 
-      label: "커뮤니티", 
-      path: "/community" 
+    {
+      icon: 'M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z',
+      label: '커뮤니티',
+      path: '/community',
     },
-    { 
-      icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z", 
-      label: "마이페이지", 
-      path: "/dashboard" 
-    }
+    {
+      icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+      label: '마이페이지',
+      path: '/dashboard',
+    },
   ];
 
   const handleItemClick = (index: number, path: string) => {
@@ -60,30 +61,28 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className={`
+    <aside
+      className={`
       fixed top-0 left-0 h-screen bg-[#1E1E1E]
       transition-[width] duration-300 ease-in-out
       ${isExpanded ? 'w-64' : 'w-20'}
-    `}>
+    `}
+    >
       <div className="flex flex-col h-full">
         {/* 로그인/프로필 영역 */}
         <div className="p-4 border-b border-gray-800">
           {user.isLoggedIn ? (
             <div className="flex items-center h-10">
               <div className="w-10 h-10 flex-shrink-0">
-                <img 
-                  src={user.profileImage} 
-                  alt="Profile" 
-                  className="w-full h-full rounded-full"
-                />
+                <img src={user.profileImage} alt="Profile" className="w-full h-full rounded-full" />
               </div>
-              <div className={`
+              <div
+                className={`
                 overflow-hidden transition-all duration-300
                 ${isExpanded ? 'w-40 ml-3 opacity-100' : 'w-0 opacity-0'}
-              `}>
-                <span className="text-white text-sm font-medium whitespace-nowrap">
-                  사용자님
-                </span>
+              `}
+              >
+                <span className="text-white text-sm font-medium whitespace-nowrap">사용자님</span>
               </div>
             </div>
           ) : (
@@ -111,36 +110,37 @@ const Sidebar: React.FC = () => {
               onClick={() => handleItemClick(index, item.path)}
               className={`
                 w-full h-12 flex items-center
-                ${activeItem === index 
-                  ? 'bg-amber-500/20 text-amber-500' 
-                  : 'text-gray-400 hover:bg-gray-800/40 hover:text-white'
+                ${
+                  activeItem === index
+                    ? 'bg-amber-500/20 text-amber-500'
+                    : 'text-gray-400 hover:bg-gray-800/40 hover:text-white'
                 }
               `}
             >
               <div className="w-20 flex items-center justify-center flex-shrink-0">
                 <div className="w-6 h-6">
-                  <svg 
+                  <svg
                     className="w-full h-full"
-                    fill="none" 
-                    stroke="currentColor" 
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
                       d={item.icon}
                     />
                   </svg>
                 </div>
               </div>
-              <div className={`
+              <div
+                className={`
                 overflow-hidden transition-all duration-300
                 ${isExpanded ? 'w-40 opacity-100' : 'w-0 opacity-0'}
-              `}>
-                <span className="text-sm font-medium whitespace-nowrap">
-                  {item.label}
-                </span>
+              `}
+              >
+                <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
               </div>
             </button>
           ))}
@@ -157,49 +157,49 @@ const Sidebar: React.FC = () => {
                 transition-colors"
             >
               <div className="w-6 h-6 flex-shrink-0">
-                <svg 
+                <svg
                   className="w-full h-full"
-                  fill="none" 
-                  stroke="currentColor" 
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                   />
                 </svg>
               </div>
-              <div className={`
+              <div
+                className={`
                 overflow-hidden transition-all duration-300
                 ${isExpanded ? 'w-40 ml-2 opacity-100' : 'w-0 opacity-0'}
-              `}>
-                <span className="text-sm font-medium whitespace-nowrap">
-                  로그아웃
-                </span>
+              `}
+              >
+                <span className="text-sm font-medium whitespace-nowrap">로그아웃</span>
               </div>
             </button>
           )}
 
           {/* 토글 버튼 */}
-          <button 
+          <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="w-full h-10 flex items-center justify-center rounded
               bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white
               transition-colors"
           >
             <div className="w-6 h-6 flex-shrink-0">
-              <svg 
+              <svg
                 className={`w-full h-full transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
-                fill="none" 
-                stroke="currentColor" 
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
                   d="M9 5l7 7-7 7"
                 />
               </svg>
