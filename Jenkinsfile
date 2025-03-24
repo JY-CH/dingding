@@ -47,30 +47,34 @@ pipeline {
             }
         }
 
-        stage('Deploy (Backend-1, Backend-2, MySQL)') {
+        stage('Deploy (Backend-1, Backend-2, MySQL, Redis)') {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
                     withCredentials([
                         string(credentialsId: 'MySQL-Username', variable: 'MYSQL_USERNAME'),
-                        string(credentialsId: 'MySQL-Password', variable: 'MYSQL_PASSWORD')
+                        string(credentialsId: 'MySQL-Password', variable: 'MYSQL_PASSWORD'),
+                        string(credentialsId: 'Redis-Password', variable: 'REDIS_PASSWORD')
                     ]) {
                         script {
                             sh '''
                             ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                             cd /home/ubuntu/j12d105
 
-                            echo "🛑 기존 백엔드 및 MySQL 컨테이너 중단 & 삭제"
+                            echo "🛑 기존 백엔드, MySQL, Redis 컨테이너 중단 & 삭제"
                             docker-compose down
 
                             echo "🚀 최신 백엔드 이미지 가져오기"
                             docker-compose pull backend-1 backend-2
 
                             echo "🚀 환경 변수 설정 후 컨테이너 실행"
-                            echo "🛑🛑🛑 MYSQL_USERNAME=${MYSQL_USERNAME} 🛑🛑🛑"
-                            echo "🛑🛑🛑 MYSQL_PASSWORD=${MYSQL_PASSWORD} 🛑🛑🛑"
+                            echo "🛑 MYSQL_USERNAME=${MYSQL_USERNAME}"
+                            echo "🛑 MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+                            echo "🛑 REDIS_PASSWORD=${REDIS_PASSWORD}"
 
                             export MYSQL_USERNAME="${MYSQL_USERNAME}"
                             export MYSQL_PASSWORD="${MYSQL_PASSWORD}"
+                            export REDIS_PASSWORD="${REDIS_PASSWORD}"
+
                             docker-compose up -d
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
