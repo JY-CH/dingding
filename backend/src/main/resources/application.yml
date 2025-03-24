@@ -37,7 +37,8 @@ spring:
       enabled: true
   # 파일 업로드 경로 설정
   file:
-    upload-dir: ./uploads
+    upload-dir: /var/www/uploads  # 절대 경로 설정 추천
+
 
 jwt:
   # JWT 토큰 생성 및 검증에 사용되는 비밀키
