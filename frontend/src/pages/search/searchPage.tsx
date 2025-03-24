@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 // import HotContent from '@/components/search/HotContent';
 import SearchBar from '@/components/search/SearchBar';
 // import SearchResults from '@/components/search/SearchResults';
-// import SearchSuggestions from '@/components/search/SearchSuggestions';
+import SearchSuggestions from '@/components/search/SearchSuggestions';
 
 const SearchPage: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -12,14 +12,14 @@ const SearchPage: React.FC = () => {
     <div className="min-h-screen bg-amber-50">
       <SearchBar query={query} setQuery={setQuery} />
 
-      {/* {query.trim() === '' ? (
+      {query.trim() === '' ? (
         <>
           <SearchSuggestions />
-          <HotContent />
+          {/* <HotContent /> */}
         </>
       ) : (
-        <SearchResults />
-      )} */}
+        <SearchSuggestions />
+      )}
     </div>
   );
 };
