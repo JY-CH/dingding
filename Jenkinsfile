@@ -56,8 +56,8 @@ pipeline {
                         string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD')
                     ]) {
                         script {
-                            sh '''
-                            ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
+                            sh """
+                            ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io << 'EOF'
                             cd /home/ubuntu/j12d105
 
                             echo "🛑 기존 백엔드, MySQL, Redis 컨테이너 중단 & 삭제"
@@ -67,20 +67,20 @@ pipeline {
                             docker-compose pull backend-1 backend-2
 
                             echo "🚀 환경 변수 설정 후 컨테이너 실행"
-                            echo "🛑 MYSQL_USERNAME=${MYSQL_USERNAME}"
-                            echo "🛑 MYSQL_PASSWORD=${MYSQL_PASSWORD}"
-                            echo "🛑 REDIS_PASSWORD=${REDIS_PASSWORD}"
-
                             export MYSQL_USERNAME="${MYSQL_USERNAME}"
                             export MYSQL_PASSWORD="${MYSQL_PASSWORD}"
                             export REDIS_PASSWORD="${REDIS_PASSWORD}"
+
+                            echo "MYSQL_USERNAME=${MYSQL_USERNAME}" >> .env
+                            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env
+                            echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
 
                             docker-compose up -d
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
                             docker ps -a
                             EOF
-                            '''
+                            """
                         }
                     }
                 }
