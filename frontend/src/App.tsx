@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
+import AllSongsPage from './pages/dashboard/AllSongPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import VideoStramingPage from './pages/dashboard/VideoStramingPage';
 import DetailPage from './pages/DetailPage';
 import EditPage from './pages/EditPage';
 import HomePage from './pages/HomePage';
@@ -15,6 +17,8 @@ function App() {
         <Route path="/detail/:id" element={<DetailPage />} />
         <Route path="/edit/:id" element={<EditPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/allsongs" element={<AllSongsPage />} />
+        <Route path="/stream" element={<VideoStramingPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

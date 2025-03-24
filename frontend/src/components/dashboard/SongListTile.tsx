@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Play } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Song {
   title: string;
@@ -21,20 +22,21 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
       {/* 헤더 부분 - 고정 높이 */}
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-sm font-bold text-gray-800">{title}</h3>
-        <a
-          href="#"
+        <Link
+          to="/allsongs"
+          state={{ songs }} // songs 데이터를 state로 함께 전달
           className="text-amber-500 text-xs font-medium hover:text-amber-600 transition-colors"
         >
           모두 보기 &gt;
-        </a>
+        </Link>
       </div>
 
       {/* 컬럼 헤더 - 고정 높이 */}
       <div className="grid grid-cols-5 text-xs text-gray-500 pb-2 border-b mb-1">
         <div className="col-span-2 font-medium">노래 제목</div>
-        <div className="font-medium">날짜</div>
-        <div className="font-medium">점수</div>
-        <div></div>
+        <div className="font-medium text-right pr-4">날짜</div>
+        <div className="font-medium text-right pr-3">점수</div>
+        <div className="font-medium text-right pr-4">영상</div>
       </div>
 
       {/* 스크롤 가능한 노래 목록 영역 */}
@@ -63,8 +65,8 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
                 <div className="text-xs text-gray-500 truncate">{song.artist}</div>
               </div>
             </div>
-            <div className="text-sm text-gray-600">{song.duration}</div>
-            <div className="text-amber-500 font-medium">{song.score}</div>
+            <div className="text-sm text-gray-600 text-right">{song.duration}</div>
+            <div className="text-amber-500 font-medium text-right">{song.score}</div>
             <div className="text-right">
               <button className="bg-gray-100 hover:bg-amber-100 p-1 rounded-full text-gray-500 hover:text-amber-500 transition-colors">
                 <Play size={14} />
