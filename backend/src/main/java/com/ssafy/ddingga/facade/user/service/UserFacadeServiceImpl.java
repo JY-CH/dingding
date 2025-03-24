@@ -44,6 +44,19 @@ public class UserFacadeServiceImpl implements UserFacadeService {
                 .build();
     }
 
+    @Override
+    public UserUpdateResponseDto updateUserInfo(String userId, UserUpdateRequestDto request) {
+        //UserService를 통해 사용자 정보 업데이트
+        User updateUser = userService.updateUser(
+                userId,
+                request.getUsername(),
+                request.getProfileImage()
+        );
+
+        // 업데이트된 사용자 정보를 DTO로 변환하여 반환
+        return UserUpdateResponseDto.from(updateUser);
+    }
+
     /**
      * 사용자 로그아웃 처리
      * 1. 엑세스 토큰에서 사용자 정보 추출
@@ -62,6 +75,7 @@ public class UserFacadeServiceImpl implements UserFacadeService {
                 .message("로그아웃이 완료되었습니다.")
                 .build();
     }
+
 
     @Override
     public TokenResponseDto refreshToken(String refreshToken) {
