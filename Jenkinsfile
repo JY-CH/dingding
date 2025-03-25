@@ -123,7 +123,7 @@ pipeline {
                 // Mattermost 알림 전송 (빌드 성공 시)
                 mattermostSend(
                     color: 'good',
-                    message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 성공했습니다! \n배포한 사람: ${Name} ㅋㅋ좀치노 \n브랜치: ${env.GIT_BRANCH} \n(${env.BUILD_URL}|상세 보기)",
+                    message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 성공했습니다! \n배포한 사람: ${Name} ㅋㅋ좀치노 \n브랜치: ${env.GIT_BRANCH} \n(<${env.BUILD_URL}|상세 보기>)",
                     endpoint: "${env.MATTERMOST_WEBHOOK_URL}",
                     channel: "${env.MATTERMOST_CHANNEL}"
                 )
