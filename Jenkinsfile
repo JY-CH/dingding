@@ -4,7 +4,7 @@ pipeline {
     environment {
         COMPOSE_FILE_PATH = "/home/ubuntu/j12d105/docker-compose.yml"
         IMAGE_NAME = "backend-server"
-        DOCKER_HUB_ID = "jaeyeolyim"  // Docker Hub 아이디
+        DOCKER_HUB_ID = "jaeyeolyim"
     }
 
     stages {
@@ -47,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('Deploy (Backend-1, Backend-2, MySQL, Redis)') {
+        stage('Blue-Green Deploy') {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
                     withCredentials([
@@ -60,28 +60,30 @@ pipeline {
                             ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                             cd /home/ubuntu/j12d105
 
-                            echo "🛑 기존 백엔드, MySQL, Redis 컨테이너 중단 & 삭제"
-                            docker-compose down
+                            echo "🔍 현재 실행 중인 백엔드 컨테이너 확인"
+                            CURRENT_BACKEND=\$(docker ps --format '{{.Names}}' | grep backend-blue || true)
+                            
+                            if [ "\$CURRENT_BACKEND" == "backend-blue" ]; then
+                                NEW_BACKEND="backend-green"
+                                OLD_BACKEND="backend-blue"
+                            else
+                                NEW_BACKEND="backend-blue"
+                                OLD_BACKEND="backend-green"
+                            fi
 
-                            echo "🚀 최신 백엔드 이미지 가져오기"
-                            docker-compose pull backend-1 backend-2
+                            echo "🚀 새 컨테이너 (\$NEW_BACKEND) 배포 시작"
+                            docker-compose up -d --no-deps --force-recreate \$NEW_BACKEND
+                            
+                            echo "⏳ 5초 대기 (안정화 시간)"
+                            sleep 5
 
-                            echo "🚀 환경 변수 설정 후 컨테이너 실행"
-                            export MYSQL_USERNAME="${MYSQL_USERNAME}"
-                            export MYSQL_PASSWORD="${MYSQL_PASSWORD}"
-                            export REDIS_PASSWORD="${REDIS_PASSWORD}"
+                            echo "🔄 Nginx 트래픽 \$NEW_BACKEND 으로 전환"
+                            docker exec -it nginx nginx -s reload
 
-                            echo "MYSQL_USERNAME=${MYSQL_USERNAME}" >> .env
-                            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env
-                            echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
+                            echo "🛑 이전 컨테이너 (\$OLD_BACKEND) 종료"
+                            docker-compose down \$OLD_BACKEND
 
-                            docker-compose down --remove-orphans
-                            MYSQL_USERNAME=${MYSQL_USERNAME} \
-                            MYSQL_PASSWORD=${MYSQL_PASSWORD} \
-                            REDIS_PASSWORD=${REDIS_PASSWORD} \
-                            docker-compose up -d --force-recreate
-
-                            echo "✅ 배포 완료! 현재 컨테이너 상태:"
+                            echo "✅ Blue-Green 배포 완료!"
                             docker ps -a
                             exit 0
                             EOF
