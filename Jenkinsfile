@@ -85,9 +85,9 @@ pipeline {
                             docker-compose pull \$NEW_BACKEND_1 \$NEW_BACKEND_2
 
                             echo "🚀 새 컨테이너 실행"
-                            MYSQL_USERNAME=${MYSQL_USERNAME} \
-                            MYSQL_PASSWORD=${MYSQL_PASSWORD} \
-                            REDIS_PASSWORD=${REDIS_PASSWORD} \
+                            MYSQL_USERNAME=\${MYSQL_USERNAME} \
+                            MYSQL_PASSWORD=\${MYSQL_PASSWORD} \
+                            REDIS_PASSWORD=\${REDIS_PASSWORD} \
                             docker-compose up -d --force-recreate \$NEW_BACKEND_1 \$NEW_BACKEND_2
 
                             echo "🛠️ 새 컨테이너 정상 작동 확인 중..."
