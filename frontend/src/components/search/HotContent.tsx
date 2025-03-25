@@ -1,14 +1,11 @@
 import React from 'react';
 
-import {
-  BookHeadphones,
-  MessageSquare,
-  Headphones,
-  TrendingUp,
-  Calendar,
-  Clock,
-  UserCircle,
-} from 'lucide-react';
+import { BookHeadphones } from 'lucide-react';
+
+import GenreCards from './GenreCards';
+import HotSongs from './HotSongs';
+import PopularPosts from './PopularPosts';
+import RecentReleases from './RecentReleases';
 
 interface Song {
   id: number;
@@ -29,7 +26,11 @@ interface Post {
   likes?: number;
 }
 
-const HptContent: React.FC = () => {
+interface HotContentsProps {
+  activeTab: string;
+}
+
+const HptContent: React.FC<HotContentsProps> = ({ activeTab }) => {
   const trendingSongs: Song[] = [
     {
       id: 1,
@@ -133,138 +134,64 @@ const HptContent: React.FC = () => {
   ];
 
   const genreCards = [
-    { id: 1, name: 'Pop(팝)', songs: '120+', color: 'from-purple-500 to-indigo-500' },
-    { id: 2, name: 'Folk(포크)', songs: '120+', color: 'from-pink-500 to-purple-600' },
-    { id: 3, name: 'Country(컨트리)', songs: '120+', color: 'from-green-500 to-teal-500' },
-    { id: 4, name: 'Acoustic(어쿠스틱)', songs: '120+', color: 'from-orange-500 to-amber-500' },
+    {
+      id: 1,
+      name: '어쿠스틱',
+      description: '감성적인 어쿠스틱 기타 연주',
+      tags: ['핑거스타일', '스트링', '발라드'],
+      color: 'from-purple-500 to-indigo-500',
+      icon: <BookHeadphones />,
+      songs: '230+',
+    },
+    {
+      id: 2,
+      name: '일렉트릭',
+      description: '파워풀한 일렉트릭 기타 사운드',
+      tags: ['리프', '솔로', '디스토션'],
+      color: 'from-pink-500 to-purple-600',
+      icon: <BookHeadphones />,
+      songs: '185+',
+    },
+    {
+      id: 3,
+      name: '클래식',
+      description: '우아한 클래식 기타의 세계',
+      tags: ['아르페지오', '클래식', '바로크'],
+      color: 'from-green-500 to-teal-500',
+      icon: <BookHeadphones />,
+      songs: '142+',
+    },
+    {
+      id: 4,
+      name: '핑거스타일',
+      description: '섬세한 핑거스타일 테크닉',
+      tags: ['핑거피킹', '하모닉스', '어쿠스틱'],
+      color: 'from-orange-500 to-amber-500',
+      icon: <BookHeadphones />,
+      songs: '167+',
+    },
   ];
 
   return (
     <div className="bg-zinc-900 min-h-screen pb-20">
-      {/* 장르 카드 섹션 */}
-      <div className="px-6 py-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <BookHeadphones className="w-5 h-5 text-orange-500" />
-            <h3 className="text-lg font-bold text-white">장르 탐색</h3>
+      {activeTab === 'all' && <GenreCards genres={genreCards} />}
+      {(activeTab === 'all' || activeTab === 'albums') && (
+        <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* 트렌딩 노래 */}
+          <div>
+            <HotSongs songs={trendingSongs} />
           </div>
-          <button className="text-sm text-orange-500">모두 보기</button>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {genreCards.map((genre) => (
-            <div
-              key={genre.id}
-              className={`bg-gradient-to-br ${genre.color} rounded-xl p-5 aspect-square flex flex-col justify-between cursor-pointer transform transition hover:scale-105`}
-            >
-              <div className="text-lg font-bold text-white">{genre.name}</div>
-              <div className="text-sm text-white/80">곡 {genre.songs}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 트렌딩 노래 섹션 */}
-      <div className="px-6 py-6">
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-orange-500" />
-          <h3 className="text-lg font-bold text-white">트렌딩 노래</h3>
-        </div>
-        <div className="bg-zinc-800 rounded-xl overflow-hidden">
-          {trendingSongs.map((song, index) => (
-            <div
-              key={song.id}
-              className="flex items-center p-4 hover:bg-zinc-700 transition-colors cursor-pointer border-b border-zinc-700 last:border-b-0"
-            >
-              <div className="w-6 text-center text-gray-400 mr-3">{index + 1}</div>
-              <img
-                src={song.thumbnail}
-                alt={song.title}
-                className="w-12 h-12 object-cover rounded-md"
-              />
-              <div className="ml-4 flex-1 min-w-0">
-                <div className="text-sm font-medium text-white truncate">{song.title}</div>
-                <div className="text-xs text-gray-400 mt-1">{song.artist}</div>
-              </div>
-              <div className="flex items-center gap-3 ml-auto text-xs text-gray-400">
-                <div className="flex items-center gap-1">
-                  <Headphones className="w-3 h-3" />
-                  <span>{song.plays}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  <span>{song.duration}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 최신 발매 및 인기 게시글 그리드 */}
-      <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* 최신 발매 섹션 */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Calendar className="w-5 h-5 text-orange-500" />
-            <h3 className="text-lg font-bold text-white">최신 발매</h3>
-          </div>
-          <div className="bg-zinc-800 rounded-xl overflow-hidden">
-            {recentReleases.map((song) => (
-              <div
-                key={song.id}
-                className="flex items-center p-4 hover:bg-zinc-700 transition-colors cursor-pointer border-b border-zinc-700 last:border-b-0"
-              >
-                <img
-                  src={song.thumbnail}
-                  alt={song.title}
-                  className="w-12 h-12 object-cover rounded-md"
-                />
-                <div className="ml-4 flex-1 min-w-0">
-                  <div className="text-sm font-medium text-white truncate">{song.title}</div>
-                  <div className="text-xs text-gray-400 mt-1">{song.artist}</div>
-                </div>
-                <div className="bg-orange-500/20 text-xs font-medium text-orange-500 px-2 py-1 rounded-full ml-2">
-                  NEW
-                </div>
-              </div>
-            ))}
+          {/* 최신 발매 */}
+          <div>
+            <RecentReleases releases={recentReleases} />
           </div>
         </div>
-
-        {/* 인기 게시글 섹션 */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <MessageSquare className="w-5 h-5 text-orange-500" />
-            <h3 className="text-lg font-bold text-white">인기 게시글</h3>
-          </div>
-          <div className="bg-zinc-800 rounded-xl overflow-hidden">
-            {popularPosts.map((post) => (
-              <div
-                key={post.id}
-                className="p-4 hover:bg-zinc-700 transition-colors cursor-pointer border-b border-zinc-700 last:border-b-0"
-              >
-                <div className="flex items-center">
-                  <img
-                    src={post.thumbnail}
-                    alt={post.title}
-                    className="w-12 h-12 object-cover rounded-md"
-                  />
-                  <div className="ml-4 flex-1 min-w-0">
-                    <div className="text-sm font-medium text-white truncate">{post.title}</div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <UserCircle className="w-3 h-3 text-gray-400" />
-                      <span className="text-xs text-gray-400">{post.author}</span>
-                      <span className="text-xs text-gray-500">•</span>
-                      <span className="text-xs text-gray-400">{post.date}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-2 text-xs text-gray-300 line-clamp-2">{post.excerpt}</div>
-              </div>
-            ))}
-          </div>
+      )}
+      {(activeTab === 'all' || activeTab === 'community') && (
+        <div className="px-6 py-6">
+          <PopularPosts posts={popularPosts} />
         </div>
-      </div>
+      )}
     </div>
   );
 };

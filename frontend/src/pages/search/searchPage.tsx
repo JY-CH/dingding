@@ -13,7 +13,11 @@ export default function SearchPage() {
     <div className="min-h-screen bg-zinc-900">
       <SearchBar query={query} setQuery={setQuery} />
       <SearchTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-      {query.trim() === '' ? <HotContent /> : <SearchResults activeTab={activeTab} />}
+      {query.trim() === '' ? (
+        <HotContent activeTab={activeTab} />
+      ) : (
+        <SearchResults activeTab={activeTab} />
+      )}
     </div>
   );
 }
