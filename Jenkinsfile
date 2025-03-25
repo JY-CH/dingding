@@ -63,40 +63,48 @@ pipeline {
                             cd /home/ubuntu/j12d105
 
                             # 현재 실행 중인 백엔드 컨테이너 확인
-                            CURRENT_BACKEND=\$(docker ps --format '{{.Names}}' | grep 'backend-' | head -n 1)
-                            echo "현재 실행 중인 컨테이너: \$CURRENT_BACKEND"
+                            CURRENT_BACKEND_1=\$(docker ps --format '{{.Names}}' | grep 'backend-' | head -n 1)
+                            CURRENT_BACKEND_2=\$(docker ps --format '{{.Names}}' | grep 'backend-' | head -n 2 | tail -n 1)
+                            echo "현재 실행 중인 컨테이너: \$CURRENT_BACKEND_1, \$CURRENT_BACKEND_2"
 
-                            # 새로운 백엔드 컨테이너 결정
-                            if [ "\$CURRENT_BACKEND" == "backend-1" ]; then
-                                NEW_BACKEND="backend-2"
+                            # 새로운 백엔드 컨테이너 결정 (삼항연산자 방식)
+                            if [ "\$CURRENT_BACKEND_1" == "backend-1" ] && [ "\$CURRENT_BACKEND_2" == "backend-2" ]; then
+                                NEW_BACKEND_1="backend-3"
+                                NEW_BACKEND_2="backend-4"
                             else
-                                NEW_BACKEND="backend-1"
+                                NEW_BACKEND_1="backend-1"
+                                NEW_BACKEND_2="backend-2"
                             fi
-                            echo "새롭게 배포할 컨테이너: \$NEW_BACKEND"
+                            echo "새롭게 배포할 컨테이너: \$NEW_BACKEND_1, \$NEW_BACKEND_2"
 
                             echo "🚀 최신 백엔드 이미지 가져오기"
-                            docker-compose pull \$NEW_BACKEND
+                            docker-compose pull \$NEW_BACKEND_1 \$NEW_BACKEND_2
 
                             echo "🚀 새 컨테이너 실행"
                             MYSQL_USERNAME=${MYSQL_USERNAME} \
                             MYSQL_PASSWORD=${MYSQL_PASSWORD} \
                             REDIS_PASSWORD=${REDIS_PASSWORD} \
-                            docker-compose up -d --force-recreate \$NEW_BACKEND
+                            docker-compose up -d --force-recreate \$NEW_BACKEND_1 \$NEW_BACKEND_2
 
                             echo "🛠️ 새 컨테이너 정상 작동 확인 중..."
                             sleep 10
-                            HEALTHY=\$(docker inspect --format='{{.State.Health.Status}}' \$NEW_BACKEND)
-                            if [ "\$HEALTHY" != "healthy" ]; then
+                            HEALTHY_1=\$(docker inspect --format='{{.State.Health.Status}}' \$NEW_BACKEND_1)
+                            HEALTHY_2=\$(docker inspect --format='{{.State.Health.Status}}' \$NEW_BACKEND_2)
+                            
+                            if [ "\$HEALTHY_1" != "healthy" ] || [ "\$HEALTHY_2" != "healthy" ]; then
                                 echo "❌ 새 컨테이너가 정상적으로 실행되지 않았습니다!"
                                 exit 1
                             fi
 
                             echo "🔄 Nginx 트래픽을 새 컨테이너로 변경"
-                            sudo sed -i "s/\$CURRENT_BACKEND/\$NEW_BACKEND/g" /home/ubuntu/j12d105/nginx/nginx.conf
+                            # nginx.conf 파일에서 backend-1, backend-2를 새로운 backend-3, backend-4로 변경
+                            sudo sed -i "s/\$CURRENT_BACKEND_1/\$NEW_BACKEND_1/g" /home/ubuntu/j12d105/nginx/nginx.conf
+                            sudo sed -i "s/\$CURRENT_BACKEND_2/\$NEW_BACKEND_2/g" /home/ubuntu/j12d105/nginx/nginx.conf
                             sudo systemctl restart nginx
 
                             echo "🗑️ 기존 컨테이너 종료"
-                            docker stop \$CURRENT_BACKEND && docker rm \$CURRENT_BACKEND
+                            docker stop \$CURRENT_BACKEND_1 && docker rm \$CURRENT_BACKEND_1
+                            docker stop \$CURRENT_BACKEND_2 && docker rm \$CURRENT_BACKEND_2
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
                             docker ps -a
@@ -108,6 +116,7 @@ pipeline {
                 }
             }
         }
+
     }
     
     post {
