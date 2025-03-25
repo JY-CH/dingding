@@ -48,39 +48,7 @@ pipeline {
                 }
             }
         }
-        stage('check') {
-            setps {
-                script {
-                    sh '''
-                    ssh -v -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io << EOF
-                    
-                    echo "1. 현재 사용자 확인:"
-                    whoami
-                    
-                    echo -e "\n2. Docker 권한 확인:"
-                    groups
-                    
-                    echo -e "\n3. Docker 상태 확인:"
-                    systemctl status docker
-                    
-                    echo -e "\n4. 모든 컨테이너 상태:"
-                    docker ps -a
-                    
-                    echo -e "\n5. Docker Compose 서비스 목록:"
-                    docker-compose config --services
-                    
-                    echo -e "\n6. 네트워크 상태:"
-                    docker network ls
-                    
-                    echo -e "\n7. 환경변수 확인:"
-                    env | grep -E 'MYSQL|REDIS'
-                    
-                    exit 0
-                    EOF
-                    '''
-                }
-            }
-        }
+
         stage('Blue-Green Deployment') {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
