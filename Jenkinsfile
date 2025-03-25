@@ -79,7 +79,7 @@ pipeline {
                             MYSQL_USERNAME=${MYSQL_USERNAME} \
                             MYSQL_PASSWORD=${MYSQL_PASSWORD} \
                             REDIS_PASSWORD=${REDIS_PASSWORD} \
-                            docker-compose up -d --force-recreate \${NEW_BACKENDS[@]}
+                            docker-compose up -d --force-recreate ${NEW_BACKENDS[@]}
 
                             echo "🛠️ 새 컨테이너 정상 작동 확인 중..."
                             sleep 10
