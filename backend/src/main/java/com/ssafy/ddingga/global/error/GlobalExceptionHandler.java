@@ -1,7 +1,6 @@
 package com.ssafy.ddingga.global.error;
 
-import com.ssafy.ddingga.global.error.exception.UserAlreadyDeletedException;
-import com.ssafy.ddingga.global.error.exception.UserNotFoundException;
+import com.ssafy.ddingga.global.error.exception.*;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -13,8 +12,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import com.ssafy.ddingga.global.error.dto.ErrorResponse;
-import com.ssafy.ddingga.global.error.exception.DuplicateException;
-import com.ssafy.ddingga.global.error.exception.NotFoundException;
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)  // 우선순위 추가
@@ -131,4 +128,53 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<ErrorResponse> handleFileUploadException(FileUploadException e) {
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                "파일 업로드 에러",
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPasswordException(InvalidPasswordException e){
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                "INVALID_PASSWORD",
+                HttpStatus.UNAUTHORIZED.value()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidTokenException(InvalidTokenException e){
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                "INVALID_TOKEN",
+                HttpStatus.UNAUTHORIZED.value()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleTokenExpiredException(TokenExpiredException e) {
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                "TOKEN_EXPIRED",
+                HttpStatus.UNAUTHORIZED.value()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(UserSocialNotfoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserSocialNotFoundException(UserSocialNotfoundException e) {
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                "USER_SOCIAL_NOT_FOUND",
+                HttpStatus.NOT_FOUND.value()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
 }

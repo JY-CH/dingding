@@ -1,4 +1,4 @@
-package com.ssafy.ddingga.facade.user.dto;
+package com.ssafy.ddingga.facade.user.dto.request;
 
 
 import lombok.Getter;
@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class LoginRequestDto {
-    private String userId;
+    private String loginId;
     private String password;
 }

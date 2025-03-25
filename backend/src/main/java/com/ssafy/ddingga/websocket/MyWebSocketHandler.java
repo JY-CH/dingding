@@ -39,7 +39,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
 				session.sendMessage(new TextMessage("Server received: " + payload));
 
 				Map<String, String> data = parseJson(payload);
-				String userId = data.get("roomId");
+				String loginId = data.get("roomId");
 				String event = data.get("event");
 
 				// 이벤트 종류에 따른 처리

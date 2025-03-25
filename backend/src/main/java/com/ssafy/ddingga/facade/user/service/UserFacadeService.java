@@ -1,6 +1,9 @@
 package com.ssafy.ddingga.facade.user.service;
 
-import com.ssafy.ddingga.facade.user.dto.*;
+import com.ssafy.ddingga.facade.user.dto.request.LoginRequestDto;
+import com.ssafy.ddingga.facade.user.dto.request.SignUpRequestDto;
+import com.ssafy.ddingga.facade.user.dto.request.UserUpdateRequestDto;
+import com.ssafy.ddingga.facade.user.dto.response.*;
 
 public interface UserFacadeService {
     SignUpResponseDto signUp(SignUpRequestDto request);
@@ -16,16 +19,16 @@ public interface UserFacadeService {
 
     /**
      * 사용자 정보 수정을 처리하는 메서드
-     * @param userId 수정할 사용자의 아이디
+     * @param loginId 수정할 사용자의 아이디
      * @param request 수정할 회원 정보가 담긴 DTO
      * @return 수정된 회원정보 DTO
      */
-    UserUpdateResponseDto updateUserInfo(String userId, UserUpdateRequestDto request);
+    UserUpdateResponseDto updateUserInfo(String loginId, UserUpdateRequestDto request);
 
     /**
      * 회원 탈퇴 처리
-     * @param userId 탈퇴할 사용자의 ID
+     * @param loginId 탈퇴할 사용자의 ID
      * @return 탈퇴 처리 결과 DTO
      */
-    UserDeleteResponseDto deleteUser(String userId);
+    UserDeleteResponseDto deleteUser(String loginId);
 }

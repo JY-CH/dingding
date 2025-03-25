@@ -1,4 +1,4 @@
-package com.ssafy.ddingga.facade.user.dto;
+package com.ssafy.ddingga.facade.user.dto.response;
 
 
 import lombok.AllArgsConstructor;
@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserDeleteResponseDto {
     private String message;
-    private String userId;
+    private String loginId;
 }

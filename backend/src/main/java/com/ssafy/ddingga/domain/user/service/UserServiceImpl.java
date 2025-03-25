@@ -3,9 +3,7 @@ package com.ssafy.ddingga.domain.user.service;
 
 import com.ssafy.ddingga.domain.user.entity.User;
 import com.ssafy.ddingga.domain.user.repository.UserRepository;
-import com.ssafy.ddingga.global.error.exception.DuplicateException;
-import com.ssafy.ddingga.global.error.exception.UserAlreadyDeletedException;
-import com.ssafy.ddingga.global.error.exception.UserNotFoundException;
+import com.ssafy.ddingga.global.error.exception.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,15 +66,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User registerUser(String userId, String password, String username){
+    public User registerUser(String loginId, String password, String username){
 
         // 중복 검사
-        if (userRepository.existsByUserId(userId)) {
+        if (userRepository.existsByLoginId(loginId)) {
             throw new DuplicateException("이미 사용중인 아이디 입니다.");
         }
         // entity 생성
         User user =  User.builder()
-                .userId(userId)                        // 사용자 ID
+                .loginId(loginId)                        // 사용자 ID
                 .password(passwordEncoder.encode(password))    // 비밀번호 암호화
                 .username(username)                    // 사용자 이름
                 .profileImage("profileImg")                        // 임시 프로필 이미지
@@ -90,15 +88,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User authenticateUser(String userId, String password) {
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다,.."));
+    public User authenticateUser(String loginId, String password) {
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다,.."));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다");
+            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다");
         }
         if (user.getIsDeleted()) {
-            throw new RuntimeException("탈퇴한 계정입니다.");
+            throw new UserAlreadyDeletedException("탈퇴한 계정입니다.");
         }
         return user;
     }
@@ -106,11 +104,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User updateUser(String userId, String username, MultipartFile profileImage){
+    public User updateUser(String loginId, String username, MultipartFile profileImage){
 
         // 1. 사용자 찾기
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 2.이름 업데이트(이름이 제공된 경우에만)
         if (username != null && !username.trim().isEmpty()) {
@@ -148,7 +146,7 @@ public class UserServiceImpl implements UserService {
                 // 3-5. 새 이미지 경로 저장
                 user.setProfileImage("/uploads/"+fileName);
             } catch (IOException e) {
-                throw new RuntimeException("프로필 이미지 저장에 실패했습니다.",e);
+                throw new FileUploadException("프로필 이미지 저장에 실패했습니다.",e);
             }
         }
 
@@ -158,9 +156,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User deleteUser(String userId) {
+    public User deleteUser(String loginId) {
 
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
         if (user.getIsDeleted()) {

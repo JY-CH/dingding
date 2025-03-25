@@ -3,6 +3,7 @@ package com.ssafy.ddingga.presentation.user;
 
 import java.time.Duration;
 
+import com.ssafy.ddingga.facade.user.dto.response.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,26 +12,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ssafy.ddingga.domain.user.entity.User;
-import com.ssafy.ddingga.facade.user.dto.LoginRequestDto;
-import com.ssafy.ddingga.facade.user.dto.LoginResponseDto;
-import com.ssafy.ddingga.facade.user.dto.LogoutResponseDto;
-import com.ssafy.ddingga.facade.user.dto.RefreshTokenRequestDto;
-import com.ssafy.ddingga.facade.user.dto.SignUpRequestDto;
-import com.ssafy.ddingga.facade.user.dto.SignUpResponseDto;
-import com.ssafy.ddingga.facade.user.dto.TokenResponseDto;
-import com.ssafy.ddingga.facade.user.dto.UserUpdateRequestDto;
-import com.ssafy.ddingga.facade.user.dto.UserUpdateResponseDto;
+import com.ssafy.ddingga.facade.user.dto.request.LoginRequestDto;
+import com.ssafy.ddingga.facade.user.dto.request.RefreshTokenRequestDto;
+import com.ssafy.ddingga.facade.user.dto.request.SignUpRequestDto;
+import com.ssafy.ddingga.facade.user.dto.request.UserUpdateRequestDto;
 import com.ssafy.ddingga.facade.user.service.UserFacadeService;
 import com.ssafy.ddingga.global.security.jwt.JwtProperties;
 
@@ -216,11 +205,38 @@ public class UserController {
         request.setProfileImage(profileImage);
 
         // 서비스 계층을 통해 사용자 정보 업데이트
-        UserUpdateResponseDto response = userFacadeService.updateUserInfo(user.getUserId(), request);
+        UserUpdateResponseDto response = userFacadeService.updateUserInfo(user.getLoginId(), request);
 
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "회원 탈퇴", description = "현재 로그인한 사용자의 계정을 탈퇴처리 합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원탈퇴 성공"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+    })
+    @DeleteMapping("/delete")
+    public ResponseEntity<UserDeleteResponseDto> deleteUseR(
+            @AuthenticationPrincipal User user
+    ) {
 
+        //회원 탈퇴처리
+        UserDeleteResponseDto response = userFacadeService.deleteUser(user.getLoginId());
+
+        //리프레시 토큰 쿠키 제거
+        ResponseCookie cookie = ResponseCookie.from("refreshToken","")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .maxAge(0)
+                .path("/api/auth")
+                .build();
+
+        return  ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(response);
+
+    }
 
 }

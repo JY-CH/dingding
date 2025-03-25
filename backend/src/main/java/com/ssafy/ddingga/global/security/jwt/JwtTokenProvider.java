@@ -34,8 +34,8 @@ public class JwtTokenProvider {
         Date validity = new Date(now.getTime() + jwtProperties.getAccessTokenExpiration()*1000);
 
         return Jwts.builder()
-                .setSubject(user.getUserId())
-                .claim("id", user.getId())
+                .setSubject(user.getLoginId())
+                .claim("loginId", user.getLoginId())
                 .claim("username", user.getUsername())
                 .setIssuedAt(now)
                 .setExpiration(validity)
@@ -53,7 +53,7 @@ public class JwtTokenProvider {
         Date validity = new Date(now.getTime() + jwtProperties.getRefreshTokenExpiration());
 
         return Jwts.builder()
-                .setSubject(user.getUserId())
+                .setSubject(user.getLoginId())
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -65,7 +65,7 @@ public class JwtTokenProvider {
      * @param token JWT 토큰
      * @return 사용자 ID
      */
-    public String getUserId(String token) {
+    public String getLoginId(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()

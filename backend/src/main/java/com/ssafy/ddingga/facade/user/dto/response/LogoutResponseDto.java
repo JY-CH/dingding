@@ -1,4 +1,4 @@
-package com.ssafy.ddingga.facade.user.dto;
+package com.ssafy.ddingga.facade.user.dto.response;
 
 
 import lombok.AllArgsConstructor;
