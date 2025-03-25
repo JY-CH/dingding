@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.ssafy.ddingga.domain.article.entity.Article;
 import com.ssafy.ddingga.domain.article.service.ArticleService;
 import com.ssafy.ddingga.domain.user.service.UserService;
+import com.ssafy.ddingga.facade.article.dto.request.ArticleCreateRequestDto;
 import com.ssafy.ddingga.facade.article.dto.response.ArticleGetAllResponseDto;
 
 import lombok.RequiredArgsConstructor;
@@ -23,19 +24,26 @@ public class ArticleFacadeServiceImpl implements ArticleFacadeService{
 		List<Article> articles = articleService.allArticleList();
 		List<ArticleGetAllResponseDto> result = new ArrayList<>();
 
-		ArticleGetAllResponseDto result2 = new ArticleGetAllResponseDto();
 		for (Article article: articles){
-			result2.setArticleId(article.getArticleId());
-			result2.setUsername(article.getUser().getUsername());
-			result2.setTitle(article.getTitle());
-			result2.setCreatedAt(article.getCreatedAt());
-			result2.setCategory(article.getCategory());
-			result2.setPopularPost(article.getPopularPost());
-			result2.setRecommend(article.getRecommend());
+			ArticleGetAllResponseDto ar = new ArticleGetAllResponseDto();
+			ar.setArticleId(article.getArticleId());
+			ar.setUserId(article.getUser().getUserId());
+			ar.setUsername(article.getUser().getUsername());
+			ar.setTitle(article.getTitle());
+			ar.setCreatedAt(article.getCreatedAt());
+			ar.setCategory(article.getCategory());
+			ar.setPopularPost(article.getPopularPost());
+			ar.setRecommend(article.getRecommend());
 
-			result.add(result2);
+			result.add(ar);
 		}
 
 		return result;
 	}
+
+	@Override
+	public void articleCreate(int userId, ArticleCreateRequestDto request) {
+		articleService.creatArticle(userId,request.getTitle(),request.getContent(), request.getCategory());
+	}
+
 }

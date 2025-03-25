@@ -10,4 +10,6 @@ public interface ArticleService {
 	 * @return  전체 게시판 목록
 	 */
 	List<Article> allArticleList();
+
+	void creatArticle(int userId, String title, String content, String category);
 }

@@ -37,4 +37,6 @@ public interface UserService {
      * @return 탈퇴 처리된 사용자의 엔티티
      */
     User deleteUser(String loginId);
+
+    User getUser(int userId);
 }

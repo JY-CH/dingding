@@ -16,6 +16,7 @@ import lombok.Setter;
 public class ArticleGetAllResponseDto {
 
 	private Integer articleId; // 게시판 pk
+	private Integer userId; // userId(pk)
 	private String username;  // user 닉네임
 	private String title; // 제목
 	private LocalDateTime createdAt; // 가입일자
