@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import HotContent from '@/components/search/HotContent';
 import SearchBar from '@/components/search/SearchBar';
 import SearchResults from '@/components/search/SearchResults';
 import SearchTabs from '@/components/search/SearchTabs';
 
-export default function SearchPage() {
-  const [query, setQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
+const SearchPage: React.FC = () => {
+  const [query, setQuery] = useState<string>(''); // 검색어 상태 타입 지정
+  const [activeTab, setActiveTab] = useState<string>('all'); // 활성 탭 상태 타입 지정
 
   return (
     <div className="min-h-screen bg-zinc-900">
@@ -20,4 +20,6 @@ export default function SearchPage() {
       )}
     </div>
   );
-}
+};
+
+export default SearchPage;
