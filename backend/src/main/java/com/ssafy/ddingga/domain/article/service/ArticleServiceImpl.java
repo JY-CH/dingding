@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ArticleServiceImpl implements ArticleService {
 
 	/**
-	 * 사용자 데이터 베이스 접근을 위한 레포지토리
+	 * 게시판 데이터 베이스 접근을 위한 레포지토리
 	 * final로 선언되며 생성자 주입으로 초기화됨
 	 */
 	private final ArticleRepository articleRepository;

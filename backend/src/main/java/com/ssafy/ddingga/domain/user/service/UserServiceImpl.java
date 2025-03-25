@@ -158,4 +158,10 @@ public class UserServiceImpl implements UserService {
     public User deleteUser(String userId) {
         return null;
     }
+
+    @Override
+    public User getUser(int id) {
+        User user = userRepository.findById(id);
+        return user;
+    }
 }

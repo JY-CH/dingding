@@ -32,10 +32,9 @@ public class Article {
 
 	@Column(unique = true)
 	private Integer id;  // user의 id
-	private String title; // user 비밀번호
-	private String content;    // user 닉네임(이름)
-	private LocalDateTime createdAt; // 가입일자
-	private LocalDateTime updatedAt; // 수정일자
+	private String title; // 게시판 제목
+	private String content;    // 게시판 내용
+	private LocalDateTime createdAt; // 생성일자
 	private String category;    // 카테고리
 	private Boolean popularPost;  // 인기글
 	private Integer recommend;  // 추천수
