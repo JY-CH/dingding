@@ -47,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('Blue-Green Deploy') {
+        stage('Blue-Green Deployment with Load Balancing') {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
                     withCredentials([
@@ -60,30 +60,46 @@ pipeline {
                             ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                             cd /home/ubuntu/j12d105
 
-                            echo "🔍 현재 실행 중인 백엔드 컨테이너 확인"
-                            CURRENT_BACKEND=\$(docker ps --format '{{.Names}}' | grep backend-blue || true)
-                            
-                            if [ "\$CURRENT_BACKEND" == "backend-blue" ]; then
-                                NEW_BACKEND="backend-green"
-                                OLD_BACKEND="backend-blue"
+                            # 현재 실행 중인 백엔드 컨테이너 확인 (로드밸런싱)
+                            CURRENT_BACKENDS=( $(docker ps --format '{{.Names}}' | grep 'backend-' | sort) )
+                            echo "현재 실행 중인 컨테이너: \${CURRENT_BACKENDS[@]}"
+
+                            # 새롭게 배포할 컨테이너 결정 (Blue-Green 방식)
+                            if [[ "${CURRENT_BACKENDS[@]}" =~ "backend-1" ]]; then
+                                NEW_BACKENDS=("backend-3" "backend-4")
                             else
-                                NEW_BACKEND="backend-blue"
-                                OLD_BACKEND="backend-green"
+                                NEW_BACKENDS=("backend-1" "backend-2")
                             fi
+                            echo "새롭게 배포할 컨테이너: \${NEW_BACKENDS[@]}"
 
-                            echo "🚀 새 컨테이너 (\$NEW_BACKEND) 배포 시작"
-                            docker-compose up -d --no-deps --force-recreate \$NEW_BACKEND
-                            
-                            echo "⏳ 5초 대기 (안정화 시간)"
-                            sleep 5
+                            echo "🚀 최신 백엔드 이미지 가져오기"
+                            docker-compose pull \${NEW_BACKENDS[@]}
 
-                            echo "🔄 Nginx 트래픽 \$NEW_BACKEND 으로 전환"
-                            docker exec -it nginx nginx -s reload
+                            echo "🚀 새 컨테이너 실행"
+                            MYSQL_USERNAME=${MYSQL_USERNAME} \
+                            MYSQL_PASSWORD=${MYSQL_PASSWORD} \
+                            REDIS_PASSWORD=${REDIS_PASSWORD} \
+                            docker-compose up -d --force-recreate \${NEW_BACKENDS[@]}
 
-                            echo "🛑 이전 컨테이너 (\$OLD_BACKEND) 종료"
-                            docker-compose down \$OLD_BACKEND
+                            echo "🛠️ 새 컨테이너 정상 작동 확인 중..."
+                            sleep 10
+                            for backend in "${NEW_BACKENDS[@]}"; do
+                                HEALTHY=\$(docker inspect --format='{{.State.Health.Status}}' \$backend)
+                                if [ "\$HEALTHY" != "healthy" ]; then
+                                    echo "❌ 컨테이너 \$backend 가 정상적으로 실행되지 않았습니다!"
+                                    exit 1
+                                fi
+                            done
 
-                            echo "✅ Blue-Green 배포 완료!"
+                            echo "🔄 Nginx 트래픽을 새 컨테이너로 변경"
+                            sudo sed -i "s/${CURRENT_BACKENDS[0]}/${NEW_BACKENDS[0]}/g" /home/ubuntu/j12d105/nginx/nginx.conf
+                            sudo sed -i "s/${CURRENT_BACKENDS[1]}/${NEW_BACKENDS[1]}/g" /home/ubuntu/j12d105/nginx/nginx.conf
+                            sudo systemctl restart nginx
+
+                            echo "🗑️ 기존 컨테이너 종료"
+                            docker stop \${CURRENT_BACKENDS[@]} && docker rm \${CURRENT_BACKENDS[@]}
+
+                            echo "✅ 배포 완료! 현재 컨테이너 상태:"
                             docker ps -a
                             exit 0
                             EOF
