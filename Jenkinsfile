@@ -100,12 +100,14 @@ pipeline {
             echo '✅ Deployment Successful!'
 
             // GitLab 커밋 기록에서 배포한 사람의 GitLab 아이디 추출
-            def gitlabUser = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
+            def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+            def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+            def Name = Author_ID.substring(1)
 
             // Mattermost 알림 전송 (빌드 성공 시)
             mattermostSend(
                 color: 'good',
-                message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 성공했습니다! \n배포한 사람: ${gitlabUser} \n배포한 앱: ${env.IMAGE_NAME} \n(${env.BUILD_URL}|상세 보기) ㅋㅋ 잘했다.",
+                message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 성공했습니다! \n배포한 사람: ${Name} \n배포한 앱: ${env.IMAGE_NAME} \n(${env.BUILD_URL}|상세 보기) ㅋㅋ 잘했다.",
                 endpoint: "${env.MATTERMOST_WEBHOOK_URL}",
                 channel: "${env.MATTERMOST_CHANNEL}"
             )
@@ -114,12 +116,14 @@ pipeline {
             echo '❌ Deployment Failed.'
             
             // GitLab 커밋 기록에서 배포한 사람의 GitLab 아이디 추출
-            def gitlabUser = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
+            def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+            def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+            def Name = Author_ID.substring(1)
 
             // Mattermost 알림 전송 (빌드 실패 시)
             mattermostSend(
                 color: 'danger',
-                message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 실패했습니다. \n배포한 사람: ${gitlabUser} \n배포한 앱: ${env.IMAGE_NAME} \n${env.GIT_BRANCH}에서 오류가 발생했습니다. \n(<${env.BUILD_URL}|상세 보기>) ㅋㅋ 뭐함?.",
+                message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 실패했습니다. \n배포한 사람: ${Name} \n배포한 앱: ${env.IMAGE_NAME} \n${env.GIT_BRANCH}에서 오류가 발생했습니다. \n(<${env.BUILD_URL}|상세 보기>) ㅋㅋ 뭐함?.",
                 endpoint: "${env.MATTERMOST_WEBHOOK_URL}",
                 channel: "${env.MATTERMOST_CHANNEL}"
             )
