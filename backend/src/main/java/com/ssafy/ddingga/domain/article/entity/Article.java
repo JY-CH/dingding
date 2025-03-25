@@ -4,12 +4,16 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.ssafy.ddingga.domain.user.entity.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,8 +34,9 @@ public class Article {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer articleId; // userPk
 
-	@Column(unique = true)
-	private Integer id;  // user의 id
+	@ManyToOne // userId는 User 테이블과 다대일 관계
+	@JoinColumn(name = "user_id", nullable = false) // 외래 키로 "user_id"를 사용
+	private User user;
 	private String title; // 게시판 제목
 	private String content;    // 게시판 내용
 	private LocalDateTime createdAt; // 생성일자

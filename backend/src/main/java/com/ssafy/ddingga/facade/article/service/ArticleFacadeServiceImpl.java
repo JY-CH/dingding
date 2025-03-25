@@ -1,6 +1,5 @@
 package com.ssafy.ddingga.facade.article.service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import com.ssafy.ddingga.domain.article.service.ArticleService;
 import com.ssafy.ddingga.domain.user.service.UserService;
 import com.ssafy.ddingga.facade.article.dto.response.ArticleGetAllResponseDto;
 
-import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,7 +26,7 @@ public class ArticleFacadeServiceImpl implements ArticleFacadeService{
 		ArticleGetAllResponseDto result2 = new ArticleGetAllResponseDto();
 		for (Article article: articles){
 			result2.setArticleId(article.getArticleId());
-			result2.setUsername(userService.getUser(article.getId()).getUsername());
+			result2.setUsername(article.getUser().getUsername());
 			result2.setTitle(article.getTitle());
 			result2.setCreatedAt(article.getCreatedAt());
 			result2.setCategory(article.getCategory());

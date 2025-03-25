@@ -42,10 +42,4 @@ public interface UserService {
      */
     User deleteUser(String userId);
 
-    /**
-     * 회원 정보 조회
-     * @param id 해당 user 정보 조회
-     * @return 사용자의 엔티티
-     */
-    User getUser(int id);
 }
