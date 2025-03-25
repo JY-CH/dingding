@@ -1,15 +1,14 @@
-package com.ssafy.ddingga.facade.user.dto;
+package com.ssafy.ddingga.facade.user.dto.response;
 
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class LogoutResponseDto {
+public class UserDeleteResponseDto {
     private String message;
+    private String loginId;
 }

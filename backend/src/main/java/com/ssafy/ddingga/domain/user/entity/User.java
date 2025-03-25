@@ -22,15 +22,16 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; // userPk
+    private Integer userId; // userPk
 
     @Column(unique = true)
-    private String userId;  // user의 id
+    private String loginId;  // user의 id
     private String password; // user 비밀번호
     private String username;    // user 닉네임(이름)
     private LocalDateTime createAt; // 가입일자
     private String profileImage;    // 프로필이미지
-    private Boolean isDeleted;  // 회원탈퇴여부
+    @Builder.Default
+    private Boolean isDeleted = false;  // 회원탈퇴여부
 
     /** 사용자가 어떤 권한을 가지고 있는지 정의,
      * JWT 토큰에 이 권한정보가 포함, API 요청 시 권한검사에 사용

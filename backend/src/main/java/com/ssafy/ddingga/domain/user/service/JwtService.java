@@ -2,7 +2,7 @@ package com.ssafy.ddingga.domain.user.service;
 
 import com.ssafy.ddingga.domain.user.entity.AuthProvider;
 import com.ssafy.ddingga.domain.user.entity.User;
-import com.ssafy.ddingga.facade.user.dto.TokenResponseDto;
+import com.ssafy.ddingga.facade.user.dto.response.TokenResponseDto;
 
 public interface JwtService {
     TokenResponseDto issueToken(User user);
@@ -11,9 +11,9 @@ public interface JwtService {
 
     /**
      * 리프레시 토큰을 무효화하여 로그아웃 처리
-     * @param userId 사용자 ID
+     * @param loginID 사용자 ID
      */
-    void invalidateRefreshToken(String userId);
+    void invalidateRefreshToken(String loginID);
 
 }
 

@@ -3,6 +3,10 @@ package com.ssafy.ddingga.domain.user.service;
 
 import java.time.LocalDateTime;
 
+import com.ssafy.ddingga.global.error.exception.InvalidTokenException;
+import com.ssafy.ddingga.global.error.exception.TokenExpiredException;
+import com.ssafy.ddingga.global.error.exception.UserNotFoundException;
+import com.ssafy.ddingga.global.error.exception.UserSocialNotfoundException;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.ddingga.domain.user.entity.AuthProvider;
@@ -10,7 +14,7 @@ import com.ssafy.ddingga.domain.user.entity.User;
 import com.ssafy.ddingga.domain.user.entity.UserSocial;
 import com.ssafy.ddingga.domain.user.repository.UserRepository;
 import com.ssafy.ddingga.domain.user.repository.UserSocialRepository;
-import com.ssafy.ddingga.facade.user.dto.TokenResponseDto;
+import com.ssafy.ddingga.facade.user.dto.response.TokenResponseDto;
 import com.ssafy.ddingga.global.security.jwt.JwtProperties;
 import com.ssafy.ddingga.global.security.jwt.JwtTokenProvider;
 
@@ -52,7 +56,7 @@ public class JwtServiceImpl implements JwtService {
                 .orElse(UserSocial.builder()
                         .user(user)
                         .provider(provider)
-                        .providerId(provider == AuthProvider.LOCAL ? user.getUserId() : null)
+                        .providerId(provider == AuthProvider.LOCAL ? user.getLoginId() : null)
                         .build());
 
         // 리프레시토큰 업데이트
@@ -70,10 +74,10 @@ public class JwtServiceImpl implements JwtService {
     @Transactional
     public TokenResponseDto refreshToken(String refreshToken) {
         UserSocial userSocial = userSocialRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("유효하지 않은 리프레시 토큰입니다."));
+                .orElseThrow(() -> new InvalidTokenException("유효하지 않은 리프레시 토큰입니다."));
 
         if (userSocial.getTokenExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("리프레시 토큰이 만료되었습니다.");
+            throw new TokenExpiredException("리프레시 토큰이 만료되었습니다.");
         }
 
         User user = userSocial.getUser();
@@ -96,14 +100,14 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     @Transactional
-    public void invalidateRefreshToken(String userId) {
+    public void invalidateRefreshToken(String loginId) {
         // 사용자 ID로 유저 객체 조회
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("사용자가 존재하지 않습니다"));
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new UserNotFoundException("사용자가 존재하지 않습니다"));
 
         // 사용자의 리프레시토큰 조회
         UserSocial userSocial = userSocialRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("사용자 인증 정보가 존재하지 않습니다"));
+                .orElseThrow(() -> new UserSocialNotfoundException("사용자 인증 정보가 존재하지 않습니다"));
 
         //리프레시 토큰 무효화(null로 설정)
         userSocial.setRefreshToken(null);
