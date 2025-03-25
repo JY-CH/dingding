@@ -4,7 +4,7 @@ pipeline {
     environment {
         COMPOSE_FILE_PATH = "/home/ubuntu/j12d105/docker-compose.yml"
         IMAGE_NAME = "backend-server"
-        DOCKER_HUB_ID = "jaeyeolyim"
+        DOCKER_HUB_ID = "jaeyeolyim"  // Docker Hub 아이디
     }
 
     stages {
@@ -47,10 +47,10 @@ pipeline {
             }
         }
 
-        stage('Blue-Green Deployment with Load Balancing') {
+        stage('Blue-Green Deployment') {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
-                    withCredentials([
+                    withCredentials([ 
                         string(credentialsId: 'MySQL-Username', variable: 'MYSQL_USERNAME'),
                         string(credentialsId: 'MySQL-Password', variable: 'MYSQL_PASSWORD'),
                         string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD')
@@ -60,44 +60,41 @@ pipeline {
                             ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                             cd /home/ubuntu/j12d105
 
-                            # 현재 실행 중인 백엔드 컨테이너 확인 (로드밸런싱)
-                            CURRENT_BACKENDS=( $(docker ps --format '{{.Names}}' | grep 'backend-' | sort) )
-                            echo "현재 실행 중인 컨테이너: \${CURRENT_BACKENDS[@]}"
+                            # 현재 실행 중인 백엔드 컨테이너 확인
+                            CURRENT_BACKEND=\$(docker ps --format '{{.Names}}' | grep 'backend-' | head -n 1)
+                            echo "현재 실행 중인 컨테이너: \$CURRENT_BACKEND"
 
-                            # 새롭게 배포할 컨테이너 결정 (Blue-Green 방식)
-                            if [[ "${CURRENT_BACKENDS[@]}" =~ "backend-1" ]]; then
-                                NEW_BACKENDS=("backend-3" "backend-4")
+                            # 새로운 백엔드 컨테이너 결정
+                            if [ "\$CURRENT_BACKEND" == "backend-1" ]; then
+                                NEW_BACKEND="backend-2"
                             else
-                                NEW_BACKENDS=("backend-1" "backend-2")
+                                NEW_BACKEND="backend-1"
                             fi
-                            echo "새롭게 배포할 컨테이너: \${NEW_BACKENDS[@]}"
+                            echo "새롭게 배포할 컨테이너: \$NEW_BACKEND"
 
                             echo "🚀 최신 백엔드 이미지 가져오기"
-                            docker-compose pull \${NEW_BACKENDS[@]}
+                            docker-compose pull \$NEW_BACKEND
 
                             echo "🚀 새 컨테이너 실행"
                             MYSQL_USERNAME=${MYSQL_USERNAME} \
                             MYSQL_PASSWORD=${MYSQL_PASSWORD} \
                             REDIS_PASSWORD=${REDIS_PASSWORD} \
-                            docker-compose up -d --force-recreate \${NEW_BACKENDS[@]}
+                            docker-compose up -d --force-recreate \$NEW_BACKEND
 
                             echo "🛠️ 새 컨테이너 정상 작동 확인 중..."
                             sleep 10
-                            for backend in "${NEW_BACKENDS[@]}"; do
-                                HEALTHY=\$(docker inspect --format='{{.State.Health.Status}}' \$backend)
-                                if [ "\$HEALTHY" != "healthy" ]; then
-                                    echo "❌ 컨테이너 \$backend 가 정상적으로 실행되지 않았습니다!"
-                                    exit 1
-                                fi
-                            done
+                            HEALTHY=\$(docker inspect --format='{{.State.Health.Status}}' \$NEW_BACKEND)
+                            if [ "\$HEALTHY" != "healthy" ]; then
+                                echo "❌ 새 컨테이너가 정상적으로 실행되지 않았습니다!"
+                                exit 1
+                            fi
 
                             echo "🔄 Nginx 트래픽을 새 컨테이너로 변경"
-                            sudo sed -i "s/${CURRENT_BACKENDS[0]}/${NEW_BACKENDS[0]}/g" /home/ubuntu/j12d105/nginx/nginx.conf
-                            sudo sed -i "s/${CURRENT_BACKENDS[1]}/${NEW_BACKENDS[1]}/g" /home/ubuntu/j12d105/nginx/nginx.conf
+                            sudo sed -i "s/\$CURRENT_BACKEND/\$NEW_BACKEND/g" /home/ubuntu/j12d105/nginx/nginx.conf
                             sudo systemctl restart nginx
 
                             echo "🗑️ 기존 컨테이너 종료"
-                            docker stop \${CURRENT_BACKENDS[@]} && docker rm \${CURRENT_BACKENDS[@]}
+                            docker stop \$CURRENT_BACKEND && docker rm \$CURRENT_BACKEND
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
                             docker ps -a
