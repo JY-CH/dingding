@@ -24,7 +24,7 @@ import lombok.Setter;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Setter
 @Getter
 @Builder
@@ -40,6 +40,7 @@ public class Article {
 	private String title; // 게시판 제목
 	private String content;    // 게시판 내용
 	private LocalDateTime createdAt; // 생성일자
+	private LocalDateTime updatedAt; // 수정일자
 	private String category;    // 카테고리
 	private Boolean popularPost;  // 인기글
 	private Integer recommend;  // 추천수
