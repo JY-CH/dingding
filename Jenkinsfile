@@ -4,7 +4,7 @@ pipeline {
     environment {
         COMPOSE_FILE_PATH = "/home/ubuntu/j12d105/docker-compose.yml"
         IMAGE_NAME = "backend-server"
-        DOCKER_HUB_ID = "jaeyeolyim"
+        DOCKER_HUB_ID = "jaeyeolyim"  // Docker Hub 아이디
     }
 
     stages {
@@ -66,31 +66,31 @@ pipeline {
 
                             # 새로운 백엔드 컨테이너 결정
                             if [ "\$CURRENT_BACKEND" == "backend-1" ]; then
-                                NEW_BACKENDS=("backend-2")
+                                NEW_BACKEND="backend-2"
                             else
-                                NEW_BACKENDS=("backend-1")
+                                NEW_BACKEND="backend-1"
                             fi
-                            echo "새롭게 배포할 컨테이너: \$NEW_BACKENDS"
+                            echo "새롭게 배포할 컨테이너: \$NEW_BACKEND"
 
                             echo "🚀 최신 백엔드 이미지 가져오기"
-                            docker-compose pull ${NEW_BACKENDS[@]}
+                            docker-compose pull \$NEW_BACKEND
 
                             echo "🚀 새 컨테이너 실행"
                             MYSQL_USERNAME=${MYSQL_USERNAME} \
                             MYSQL_PASSWORD=${MYSQL_PASSWORD} \
                             REDIS_PASSWORD=${REDIS_PASSWORD} \
-                            docker-compose up -d --force-recreate ${NEW_BACKENDS[@]}
+                            docker-compose up -d --force-recreate \$NEW_BACKEND
 
                             echo "🛠️ 새 컨테이너 정상 작동 확인 중..."
                             sleep 10
-                            HEALTHY=\$(docker inspect --format='{{.State.Health.Status}}' ${NEW_BACKENDS[0]})
+                            HEALTHY=\$(docker inspect --format='{{.State.Health.Status}}' \$NEW_BACKEND)
                             if [ "\$HEALTHY" != "healthy" ]; then
                                 echo "❌ 새 컨테이너가 정상적으로 실행되지 않았습니다!"
                                 exit 1
                             fi
 
                             echo "🔄 Nginx 트래픽을 새 컨테이너로 변경"
-                            sudo sed -i "s/\$CURRENT_BACKEND/\${NEW_BACKENDS[0]}/g" /home/ubuntu/j12d105/nginx/nginx.conf
+                            sudo sed -i "s/\$CURRENT_BACKEND/\$NEW_BACKEND/g" /home/ubuntu/j12d105/nginx/nginx.conf
                             sudo systemctl restart nginx
 
                             echo "🗑️ 기존 컨테이너 종료"
@@ -106,7 +106,6 @@ pipeline {
                 }
             }
         }
-
     }
     post {
         success {
