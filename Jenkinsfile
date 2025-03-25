@@ -4,7 +4,7 @@ pipeline {
     environment {
         COMPOSE_FILE_PATH = "/home/ubuntu/j12d105/docker-compose.yml"
         IMAGE_NAME = "backend-server"
-        DOCKER_HUB_ID = "jaeyeolyim"  // Docker Hub 아이디
+        DOCKER_HUB_ID = "jaeyeolyim"
     }
 
     stages {
@@ -47,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('Deploy (Backend-1, Backend-2, MySQL, Redis)') {
+        stage('Blue-Green Deployment with Load Balancing') {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
                     withCredentials([
@@ -60,26 +60,44 @@ pipeline {
                             ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                             cd /home/ubuntu/j12d105
 
-                            echo "🛑 기존 백엔드, MySQL, Redis 컨테이너 중단 & 삭제"
-                            docker-compose down
+                            # 현재 실행 중인 백엔드 컨테이너 확인 (로드밸런싱)
+                            CURRENT_BACKENDS=( $(docker ps --format '{{.Names}}' | grep 'backend-' | sort) )
+                            echo "현재 실행 중인 컨테이너: \${CURRENT_BACKENDS[@]}"
+
+                            # 새롭게 배포할 컨테이너 결정 (Blue-Green 방식)
+                            if [[ "${CURRENT_BACKENDS[@]}" =~ "backend-1" ]]; then
+                                NEW_BACKENDS=("backend-3" "backend-4")
+                            else
+                                NEW_BACKENDS=("backend-1" "backend-2")
+                            fi
+                            echo "새롭게 배포할 컨테이너: \${NEW_BACKENDS[@]}"
 
                             echo "🚀 최신 백엔드 이미지 가져오기"
-                            docker-compose pull backend-1 backend-2
+                            docker-compose pull \${NEW_BACKENDS[@]}
 
-                            echo "🚀 환경 변수 설정 후 컨테이너 실행"
-                            export MYSQL_USERNAME="${MYSQL_USERNAME}"
-                            export MYSQL_PASSWORD="${MYSQL_PASSWORD}"
-                            export REDIS_PASSWORD="${REDIS_PASSWORD}"
-
-                            echo "MYSQL_USERNAME=${MYSQL_USERNAME}" >> .env
-                            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env
-                            echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
-
-                            docker-compose down --remove-orphans
+                            echo "🚀 새 컨테이너 실행"
                             MYSQL_USERNAME=${MYSQL_USERNAME} \
                             MYSQL_PASSWORD=${MYSQL_PASSWORD} \
                             REDIS_PASSWORD=${REDIS_PASSWORD} \
-                            docker-compose up -d --force-recreate
+                            docker-compose up -d --force-recreate \${NEW_BACKENDS[@]}
+
+                            echo "🛠️ 새 컨테이너 정상 작동 확인 중..."
+                            sleep 10
+                            for backend in "${NEW_BACKENDS[@]}"; do
+                                HEALTHY=\$(docker inspect --format='{{.State.Health.Status}}' \$backend)
+                                if [ "\$HEALTHY" != "healthy" ]; then
+                                    echo "❌ 컨테이너 \$backend 가 정상적으로 실행되지 않았습니다!"
+                                    exit 1
+                                fi
+                            done
+
+                            echo "🔄 Nginx 트래픽을 새 컨테이너로 변경"
+                            sudo sed -i "s/${CURRENT_BACKENDS[0]}/${NEW_BACKENDS[0]}/g" /home/ubuntu/j12d105/nginx/nginx.conf
+                            sudo sed -i "s/${CURRENT_BACKENDS[1]}/${NEW_BACKENDS[1]}/g" /home/ubuntu/j12d105/nginx/nginx.conf
+                            sudo systemctl restart nginx
+
+                            echo "🗑️ 기존 컨테이너 종료"
+                            docker stop \${CURRENT_BACKENDS[@]} && docker rm \${CURRENT_BACKENDS[@]}
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
                             docker ps -a
