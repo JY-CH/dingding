@@ -7,6 +7,8 @@ pipeline {
         GIT_CREDENTIALS = credentials('dlawoduf15')  // GitLab Credentials
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')  // Docker Hub Credentials
         DOCKER_HUB_ID = "jaeyeolyim"  // Docker Hub 아이디
+        MATTERMOST_WEBHOOK_URL = 'https://meeting.ssafy.com/hooks/9xbbpnkbqfyo3nzxjrkaib8xbc'  // Mattermost Incoming Webhook URL
+        MATTERMOST_CHANNEL = 'd105-jenkins alarm'  // Mattermost 채널
     }
 
     stages {
@@ -38,7 +40,7 @@ pipeline {
                         echo "GIT_CREDENTIALS=\$GIT_TOKEN" > .env
 
                         echo "🚀 Docker Image 빌드 시작"
-                        docker build -t ${IMAGE_NAME} .
+                        docker build -t ${IMAGE_NAME} . 
                         """
                     }
 
@@ -96,9 +98,31 @@ pipeline {
     post {
         success {
             echo '✅ Deployment Successful!'
+
+            // GitLab 커밋 기록에서 배포한 사람의 GitLab 아이디 추출
+            def gitlabUser = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
+
+            // Mattermost 알림 전송 (빌드 성공 시)
+            mattermostSend(
+                color: 'good',
+                message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 성공했습니다! \n배포한 사람: ${gitlabUser} \n배포한 앱: ${env.IMAGE_NAME} \n(${env.BUILD_URL}|상세 보기) ㅋㅋ 잘했다.",
+                endpoint: "${env.MATTERMOST_WEBHOOK_URL}",
+                channel: "${env.MATTERMOST_CHANNEL}"
+            )
         }
         failure {
             echo '❌ Deployment Failed.'
+            
+            // GitLab 커밋 기록에서 배포한 사람의 GitLab 아이디 추출
+            def gitlabUser = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
+
+            // Mattermost 알림 전송 (빌드 실패 시)
+            mattermostSend(
+                color: 'danger',
+                message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 실패했습니다. \n배포한 사람: ${gitlabUser} \n배포한 앱: ${env.IMAGE_NAME} \n${env.GIT_BRANCH}에서 오류가 발생했습니다. \n(<${env.BUILD_URL}|상세 보기>) ㅋㅋ 뭐함?.",
+                endpoint: "${env.MATTERMOST_WEBHOOK_URL}",
+                channel: "${env.MATTERMOST_CHANNEL}"
+            )
         }
     }
 }
