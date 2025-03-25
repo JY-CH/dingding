@@ -5,6 +5,8 @@ pipeline {
         COMPOSE_FILE_PATH = "/home/ubuntu/j12d105/docker-compose.yml"
         IMAGE_NAME = "backend-server"
         DOCKER_HUB_ID = "jaeyeolyim"  // Docker Hub 아이디
+        MATTERMOST_WEBHOOK_URL = 'https://meeting.ssafy.com/hooks/9xbbpnkbqfyo3nzxjrkaib8xbc'  // Mattermost Incoming Webhook URL
+        MATTERMOST_CHANNEL = 'd105-jenkins-alarm'  // Mattermost 채널
     }
 
     stages {
@@ -47,10 +49,10 @@ pipeline {
             }
         }
 
-        stage('Deploy (Backend-1, Backend-2, MySQL, Redis)') {
+        stage('Blue-Green Deployment') {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
-                    withCredentials([
+                    withCredentials([ 
                         string(credentialsId: 'MySQL-Username', variable: 'MYSQL_USERNAME'),
                         string(credentialsId: 'MySQL-Password', variable: 'MYSQL_PASSWORD'),
                         string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD')
@@ -60,26 +62,41 @@ pipeline {
                             ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                             cd /home/ubuntu/j12d105
 
-                            echo "🛑 기존 백엔드, MySQL, Redis 컨테이너 중단 & 삭제"
-                            docker-compose down
+                            # 현재 실행 중인 백엔드 컨테이너 확인
+                            CURRENT_BACKEND=\$(docker ps --format '{{.Names}}' | grep 'backend-' | head -n 1)
+                            echo "현재 실행 중인 컨테이너: \$CURRENT_BACKEND"
+
+                            # 새로운 백엔드 컨테이너 결정
+                            if [ "\$CURRENT_BACKEND" == "backend-1" ]; then
+                                NEW_BACKEND="backend-2"
+                            else
+                                NEW_BACKEND="backend-1"
+                            fi
+                            echo "새롭게 배포할 컨테이너: \$NEW_BACKEND"
 
                             echo "🚀 최신 백엔드 이미지 가져오기"
-                            docker-compose pull backend-1 backend-2
+                            docker-compose pull \$NEW_BACKEND
 
-                            echo "🚀 환경 변수 설정 후 컨테이너 실행"
-                            export MYSQL_USERNAME="${MYSQL_USERNAME}"
-                            export MYSQL_PASSWORD="${MYSQL_PASSWORD}"
-                            export REDIS_PASSWORD="${REDIS_PASSWORD}"
-
-                            echo "MYSQL_USERNAME=${MYSQL_USERNAME}" >> .env
-                            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env
-                            echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
-
-                            docker-compose down --remove-orphans
+                            echo "🚀 새 컨테이너 실행"
                             MYSQL_USERNAME=${MYSQL_USERNAME} \
                             MYSQL_PASSWORD=${MYSQL_PASSWORD} \
                             REDIS_PASSWORD=${REDIS_PASSWORD} \
-                            docker-compose up -d --force-recreate
+                            docker-compose up -d --force-recreate \$NEW_BACKEND
+
+                            echo "🛠️ 새 컨테이너 정상 작동 확인 중..."
+                            sleep 10
+                            HEALTHY=\$(docker inspect --format='{{.State.Health.Status}}' \$NEW_BACKEND)
+                            if [ "\$HEALTHY" != "healthy" ]; then
+                                echo "❌ 새 컨테이너가 정상적으로 실행되지 않았습니다!"
+                                exit 1
+                            fi
+
+                            echo "🔄 Nginx 트래픽을 새 컨테이너로 변경"
+                            sudo sed -i "s/\$CURRENT_BACKEND/\$NEW_BACKEND/g" /home/ubuntu/j12d105/nginx/nginx.conf
+                            sudo systemctl restart nginx
+
+                            echo "🗑️ 기존 컨테이너 종료"
+                            docker stop \$CURRENT_BACKEND && docker rm \$CURRENT_BACKEND
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
                             docker ps -a
@@ -92,12 +109,43 @@ pipeline {
             }
         }
     }
+    
     post {
         success {
             echo "✅ Deployment Successful!"
+            
+            // GitLab 커밋 기록에서 배포한 사람의 GitLab 아이디 추출
+            script {
+                def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+                def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+                def Name = Author_ID.substring(1)
+
+                // Mattermost 알림 전송 (빌드 성공 시)
+                mattermostSend(
+                    color: 'good',
+                    message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 성공했습니다! \n배포한 사람: ${Name} ㅋㅋ좀치노 \n브랜치: ${env.GIT_BRANCH} \n(<${env.BUILD_URL}|상세 보기>)",
+                    endpoint: "${env.MATTERMOST_WEBHOOK_URL}",
+                    channel: "${env.MATTERMOST_CHANNEL}"
+                )
+            }
         }
         failure {
             echo "❌ Deployment Failed."
+            
+            script {
+                // GitLab 커밋 기록에서 배포한 사람의 GitLab 아이디 추출
+                def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+                def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+                def Name = Author_ID.substring(1)
+
+                // Mattermost 알림 전송 (빌드 실패 시)
+                mattermostSend(
+                    color: 'danger',
+                    message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 실패했습니다. \n배포한 사람: ${Name} 뭐함? \n${env.GIT_BRANCH}에서 오류가 발생했습니다. \n(<${env.BUILD_URL}|상세 보기>)",
+                    endpoint: "${env.MATTERMOST_WEBHOOK_URL}",
+                    channel: "${env.MATTERMOST_CHANNEL}"
+                )
+            }
         }
     }
 }
