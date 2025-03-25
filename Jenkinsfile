@@ -8,7 +8,7 @@ pipeline {
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')  // Docker Hub Credentials
         DOCKER_HUB_ID = "jaeyeolyim"  // Docker Hub 아이디
         MATTERMOST_WEBHOOK_URL = 'https://meeting.ssafy.com/hooks/9xbbpnkbqfyo3nzxjrkaib8xbc'  // Mattermost Incoming Webhook URL
-        MATTERMOST_CHANNEL = 'd105-jenkins alarm'  // Mattermost 채널
+        MATTERMOST_CHANNEL = 'd105-jenkins-alarm'  // Mattermost 채널
     }
 
     stages {
