@@ -62,7 +62,7 @@ pipeline {
                             ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                             cd /home/ubuntu/j12d105
 
-                            # 현재 실행 중인 백엔드 컨테이너 확인
+                            # 현재 실행 중인 백엔드 컨테이너 확인a
                             CURRENT_BACKEND_1=$(docker ps --format '{{.Names}}' | grep -E '^backend-[1-4]$' | head -n 1)
                             CURRENT_BACKEND_2=$(docker ps --format '{{.Names}}' | grep -E '^backend-[1-4]$' | head -n 2 | tail -n 1)
 
