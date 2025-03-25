@@ -1,28 +1,35 @@
-package com.ssafy.ddingga.domain.song.entity;
+package com.ssafy.ddingga.domain.replay.entity;
 
+
+import com.ssafy.ddingga.domain.song.entity.Song;
 import com.ssafy.ddingga.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
-public class Chord {
+public class Replay {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer chordId;
+    private Integer replayId;
 
-    @ManyToOne(fetch = FetchType.LAZY) //조회시 userId 외에는 필요없어서 fetch = FetchType.LAZY
-    @JoinColumn(name="user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id",nullable = false)
     private User user;
 
-    @ManyToOne // songId를 통해 songTitle이 필요하므로 기본형인 EAGER
+    @ManyToOne
     @JoinColumn(name = "song_id", nullable = false)
     private Song song;
 
     private Integer score;
-    private Integer count;
 
+    private String mode;
+    private String videoPath;
+    private LocalDateTime practiceDate;
 }
