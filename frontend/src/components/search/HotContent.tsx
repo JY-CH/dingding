@@ -1,6 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { MessageSquare, Headphones, TrendingUp, Calendar, Clock, UserCircle } from 'lucide-react';
+import {
+  BookHeadphones,
+  MessageSquare,
+  Headphones,
+  TrendingUp,
+  Calendar,
+  Clock,
+  UserCircle,
+} from 'lucide-react';
 
 interface Song {
   id: number;
@@ -21,9 +29,7 @@ interface Post {
   likes?: number;
 }
 
-const SearchResults: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('songs');
-
+const HptContent: React.FC = () => {
   const trendingSongs: Song[] = [
     {
       id: 1,
@@ -135,46 +141,13 @@ const SearchResults: React.FC = () => {
 
   return (
     <div className="bg-zinc-900 min-h-screen pb-20">
-      {/* 상단 탭 메뉴 */}
-      <div className="px-6 py-3 border-b border-zinc-800 sticky top-0 bg-zinc-900 z-10">
-        <div className="flex space-x-6 overflow-x-auto no-scrollbar">
-          <button
-            className={`text-sm whitespace-nowrap pb-2 transition-colors ${activeTab === 'songs' ? 'text-orange-500 border-b-2 border-orange-500 font-medium' : 'text-gray-400'}`}
-            onClick={() => setActiveTab('songs')}
-          >
-            노래
-          </button>
-          <button
-            className={`text-sm whitespace-nowrap pb-2 transition-colors ${activeTab === 'artists' ? 'text-orange-500 border-b-2 border-orange-500 font-medium' : 'text-gray-400'}`}
-            onClick={() => setActiveTab('artists')}
-          >
-            아티스트
-          </button>
-          <button
-            className={`text-sm whitespace-nowrap pb-2 transition-colors ${activeTab === 'albums' ? 'text-orange-500 border-b-2 border-orange-500 font-medium' : 'text-gray-400'}`}
-            onClick={() => setActiveTab('albums')}
-          >
-            앨범
-          </button>
-          <button
-            className={`text-sm whitespace-nowrap pb-2 transition-colors ${activeTab === 'playlists' ? 'text-orange-500 border-b-2 border-orange-500 font-medium' : 'text-gray-400'}`}
-            onClick={() => setActiveTab('playlists')}
-          >
-            플레이리스트
-          </button>
-          <button
-            className={`text-sm whitespace-nowrap pb-2 transition-colors ${activeTab === 'community' ? 'text-orange-500 border-b-2 border-orange-500 font-medium' : 'text-gray-400'}`}
-            onClick={() => setActiveTab('community')}
-          >
-            커뮤니티
-          </button>
-        </div>
-      </div>
-
       {/* 장르 카드 섹션 */}
       <div className="px-6 py-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-white">장르 탐색</h3>
+          <div className="flex items-center gap-2">
+            <BookHeadphones className="w-5 h-5 text-orange-500" />
+            <h3 className="text-lg font-bold text-white">장르 탐색</h3>
+          </div>
           <button className="text-sm text-orange-500">모두 보기</button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -296,4 +269,4 @@ const SearchResults: React.FC = () => {
   );
 };
 
-export default SearchResults;
+export default HptContent;
