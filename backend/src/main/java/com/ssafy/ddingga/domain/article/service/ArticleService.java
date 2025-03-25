@@ -11,5 +11,13 @@ public interface ArticleService {
 	 */
 	List<Article> allArticleList();
 
+	Article getArticle(int articleId);
+
 	void creatArticle(int userId, String title, String content, String category);
+
+	Article updateArticle(int articleId, String title, String content, String category);
+
+	void deleteArticle(int articleId);
+
+	List<Article> searchArticles(String keyword);
 }
