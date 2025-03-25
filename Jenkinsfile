@@ -63,10 +63,10 @@ pipeline {
                             cd /home/ubuntu/j12d105
 
                             # 현재 실행 중인 백엔드 컨테이너 확인
-                            CURRENT_BACKEND_1=\$(docker ps --format '{{.Names}}' | grep 'backend-' | head -n 1)
-                            CURRENT_BACKEND_2=\$(docker ps --format '{{.Names}}' | grep 'backend-' | head -n 2 | tail -n 1)
+                            CURRENT_BACKEND_1=\$(docker ps --format '{{.Names}}' | grep -E '^backend-[1-4]$' | head -n 1)
+                            CURRENT_BACKEND_2=\$(docker ps --format '{{.Names}}' | grep -E '^backend-[1-4]$' | head -n 2 | tail -n 1)
                             echo "현재 실행 중인 컨테이너: \$CURRENT_BACKEND_1, \$CURRENT_BACKEND_2"
-
+                            
                             # 새로운 백엔드 컨테이너 결정 (실행 중인 백엔드 컨테이너 상태에 따라)
                             if [ "\$CURRENT_BACKEND_1" == "backend-1" ] && [ "\$CURRENT_BACKEND_2" == "backend-2" ]; then
                                 NEW_BACKEND_1="backend-3"
@@ -106,8 +106,8 @@ pipeline {
                             sudo sed -i "s/\$CURRENT_BACKEND_2/\$NEW_BACKEND_2/g" /home/ubuntu/j12d105/nginx/nginx.conf
                             sudo systemctl restart nginx
 
-                            echo "🗑️ 기존 컨테이너 종료"
-                            # 기존 컨테이너 종료 (필요 시)
+                            echo "🗑️ 기존 컨테이너 종료 및 삭제"
+                            # 기존 컨테이너 종료 후 삭제
                             docker stop \$CURRENT_BACKEND_1 && docker rm \$CURRENT_BACKEND_1
                             docker stop \$CURRENT_BACKEND_2 && docker rm \$CURRENT_BACKEND_2
 
@@ -117,6 +117,7 @@ pipeline {
                             EOF
                             """
                         }
+
 
                     }
                 }
