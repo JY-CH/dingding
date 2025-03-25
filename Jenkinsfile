@@ -67,14 +67,18 @@ pipeline {
                             CURRENT_BACKEND_2=\$(docker ps --format '{{.Names}}' | grep 'backend-' | head -n 2 | tail -n 1)
                             echo "현재 실행 중인 컨테이너: \$CURRENT_BACKEND_1, \$CURRENT_BACKEND_2"
 
-                            # 새로운 백엔드 컨테이너 결정 (삼항연산자 방식)
+                            # 새로운 백엔드 컨테이너 결정 (실행 중인 백엔드 컨테이너 상태에 따라)
                             if [ "\$CURRENT_BACKEND_1" == "backend-1" ] && [ "\$CURRENT_BACKEND_2" == "backend-2" ]; then
                                 NEW_BACKEND_1="backend-3"
                                 NEW_BACKEND_2="backend-4"
-                            else
+                            elif [ "\$CURRENT_BACKEND_1" == "backend-3" ] && [ "\$CURRENT_BACKEND_2" == "backend-4" ]; then
                                 NEW_BACKEND_1="backend-1"
                                 NEW_BACKEND_2="backend-2"
+                            else
+                                echo "현재 실행 중인 백엔드 컨테이너 상태가 예상과 다릅니다. 종료합니다."
+                                exit 1
                             fi
+
                             echo "새롭게 배포할 컨테이너: \$NEW_BACKEND_1, \$NEW_BACKEND_2"
 
                             echo "🚀 최신 백엔드 이미지 가져오기"
@@ -90,7 +94,7 @@ pipeline {
                             sleep 10
                             HEALTHY_1=\$(docker inspect --format='{{.State.Health.Status}}' \$NEW_BACKEND_1)
                             HEALTHY_2=\$(docker inspect --format='{{.State.Health.Status}}' \$NEW_BACKEND_2)
-                            
+
                             if [ "\$HEALTHY_1" != "healthy" ] || [ "\$HEALTHY_2" != "healthy" ]; then
                                 echo "❌ 새 컨테이너가 정상적으로 실행되지 않았습니다!"
                                 exit 1
@@ -103,6 +107,7 @@ pipeline {
                             sudo systemctl restart nginx
 
                             echo "🗑️ 기존 컨테이너 종료"
+                            # 기존 컨테이너 종료 (필요 시)
                             docker stop \$CURRENT_BACKEND_1 && docker rm \$CURRENT_BACKEND_1
                             docker stop \$CURRENT_BACKEND_2 && docker rm \$CURRENT_BACKEND_2
 
@@ -112,6 +117,7 @@ pipeline {
                             EOF
                             """
                         }
+
                     }
                 }
             }
