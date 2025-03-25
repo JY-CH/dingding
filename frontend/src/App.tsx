@@ -7,6 +7,7 @@ import DetailPage from './pages/DetailPage';
 import EditPage from './pages/EditPage';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
+import SearchPage from './pages/search/SearchPage';
 import './index.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/allsongs" element={<AllSongsPage />} />
         <Route path="/stream" element={<VideoStramingPage />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
