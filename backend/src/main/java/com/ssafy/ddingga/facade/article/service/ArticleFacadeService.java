@@ -9,15 +9,15 @@ import com.ssafy.ddingga.facade.article.dto.response.ArticleGetAllResponseDto;
 import com.ssafy.ddingga.facade.article.dto.response.ArticleSearchResponseDto;
 
 public interface ArticleFacadeService {
-	List<ArticleGetAllResponseDto> articlesGetAll();
+	List<ArticleGetAllResponseDto> allGetArticleList();
 
-	ArticleDetailResponseDto articleGet(int articleId);
+	ArticleDetailResponseDto getArticle(int articleId);
 
-	void articleCreate(int userId, ArticleCreateRequestDto request);
+	void createArticle(int userId, ArticleCreateRequestDto request);
 
-	void articleUpdate(int articleId, ArticleUpdateRequestDto request);
+	void updateArticle(int checkUserId, int articleId, ArticleUpdateRequestDto request);
 
-	void articleDelete(int articleId);
+	void deleteArticle(int checkUserId, int articleId);
 
-	List<ArticleSearchResponseDto> articleSearch(String keyword);
+	List<ArticleSearchResponseDto> searchArticleList(String keyword);
 }

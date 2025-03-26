@@ -1,6 +1,5 @@
 package com.ssafy.ddingga.facade.article.service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +23,8 @@ public class ArticleFacadeServiceImpl implements ArticleFacadeService {
 	private final UserService userService;
 
 	@Override
-	public List<ArticleGetAllResponseDto> articlesGetAll() {
-		List<Article> articles = articleService.allArticleList();
+	public List<ArticleGetAllResponseDto> allGetArticleList() {
+		List<Article> articles = articleService.allGetArticleList();
 		List<ArticleGetAllResponseDto> result = new ArrayList<>();
 
 		for (Article article : articles) {
@@ -46,7 +45,7 @@ public class ArticleFacadeServiceImpl implements ArticleFacadeService {
 	}
 
 	@Override
-	public ArticleDetailResponseDto articleGet(int articleId) {
+	public ArticleDetailResponseDto getArticle(int articleId) {
 		Article article = articleService.getArticle(articleId);
 		ArticleDetailResponseDto responseDto = ArticleDetailResponseDto.builder()
 			.articleId(article.getArticleId())
@@ -64,23 +63,24 @@ public class ArticleFacadeServiceImpl implements ArticleFacadeService {
 	}
 
 	@Override
-	public void articleCreate(int userId, ArticleCreateRequestDto request) {
+	public void createArticle(int userId, ArticleCreateRequestDto request) {
 		articleService.creatArticle(userId, request.getTitle(), request.getContent(), request.getCategory());
 	}
 
 	@Override
-	public void articleUpdate(int articleId, ArticleUpdateRequestDto request) {
-		articleService.updateArticle(articleId, request.getTitle(), request.getContent(), request.getCategory());
+	public void updateArticle(int checkUserId, int articleId, ArticleUpdateRequestDto request) {
+		articleService.updateArticle(checkUserId, articleId, request.getTitle(), request.getContent(),
+			request.getCategory());
 	}
 
 	@Override
-	public void articleDelete(int articleId) {
-		articleService.deleteArticle(articleId);
+	public void deleteArticle(int checkUserId, int articleId) {
+		articleService.deleteArticle(checkUserId, articleId);
 	}
 
 	@Override
-	public List<ArticleSearchResponseDto> articleSearch(String keyword) {
-		List<Article> articles= articleService.searchArticles(keyword);
+	public List<ArticleSearchResponseDto> searchArticleList(String keyword) {
+		List<Article> articles = articleService.searchArticles(keyword);
 		List<ArticleSearchResponseDto> result = new ArrayList<>();
 
 		for (Article article : articles) {

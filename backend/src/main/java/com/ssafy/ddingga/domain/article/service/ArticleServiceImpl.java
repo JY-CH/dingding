@@ -32,7 +32,7 @@ public class ArticleServiceImpl implements ArticleService {
 	private final UserService userService;
 
 	@Override
-	public List<Article> allArticleList() {
+	public List<Article> allGetArticleList() {
 		List<Article> articles = articleRepository.findAll();
 
 		return articles;
@@ -75,7 +75,7 @@ public class ArticleServiceImpl implements ArticleService {
 	}
 
 	@Override
-	public Article updateArticle(int articleId, String title, String content, String category) {
+	public Article updateArticle(int checkUserId, int articleId, String title, String content, String category) {
 		// 제목과 내용이 비어 있지 않은지 확인
 		if (title.trim().isEmpty() || content.trim().isEmpty()) {
 			throw new IllegalArgumentException("Title and content must not be empty.");
@@ -93,10 +93,13 @@ public class ArticleServiceImpl implements ArticleService {
 	}
 
 	@Override
-	public void deleteArticle(int articleId){
+	public void deleteArticle(int checkUserId, int articleId) {
 		// 먼저, 삭제하려는 article이 존재하는지 확인
 		Article article = articleRepository.findByArticleId(articleId)
 			.orElseThrow(() -> new NotFoundException("없는 게시글 id 입니다."));
+
+		if(checkUserId!=article.getUser().getUserId()){
+		}
 
 		// 해당 article이 존재하면 삭제
 		articleRepository.delete(article);
