@@ -12,3 +12,38 @@ export interface User {
     description: string;
     createdAt: Date;
   }
+
+export interface Song {
+  id: string;
+  title: string;
+  artist: string;
+  album: string;
+  cover: string;
+  audio: string;
+  duration: number;
+  plays: number;
+}
+
+export interface Playlist {
+  id: string;
+  title: string;
+  description: string;
+  cover: string;
+  songs: Song[];
+}
+
+export interface Artist {
+  id: string;
+  name: string;
+  image: string;
+  followers: number;
+  genres: string[];
+}
+
+export interface Category {
+  id: string;
+  title: string;
+  cover: string;
+  color: string;
+  count: number;
+}

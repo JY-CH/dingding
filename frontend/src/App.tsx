@@ -11,6 +11,8 @@ import SearchPage from './pages/SearchPage';
 import './index.css';
 
 function App() {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <BrowserRouter>
       <Routes>

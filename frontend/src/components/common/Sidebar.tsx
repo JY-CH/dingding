@@ -7,8 +7,12 @@ interface User {
   profileImage?: string;
 }
 
-const Sidebar: React.FC = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
+interface SidebarProps {
+  isExpanded: boolean;
+  onToggle: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
   const [activeItem, setActiveItem] = useState<number | null>(null);
   // 임시 유저 상태 (실제로는 전역 상태 관리나 context를 사용해야 함)
   const [user, setUser] = useState<User>({
@@ -66,8 +70,8 @@ const Sidebar: React.FC = () => {
       fixed top-0 left-0 h-screen bg-[#1E1E1E]
       transition-[width] duration-300 ease-in-out
       ${isExpanded ? 'w-64' : 'w-20'}
-    `}
-    >
+      z-50
+    `}>
       <div className="flex flex-col h-full">
         {/* 로그인/프로필 영역 */}
         <div className="p-4 border-b border-gray-800">
@@ -88,7 +92,7 @@ const Sidebar: React.FC = () => {
           ) : (
             <div className="h-10 flex items-center justify-center">
               <button
-                onClick={handleLogin}
+                onClick={() => navigate('/login')}
                 className={`
                   w-full h-8 rounded flex items-center justify-center
                   bg-amber-500 hover:bg-amber-600
@@ -96,7 +100,7 @@ const Sidebar: React.FC = () => {
                   ${isExpanded ? 'text-sm' : 'text-[10px]'}
                 `}
               >
-                {isExpanded ? '로그인' : '로그인'}
+                로그인
               </button>
             </div>
           )}
@@ -183,8 +187,8 @@ const Sidebar: React.FC = () => {
           )}
 
           {/* 토글 버튼 */}
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
+          <button 
+            onClick={onToggle}
             className="w-full h-10 flex items-center justify-center rounded
               bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white
               transition-colors"
