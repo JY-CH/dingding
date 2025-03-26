@@ -57,3 +57,7 @@ jwt:
 
 server:
   port: 8090
+
+springdoc:
+  swagger-ui:
+    persist-authorization: true

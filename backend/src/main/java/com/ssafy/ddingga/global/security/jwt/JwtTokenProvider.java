@@ -6,7 +6,7 @@ import java.util.Date;
 
 import org.springframework.stereotype.Component;
 
-import com.ssafy.ddingga.domain.user.entity.User;
+import com.ssafy.ddingga.domain.auth.entity.User;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.ssafy.ddingga.domain.article.entity.Article;
 import com.ssafy.ddingga.domain.article.repository.ArticleRepository;
-import com.ssafy.ddingga.domain.user.entity.User;
-import com.ssafy.ddingga.domain.user.service.UserService;
+import com.ssafy.ddingga.domain.auth.entity.User;
+import com.ssafy.ddingga.domain.auth.service.AuthService;
 import com.ssafy.ddingga.global.error.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class ArticleServiceImpl implements ArticleService {
 	 * final로 선언되며 생성자 주입으로 초기화됨
 	 */
 	private final ArticleRepository articleRepository;
-	private final UserService userService;
+	private final AuthService authService;
 
 	@Override
 	public List<Article> allGetArticleList() {
@@ -48,7 +48,7 @@ public class ArticleServiceImpl implements ArticleService {
 	@Override
 	public void creatArticle(int userId, String title, String content, String category) {
 		// userId를 통해 User 엔티티 조회
-		User user = userService.getUser(userId);  // userId로 User를 조회
+		User user = authService.getUser(userId);  // userId로 User를 조회
 
 		// User가 존재하지 않는 경우 예외 처리 (null 체크)
 		if (user == null) {

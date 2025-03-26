@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.ssafy.ddingga.domain.user.entity.User;
+import com.ssafy.ddingga.domain.auth.entity.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
