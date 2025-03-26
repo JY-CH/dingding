@@ -10,7 +10,7 @@ const SearchPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('all'); // 활성 탭 상태 타입 지정
 
   return (
-    <div className="min-h-screen bg-zinc-900">
+    <div className="p-8 min-h-screen bg-zinc-900">
       <SearchBar query={query} setQuery={setQuery} />
       <SearchTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       {query.trim() === '' ? (
