@@ -1,6 +1,5 @@
 package com.ssafy.ddingga.facade.user.dto.response;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class LogoutResponseDto {
-    private String message;
+	private String message;
 }
