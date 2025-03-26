@@ -98,9 +98,9 @@ public class JwtServiceImpl implements JwtService {
 
 	@Override
 	@Transactional
-	public void invalidateRefreshToken(String loginId) {
+	public void invalidateRefreshToken(Integer userId) {
 		// 사용자 ID로 유저 객체 조회
-		User user = userRepository.findByLoginId(loginId)
+		User user = userRepository.findByUserId(userId)
 			.orElseThrow(() -> new UserNotFoundException("사용자가 존재하지 않습니다"));
 
 		// 사용자의 리프레시토큰 조회

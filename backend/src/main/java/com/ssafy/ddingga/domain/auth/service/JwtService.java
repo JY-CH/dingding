@@ -13,9 +13,9 @@ public interface JwtService {
 
 	/**
 	 * 리프레시 토큰을 무효화하여 로그아웃 처리
-	 * @param loginID 사용자 ID
+	 * @param userId 사용자 ID
 	 */
-	void invalidateRefreshToken(String loginID);
+	void invalidateRefreshToken(Integer userId);
 
 }
 

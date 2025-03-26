@@ -217,7 +217,7 @@ public class AuthController {
 		request.setProfileImage(profileImage);
 
 		// 서비스 계층을 통해 사용자 정보 업데이트
-		AuthUpdateResponseDto response = authFacadeService.updateUserInfo(user.getLoginId(), request);
+		AuthUpdateResponseDto response = authFacadeService.updateUserInfo(user.getUserId(), request);
 
 		return ResponseEntity.ok(response);
 	}
@@ -229,12 +229,12 @@ public class AuthController {
 		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
 	})
 	@DeleteMapping("/delete")
-	public ResponseEntity<AuthDeleteResponseDto> deleteUseR(
+	public ResponseEntity<AuthDeleteResponseDto> deleteUser(
 		@AuthenticationPrincipal User user
 	) {
 
 		//회원 탈퇴처리
-		AuthDeleteResponseDto response = authFacadeService.deleteUser(user.getLoginId());
+		AuthDeleteResponseDto response = authFacadeService.deleteUser(user.getUserId());
 
 		//리프레시 토큰 쿠키 제거
 		ResponseCookie cookie = ResponseCookie.from("refreshToken", "")

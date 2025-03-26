@@ -104,10 +104,10 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	@Transactional
-	public User updateUser(String loginId, String username, MultipartFile profileImage) {
+	public User updateUser(Integer userId, String username, MultipartFile profileImage) {
 
 		// 1. 사용자 찾기
-		User user = userRepository.findByLoginId(loginId)
+		User user = userRepository.findByUserId(userId)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
 		// 2.이름 업데이트(이름이 제공된 경우에만)
@@ -157,9 +157,9 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	@Transactional
-	public User deleteUser(String loginId) {
+	public User deleteUser(Integer userId) {
 
-		User user = userRepository.findByLoginId(loginId)
+		User user = userRepository.findByUserId(userId)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
 		if (user.getIsDeleted()) {
