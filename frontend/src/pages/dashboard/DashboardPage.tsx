@@ -1,10 +1,11 @@
 // src/pages/Dashboard.tsx
 import React from 'react';
-import ProfileTile from '../components/dashboard/ProfileTile';
-import StatsTile from '../components/dashboard/StatsTile';
-import BarChartTile from '../components/dashboard/BarChartTile';
-import LineChartTile from '../components/dashboard/LineChartTile';
-import SongListTile from '../components/dashboard/SongListTile';
+
+import BarChartTile from '@/components/dashboard/BarChartTile';
+import LineChartTile from '@/components/dashboard/LineChartTile';
+import ProfileTile from '@/components/dashboard/ProfileTile';
+import SongListTile from '@/components/dashboard/SongListTile';
+import StatsTile from '@/components/dashboard/StatsTile';
 
 const profileData = {
   name: '임재열',

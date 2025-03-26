@@ -1,26 +1,31 @@
-import { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+import AllSongsPage from './pages/dashboard/AllSongPage';
+import DashboardPage from './pages/dashboard/DashboardPage';
+import VideoStramingPage from './pages/dashboard/VideoStramingPage';
 import DetailPage from './pages/DetailPage';
 import EditPage from './pages/EditPage';
+import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
-import DashboardPage from './pages/DashboardPage';
-import MainPage from './pages/MainPage';
-import Sidebar from './components/common/Sidebar';
-import AppContent from './components/layout/AppContent';
+import SearchPage from './pages/SearchPage';
 import './index.css';
 
 function App() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="flex h-screen">
-      <Sidebar 
-        isExpanded={isExpanded} 
-        onToggle={() => setIsExpanded(!isExpanded)} 
-      />
-      <AppContent isExpanded={isExpanded} />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/detail/:id" element={<DetailPage />} />
+        <Route path="/edit/:id" element={<EditPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/allsongs" element={<AllSongsPage />} />
+        <Route path="/stream" element={<VideoStramingPage />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
