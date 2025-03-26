@@ -49,10 +49,10 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
               <h3 className="text-xl font-bold text-white">{name}</h3>
               <p className="text-sm text-gray-400 mt-1">{email}</p>
               <div className="flex items-center gap-2 mt-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-amber-500 text-white">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-zinc-700 text-white">
                   🎸
                 </div>
-                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-amber-500 text-white">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-zinc-700 text-white">
                   🏆
                 </div>
                 <span className="text-lg font-semibold text-white">{rank}</span>
@@ -63,7 +63,7 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
           {/* 내 정보 수정 버튼 */}
           <div className="flex justify-end mt-4">
             <button
-              className="px-4 py-2 bg-amber-500 text-white text-sm font-bold rounded-md shadow hover:bg-orange-600 transition-colors"
+              className="px-4 py-2 bg-amber-500 text-white text-sm font-bold rounded-md shadow hover:bg-amber-600 transition-colors"
               onClick={() => setIsModalOpen(true)}
             >
               내 정보 수정

@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { Dialog } from "@headlessui/react";
-import { X, Camera } from "lucide-react";
+import { Dialog } from '@headlessui/react';
+import { X, Camera } from 'lucide-react';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -11,7 +11,13 @@ interface ProfileModalProps {
   profileImageUrl: string;
 }
 
-const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, name: initialName, email, profileImageUrl: initialProfileImage }) => {
+const ProfileModal: React.FC<ProfileModalProps> = ({
+  isOpen,
+  onClose,
+  name: initialName,
+  email,
+  profileImageUrl: initialProfileImage,
+}) => {
   const [name, setName] = useState(initialName);
   const [profileImage, setProfileImage] = useState(initialProfileImage);
 
@@ -30,7 +36,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, name: init
     >
       <Dialog.Panel className="bg-zinc-800 rounded-2xl shadow-lg w-full max-w-md p-6 relative">
         {/* 닫기 버튼 */}
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-200">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
+        >
           <X size={20} />
         </button>
 
@@ -45,7 +54,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, name: init
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover border-4 border-zinc-700"
             />
-            <label className="absolute bottom-0 right-0 p-1 bg-amber-500 rounded-full cursor-pointer hover:bg-amber-600 transition-colors">
+            <label className="absolute bottom-0 right-0 p-1 bg-zinc-600 rounded-full cursor-pointer hover:bg-amber-500 transition-colors">
               <Camera size={20} className="text-white" />
               <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
             </label>
