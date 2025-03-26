@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 interface FeaturedItem {
   id: number;
@@ -22,46 +22,46 @@ const FeaturedCarousel = () => {
   const featuredItems: FeaturedItem[] = [
     {
       id: 1,
-      title: "Story Time",
-      artist: "Luddy Dave",
+      title: 'Story Time',
+      artist: 'Luddy Dave',
       description: "L'heure du Conte - 새로운 앨범 발매",
-      imageUrl: "/images/featured/story-time-banner.jpg",
-      albumCover: "/images/featured/story-time-cover.jpg",
-      gradient: "from-blue-600 via-blue-800 to-blue-900",
+      imageUrl: '/images/featured/story-time-banner.jpg',
+      albumCover: '/images/featured/story-time-cover.jpg',
+      gradient: 'from-blue-600 via-blue-800 to-blue-900',
       type: 'ALBUM',
       stats: {
         likes: 24680,
-        plays: 158900
-      }
+        plays: 158900,
+      },
     },
     {
       id: 2,
-      title: "Midnight Melodies",
-      artist: "Sarah Moon",
-      description: "깊어가는 밤, 감성을 담은 어쿠스틱 기타",
-      imageUrl: "/images/featured/story-time-banner.jpg",
-      albumCover: "/images/featured/story-time-cover.jpg",
-      gradient: "from-purple-600 via-purple-800 to-purple-900",
+      title: 'Midnight Melodies',
+      artist: 'Sarah Moon',
+      description: '깊어가는 밤, 감성을 담은 어쿠스틱 기타',
+      imageUrl: '/images/featured/story-time-banner.jpg',
+      albumCover: '/images/featured/story-time-cover.jpg',
+      gradient: 'from-purple-600 via-purple-800 to-purple-900',
       type: 'PLAYLIST',
       stats: {
         likes: 18920,
-        plays: 142500
-      }
+        plays: 142500,
+      },
     },
     {
       id: 3,
-      title: "Guitar Dreams",
-      artist: "Alex Rivers",
-      description: "지친 하루를 위로하는 따뜻한 선율",
-      imageUrl: "/images/featured/story-time-banner.jpg",
-      albumCover: "/images/featured/story-time-cover.jpg",
-      gradient: "from-emerald-600 via-emerald-800 to-emerald-900",
+      title: 'Guitar Dreams',
+      artist: 'Alex Rivers',
+      description: '지친 하루를 위로하는 따뜻한 선율',
+      imageUrl: '/images/featured/story-time-banner.jpg',
+      albumCover: '/images/featured/story-time-cover.jpg',
+      gradient: 'from-emerald-600 via-emerald-800 to-emerald-900',
       type: 'ALBUM',
       stats: {
         likes: 31240,
-        plays: 203400
-      }
-    }
+        plays: 203400,
+      },
+    },
   ];
 
   useEffect(() => {
@@ -86,7 +86,7 @@ const FeaturedCarousel = () => {
   return (
     <div className="relative h-[400px] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900">
       {featuredItems.map((item, index) => (
-        <div 
+        <div
           key={item.id}
           className={`
             absolute inset-0 w-full h-full
@@ -98,41 +98,54 @@ const FeaturedCarousel = () => {
           <div className="absolute inset-0 flex">
             {/* 왼쪽 콘텐츠 영역 */}
             <div className="w-2/3 p-12 pl-16 flex flex-col justify-center relative z-10">
-              <span className={`
+              <span
+                className={`
                 text-sm font-medium text-amber-400 mb-4
                 transition-all duration-700 delay-100
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-              `}>
-                {item.type === 'ALBUM' ? '새로운 앨범' : 
-                 item.type === 'PLAYLIST' ? '추천 플레이리스트' : '아티스트 특집'}
+              `}
+              >
+                {item.type === 'ALBUM'
+                  ? '새로운 앨범'
+                  : item.type === 'PLAYLIST'
+                    ? '추천 플레이리스트'
+                    : '아티스트 특집'}
               </span>
-              <h2 className={`
+              <h2
+                className={`
                 text-4xl font-bold text-white mb-5
                 transition-all duration-700 delay-200
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-              `}>
+              `}
+              >
                 {item.title}
               </h2>
-              <p className={`
+              <p
+                className={`
                 text-xl text-white/80 mb-4
                 transition-all duration-700 delay-300
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-              `}>
+              `}
+              >
                 {item.artist}
               </p>
-              <p className={`
+              <p
+                className={`
                 text-base text-white/60 mb-8 max-w-lg
                 transition-all duration-700 delay-400
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-              `}>
+              `}
+              >
                 {item.description}
               </p>
-              
-              <div className={`
+
+              <div
+                className={`
                 flex items-center gap-8
                 transition-all duration-700 delay-500
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-              `}>
+              `}
+              >
                 <button className="px-8 py-3.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold transition-colors">
                   지금 듣기
                 </button>
@@ -156,8 +169,8 @@ const FeaturedCarousel = () => {
             {/* 오른쪽 이미지 영역 */}
             <div className="w-1/3 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-zinc-900/80 to-transparent z-10" />
-              <img 
-                src={item.imageUrl} 
+              <img
+                src={item.imageUrl}
                 alt={item.title}
                 className={`
                   absolute inset-0 w-full h-full object-cover
@@ -193,4 +206,4 @@ const FeaturedCarousel = () => {
   );
 };
 
-export default FeaturedCarousel; 
+export default FeaturedCarousel;

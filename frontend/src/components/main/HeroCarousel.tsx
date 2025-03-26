@@ -13,12 +13,12 @@ interface HeroSlide {
 const heroSlides: HeroSlide[] = [
   {
     id: 1,
-    title: "Story Time",
-    artist: "Luddy Dave",
+    title: 'Story Time',
+    artist: 'Luddy Dave',
     description: "L'heure du Conte - 새로운 앨범 발매",
-    image: "/images/featured/story-time-banner.jpg",
+    image: '/images/featured/story-time-banner.jpg',
     likes: 24680,
-    plays: 158900
+    plays: 158900,
   },
   // 추가 슬라이드 데이터...
 ];
@@ -47,27 +47,19 @@ const HeroCarousel: React.FC = () => {
 
   return (
     <div className="relative h-[500px] overflow-hidden">
-      <div 
+      <div
         className="absolute inset-0 flex transition-transform duration-700 ease-out"
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         onTransitionEnd={() => setIsTransitioning(false)}
       >
-        {heroSlides.map((slide, index) => (
+        {heroSlides.map((slide) => (
           <div key={slide.id} className="relative w-full flex-shrink-0">
             <div className="absolute inset-0 flex">
               <div className="w-2/3 p-10 flex flex-col justify-center relative z-10">
-                <span className="text-sm font-medium text-amber-400 mb-2">
-                  새로운 앨범
-                </span>
-                <h2 className="text-4xl font-bold text-white mb-3">
-                  {slide.title}
-                </h2>
-                <p className="text-xl text-white/80 mb-2">
-                  {slide.artist}
-                </p>
-                <p className="text-base text-white/60 mb-6 max-w-lg">
-                  {slide.description}
-                </p>
+                <span className="text-sm font-medium text-amber-400 mb-2">새로운 앨범</span>
+                <h2 className="text-4xl font-bold text-white mb-3">{slide.title}</h2>
+                <p className="text-xl text-white/80 mb-2">{slide.artist}</p>
+                <p className="text-base text-white/60 mb-6 max-w-lg">{slide.description}</p>
                 <div className="flex items-center gap-6">
                   <button className="px-8 py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold transition-colors">
                     지금 듣기
@@ -90,8 +82,8 @@ const HeroCarousel: React.FC = () => {
               </div>
               <div className="w-1/3 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-zinc-900/80 to-transparent z-10" />
-                <img 
-                  alt={slide.title} 
+                <img
+                  alt={slide.title}
                   className="absolute inset-0 w-full h-full object-cover"
                   src={slide.image}
                 />
@@ -124,4 +116,4 @@ const HeroCarousel: React.FC = () => {
   );
 };
 
-export default HeroCarousel; 
+export default HeroCarousel;

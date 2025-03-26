@@ -1,9 +1,10 @@
 import React from 'react';
 
-import Navigation from './Navigation';
 import { useLocation } from 'react-router-dom';
-import MusicPlayer from '../common/MusicPlayer';
+
+import Navigation from './Navigation';
 import { mockSongs } from '../../data/mockData';
+import MusicPlayer from '../common/MusicPlayer';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -22,9 +23,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </div>
       </header>
       <main className="flex-grow">
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          {children}
-        </div>
+        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">{children}</div>
       </main>
       <footer className="bg-white shadow mt-auto py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

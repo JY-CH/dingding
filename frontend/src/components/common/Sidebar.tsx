@@ -54,10 +54,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
     navigate(path);
   };
 
-  const handleLogin = () => {
-    // 실제 로그인 로직으로 대체 필요
-    setUser({ isLoggedIn: true, profileImage: 'https://via.placeholder.com/40' });
-  };
+  // const handleLogin = () => {
+  //   // 실제 로그인 로직으로 대체 필요
+  //   setUser({ isLoggedIn: true, profileImage: 'https://via.placeholder.com/40' });
+  // };
 
   const handleLogout = () => {
     setUser({ isLoggedIn: false });
@@ -71,7 +71,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
       transition-[width] duration-300 ease-in-out
       ${isExpanded ? 'w-64' : 'w-20'}
       z-50
-    `}>
+    `}
+    >
       <div className="flex flex-col h-full">
         {/* 로그인/프로필 영역 */}
         <div className="p-4 border-b border-gray-800">
@@ -187,7 +188,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
           )}
 
           {/* 토글 버튼 */}
-          <button 
+          <button
             onClick={onToggle}
             className="w-full h-10 flex items-center justify-center rounded
               bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white

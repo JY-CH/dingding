@@ -1,14 +1,15 @@
 import { useLocation } from 'react-router-dom';
 import { Routes, Route } from 'react-router-dom';
-import HomePage from '../../pages/HomePage';
+
+import { mockSongs } from '../../data/mockData';
+import DashboardPage from '../../pages/dashboard/DashboardPage';
 import DetailPage from '../../pages/DetailPage';
 import EditPage from '../../pages/EditPage';
-import NotFoundPage from '../../pages/NotFoundPage';
-import DashboardPage from '../../pages/DashboardPage';
-import MainPage from '../../pages/MainPage';
+import HomePage from '../../pages/HomePage';
 import LoginPage from '../../pages/LoginPage';
+import MainPage from '../../pages/MainPage';
+import NotFoundPage from '../../pages/NotFoundPage';
 import MusicPlayer from '../common/MusicPlayer';
-import { mockSongs } from '../../data/mockData';
 
 interface AppContentProps {
   isExpanded: boolean;
@@ -19,11 +20,13 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
   const hidePlayerPaths = ['/login', '/signup'];
 
   return (
-    <div className={`
+    <div
+      className={`
       flex-1 flex flex-col
       transition-[margin] duration-300 ease-in-out
       ${isExpanded ? 'ml-64' : 'ml-20'}
-    `}>
+    `}
+    >
       <div className="flex-1 overflow-auto pb-20">
         <Routes>
           <Route path="/" element={<MainPage />} />
@@ -42,4 +45,4 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
   );
 };
 
-export default AppContent; 
+export default AppContent;
