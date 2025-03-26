@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ssafy.ddingga.domain.user.entity.User;
+import com.ssafy.ddingga.domain.auth.entity.User;
 import com.ssafy.ddingga.facade.article.dto.request.ArticleCreateRequestDto;
 import com.ssafy.ddingga.facade.article.dto.request.ArticleUpdateRequestDto;
 import com.ssafy.ddingga.facade.article.dto.response.ArticleDetailResponseDto;
