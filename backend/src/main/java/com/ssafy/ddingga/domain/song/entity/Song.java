@@ -1,6 +1,5 @@
 package com.ssafy.ddingga.domain.song.entity;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,10 +13,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Song {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer songId;
-    private String songTitle;
-    private String songImage;
-    private String songWriter;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer songId;
+	private String songTitle;
+	private String songImage;
+	private String songWriter;
 }
