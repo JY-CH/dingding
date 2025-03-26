@@ -3,6 +3,7 @@ package com.ssafy.ddingga.domain.article.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.ddingga.domain.article.entity.Article;
@@ -82,6 +83,10 @@ public class ArticleServiceImpl implements ArticleService {
 		Article updatedArticle = articleRepository.findByArticleId(articleId)
 			.orElseThrow(() -> new NotFoundException("없는 게시글 id 입니다."));
 
+		if (checkUserId != updatedArticle.getUser().getUserId()) {
+			throw new AccessDeniedException("접근권한이 없습니다.");
+		}
+
 		updatedArticle.setTitle(title);
 		updatedArticle.setContent(content);
 		updatedArticle.setCategory(category);
@@ -98,6 +103,7 @@ public class ArticleServiceImpl implements ArticleService {
 			.orElseThrow(() -> new NotFoundException("없는 게시글 id 입니다."));
 
 		if (checkUserId != article.getUser().getUserId()) {
+			throw new AccessDeniedException("접근권한이 없습니다.");
 		}
 
 		// 해당 article이 존재하면 삭제
