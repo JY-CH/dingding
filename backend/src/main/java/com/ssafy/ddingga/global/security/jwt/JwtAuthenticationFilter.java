@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.ssafy.ddingga.domain.auth.repository.UserRepository;
+import com.ssafy.ddingga.domain.auth.repository.AuthRepository;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtTokenProvider jwtTokenProvider;
-	private final UserRepository userRepository;
+	private final AuthRepository authRepository;
 	private final JwtProperties jwtProperties;
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				Integer userId = jwtTokenProvider.getUserId(token);
 				String loginId = jwtTokenProvider.getLoginId(token);
 
-				userRepository.findByUserId(userId)
+				authRepository.findByUserId(userId)
 					.ifPresent(user -> {
 						UsernamePasswordAuthenticationToken authentication =
 							new UsernamePasswordAuthenticationToken(

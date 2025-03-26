@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import com.ssafy.ddingga.domain.auth.entity.AuthProvider;
 import com.ssafy.ddingga.domain.auth.entity.User;
 import com.ssafy.ddingga.domain.auth.entity.UserSocial;
-import com.ssafy.ddingga.domain.auth.repository.UserRepository;
-import com.ssafy.ddingga.domain.auth.repository.UserSocialRepository;
+import com.ssafy.ddingga.domain.auth.repository.AuthRepository;
+import com.ssafy.ddingga.domain.auth.repository.AuthSocialRepository;
 import com.ssafy.ddingga.facade.auth.dto.response.TokenResponseDto;
 import com.ssafy.ddingga.global.error.exception.InvalidTokenException;
 import com.ssafy.ddingga.global.error.exception.TokenExpiredException;
@@ -29,8 +29,8 @@ import lombok.RequiredArgsConstructor;
 public class JwtServiceImpl implements JwtService {
 
 	private final JwtTokenProvider jwtTokenProvider;
-	private final UserRepository userRepository;
-	private final UserSocialRepository userSocialRepository;
+	private final AuthRepository authRepository;
+	private final AuthSocialRepository authSocialRepository;
 	private final JwtProperties jwtProperties;
 
 	@Override
@@ -51,7 +51,7 @@ public class JwtServiceImpl implements JwtService {
 		// 기존 소셜 정보 찾기
 		// 사용자가 이미 로그인 한 적이 있는지 확인한다는뜻
 		// 소셜로그인은 차후 구현할 예정이지만 확장성을 위해 컬럼존재
-		UserSocial userSocial = userSocialRepository.findByUser(user)
+		UserSocial userSocial = authSocialRepository.findByUser(user)
 			.orElse(UserSocial.builder()
 				.user(user)
 				.provider(provider)
@@ -61,7 +61,7 @@ public class JwtServiceImpl implements JwtService {
 		// 리프레시토큰 업데이트
 		userSocial.setRefreshToken(refreshToken);
 		userSocial.setTokenExpiryDate(tokenExpiryDate);
-		userSocialRepository.save(userSocial);
+		authSocialRepository.save(userSocial);
 
 		return new TokenResponseDto(accessToken, refreshToken);
 	}
@@ -72,7 +72,7 @@ public class JwtServiceImpl implements JwtService {
 	@Override
 	@Transactional
 	public TokenResponseDto refreshToken(String refreshToken) {
-		UserSocial userSocial = userSocialRepository.findByRefreshToken(refreshToken)
+		UserSocial userSocial = authSocialRepository.findByRefreshToken(refreshToken)
 			.orElseThrow(() -> new InvalidTokenException("유효하지 않은 리프레시 토큰입니다."));
 
 		if (userSocial.getTokenExpiryDate().isBefore(LocalDateTime.now())) {
@@ -90,7 +90,7 @@ public class JwtServiceImpl implements JwtService {
 			.plusSeconds(jwtProperties.getRefreshTokenExpiration());
 		userSocial.setRefreshToken(newRefreshToken);
 		userSocial.setTokenExpiryDate(tokenExpirationDate);
-		userSocialRepository.save(userSocial);
+		authSocialRepository.save(userSocial);
 
 		return new TokenResponseDto(newAccessToken, newRefreshToken);
 
@@ -100,16 +100,16 @@ public class JwtServiceImpl implements JwtService {
 	@Transactional
 	public void invalidateRefreshToken(Integer userId) {
 		// 사용자 ID로 유저 객체 조회
-		User user = userRepository.findByUserId(userId)
+		User user = authRepository.findByUserId(userId)
 			.orElseThrow(() -> new UserNotFoundException("사용자가 존재하지 않습니다"));
 
 		// 사용자의 리프레시토큰 조회
-		UserSocial userSocial = userSocialRepository.findByUser(user)
+		UserSocial userSocial = authSocialRepository.findByUser(user)
 			.orElseThrow(() -> new UserSocialNotfoundException("사용자 인증 정보가 존재하지 않습니다"));
 
 		//리프레시 토큰 무효화(null로 설정)
 		userSocial.setRefreshToken(null);
 		userSocial.setTokenExpiryDate(null);
-		userSocialRepository.save(userSocial);
+		authSocialRepository.save(userSocial);
 	}
 }

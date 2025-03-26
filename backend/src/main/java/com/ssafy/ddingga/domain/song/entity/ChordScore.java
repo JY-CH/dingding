@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
-public class Chord {
+public class ChordScore {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer chordId;

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ssafy.ddingga.domain.auth.entity.User;
-import com.ssafy.ddingga.domain.auth.repository.UserRepository;
+import com.ssafy.ddingga.domain.auth.repository.AuthRepository;
 import com.ssafy.ddingga.global.error.exception.DuplicateException;
 import com.ssafy.ddingga.global.error.exception.FileUploadException;
 import com.ssafy.ddingga.global.error.exception.InvalidPasswordException;
@@ -39,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
 	 * 사용자 데이터 베이스 접근을 위한 레포지토리
 	 * final로 선언되며 생성자 주입으로 초기화됨
 	 */
-	private final UserRepository userRepository;
+	private final AuthRepository authRepository;
 
 	/**
 	 * 비밀번호 암호화를 위한 인코더
@@ -70,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
 	public User registerUser(String loginId, String password, String username) {
 
 		// 중복 검사
-		if (userRepository.existsByLoginId(loginId)) {
+		if (authRepository.existsByLoginId(loginId)) {
 			throw new DuplicateException("이미 사용중인 아이디 입니다.");
 		}
 		// entity 생성
@@ -85,12 +85,12 @@ public class AuthServiceImpl implements AuthService {
 			.build();
 
 		// 저장
-		return userRepository.save(user);
+		return authRepository.save(user);
 	}
 
 	@Override
 	public User authenticateUser(String loginId, String password) {
-		User user = userRepository.findByLoginId(loginId)
+		User user = authRepository.findByLoginId(loginId)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다,.."));
 
 		if (!passwordEncoder.matches(password, user.getPassword())) {
@@ -107,7 +107,7 @@ public class AuthServiceImpl implements AuthService {
 	public User updateUser(Integer userId, String username, MultipartFile profileImage) {
 
 		// 1. 사용자 찾기
-		User user = userRepository.findByUserId(userId)
+		User user = authRepository.findByUserId(userId)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
 		// 2.이름 업데이트(이름이 제공된 경우에만)
@@ -152,14 +152,14 @@ public class AuthServiceImpl implements AuthService {
 		}
 
 		// 변경사항 저장
-		return userRepository.save(user);
+		return authRepository.save(user);
 	}
 
 	@Override
 	@Transactional
 	public User deleteUser(Integer userId) {
 
-		User user = userRepository.findByUserId(userId)
+		User user = authRepository.findByUserId(userId)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
 		if (user.getIsDeleted()) {
@@ -168,12 +168,12 @@ public class AuthServiceImpl implements AuthService {
 
 		user.setIsDeleted(true);
 
-		return userRepository.save(user);
+		return authRepository.save(user);
 	}
 
 	@Override
 	public User getUser(int userId) {
-		User user = userRepository.findByUserId(userId)
+		User user = authRepository.findByUserId(userId)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 		;
 		return user;
