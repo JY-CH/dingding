@@ -5,47 +5,47 @@ const ExploreSection = () => {
 
   const categories = [
     {
-      name: 'Acoustic',
-      korName: '어쿠스틱',
-      icon: '🎸',
+      name: 'Pop',
+      korName: '팝',
+      icon: '🎵',
       gradient: 'from-amber-400/40 via-orange-500/40 to-rose-600/40',
       glowColor: 'amber-500',
       count: 230,
-      description: '감성적인 어쿠스틱 기타 연주',
-      popularTags: ['핑거스타일', '스트러밍', '발라드'],
+      description: '현대적인 팝 기타 스타일',
+      popularTags: ['코드진행', '스트러밍', '리듬'],
       activeUsers: 1420
     },
     {
-      name: 'Electric',
-      korName: '일렉트릭',
-      icon: '⚡',
+      name: 'Acoustic',
+      korName: '어쿠스틱',
+      icon: '🪕',
       gradient: 'from-violet-400/40 via-purple-500/40 to-indigo-600/40',
       glowColor: 'violet-500',
       count: 185,
-      description: '파워풀한 일렉트릭 기타 사운드',
-      popularTags: ['리프', '솔로', '디스토션'],
+      description: '감성적인 어쿠스틱 기타 연주',
+      popularTags: ['핑거스타일', '스트러밍', '발라드'],
       activeUsers: 890
     },
     {
-      name: 'Classic',
-      korName: '클래식',
-      icon: '🎼',
+      name: 'Folk',
+      korName: '포크',
+      icon: '🌿',
       gradient: 'from-sky-400/40 via-blue-500/40 to-cyan-600/40',
       glowColor: 'sky-500',
       count: 142,
-      description: '우아한 클래식 기타의 세계',
-      popularTags: ['아르페지오', '클래식', '타르레가'],
+      description: '따뜻한 포크 기타 사운드',
+      popularTags: ['포크송', '핑거피킹', '하모니'],
       activeUsers: 650
     },
     {
-      name: 'Fingerstyle',
-      korName: '핑거스타일',
-      icon: '✨',
+      name: 'Country',
+      korName: '컨트리',
+      icon: '🤠',
       gradient: 'from-emerald-400/40 via-teal-500/40 to-green-600/40',
       glowColor: 'emerald-500',
       count: 167,
-      description: '섬세한 핑거스타일 테크닉',
-      popularTags: ['퍼커시브', '타핑', '하모닉스'],
+      description: '정통 컨트리 기타 스타일',
+      popularTags: ['컨트리', '피킹', '블루스'],
       activeUsers: 980
     }
   ];

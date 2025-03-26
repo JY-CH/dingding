@@ -94,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
           ) : (
             <div className="h-10 flex items-center justify-center">
               <button
-                onClick={handleLogin}
+                onClick={() => navigate('/login')}
                 className={`
                   w-full h-8 rounded flex items-center justify-center
                   bg-amber-500 hover:bg-amber-600
@@ -102,7 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
                   ${isExpanded ? 'text-sm' : 'text-[10px]'}
                 `}
               >
-                {isExpanded ? '로그인' : '로그인'}
+                로그인
               </button>
             </div>
           )}

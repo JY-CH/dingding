@@ -84,7 +84,7 @@ const FeaturedCarousel = () => {
   };
 
   return (
-    <div className="relative h-[300px] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900">
+    <div className="relative h-[400px] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900">
       {featuredItems.map((item, index) => (
         <div 
           key={item.id}
@@ -97,9 +97,9 @@ const FeaturedCarousel = () => {
         >
           <div className="absolute inset-0 flex">
             {/* 왼쪽 콘텐츠 영역 */}
-            <div className="w-2/3 p-10 flex flex-col justify-center relative z-10">
+            <div className="w-2/3 p-12 pl-16 flex flex-col justify-center relative z-10">
               <span className={`
-                text-sm font-medium text-amber-400 mb-2
+                text-sm font-medium text-amber-400 mb-4
                 transition-all duration-700 delay-100
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
               `}>
@@ -107,21 +107,21 @@ const FeaturedCarousel = () => {
                  item.type === 'PLAYLIST' ? '추천 플레이리스트' : '아티스트 특집'}
               </span>
               <h2 className={`
-                text-4xl font-bold text-white mb-3
+                text-4xl font-bold text-white mb-5
                 transition-all duration-700 delay-200
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
               `}>
                 {item.title}
               </h2>
               <p className={`
-                text-xl text-white/80 mb-2
+                text-xl text-white/80 mb-4
                 transition-all duration-700 delay-300
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
               `}>
                 {item.artist}
               </p>
               <p className={`
-                text-base text-white/60 mb-6 max-w-lg
+                text-base text-white/60 mb-8 max-w-lg
                 transition-all duration-700 delay-400
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
               `}>
@@ -129,14 +129,14 @@ const FeaturedCarousel = () => {
               </p>
               
               <div className={`
-                flex items-center gap-6
+                flex items-center gap-8
                 transition-all duration-700 delay-500
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
               `}>
-                <button className="px-8 py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold transition-colors">
+                <button className="px-8 py-3.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold transition-colors">
                   지금 듣기
                 </button>
-                <div className="flex items-center gap-4 text-sm text-white/60">
+                <div className="flex items-center gap-6 text-sm text-white/60">
                   <span className="flex items-center gap-1">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />

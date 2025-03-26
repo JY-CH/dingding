@@ -1,13 +1,19 @@
 import React from 'react';
 import Navigation from './Navigation';
+import { useLocation } from 'react-router-dom';
+import MusicPlayer from '../common/MusicPlayer';
+import { mockSongs } from '../../data/mockData';
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const location = useLocation();
+  const hidePlayerPaths = ['/login', '/signup'];
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col overflow-hidden">
       <Navigation />
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -24,6 +30,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <p className="text-center text-gray-500">© 2025 ThingThing App</p>
         </div>
       </footer>
+      {!hidePlayerPaths.includes(location.pathname) && (
+        <MusicPlayer songs={mockSongs} isExpanded={false} />
+      )}
     </div>
   );
 };
