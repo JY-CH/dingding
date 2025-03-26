@@ -79,7 +79,7 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
 
       {/* 반응형 라인 차트 */}
       <ResponsiveContainer width="100%" height={250}>
-        <LineChart data={data} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
+        <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
           <XAxis
             dataKey="day"
@@ -93,9 +93,16 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
             tickLine={false}
           />
           <Tooltip
-            contentStyle={{ backgroundColor: '#1F2937', border: 'none' }}
-            labelStyle={{ color: '#FBBF24' }}
-            itemStyle={{ color: '#FBBF24' }}
+            contentStyle={{
+              backgroundColor: 'rgba(251, 191, 36, 0.9)', // 노란색 배경
+              color: '#1F2937', // 글자 색 어두운 회색
+              borderRadius: '8px', // 둥근 모서리
+              border: 'none', // 테두리 제거
+              padding: '10px', // 내부 여백 추가
+              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', // 가벼운 그림자
+            }}
+            labelStyle={{ fontWeight: 'bold', color: '#374151' }} // 레이블 스타일
+            itemStyle={{ color: '#1F2937' }} // 데이터 항목 스타일
           />
 
           {/* 연습 모드 라인 */}

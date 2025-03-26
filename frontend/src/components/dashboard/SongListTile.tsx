@@ -18,7 +18,9 @@ interface SongListTileProps {
 
 const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
   return (
-    <div className="bg-zinc-800 rounded-lg p-6 shadow-md flex flex-col">
+    <div className="bg-zinc-800 rounded-lg p-6 shadow-md flex flex-col h-[25.4rem]">
+      {' '}
+      {/* 높이를 살짝 늘림 */}
       {/* 헤더 부분 */}
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold text-white">{title}</h3>
@@ -30,15 +32,13 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
           모두 보기 &gt;
         </Link>
       </div>
-
       {/* 컬럼 헤더 */}
       <div className="grid grid-cols-5 text-xs text-gray-400 pb-2 border-b border-zinc-700 mb-2">
         <div className="col-span-2 font-medium">노래 제목</div>
-        <div className="font-medium text-right pr-4">재생 시간</div>
-        <div className="font-medium text-right pr-3">점수</div>
+        <div className="font-medium text-right">재생 시간</div>
+        <div className="font-medium text-right">점수</div>
         <div className="font-medium text-right pr-4">영상</div>
       </div>
-
       {/* 스크롤 가능한 노래 목록 */}
       <div className="overflow-y-auto flex-grow pr-1">
         {songs.map((song, index) => (
@@ -60,7 +60,7 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
             </div>
             <div className="text-sm text-gray-400 text-right">{song.duration}</div>
             <div className="text-amber-500 font-medium text-right">{song.score}</div>
-            <div className="text-right">
+            <div className="text-right pr-2">
               <button className="bg-zinc-700 hover:bg-amber-500 p-2 rounded-full text-gray-400 hover:text-white transition-colors">
                 <Play size={16} />
               </button>

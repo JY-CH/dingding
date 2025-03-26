@@ -18,28 +18,44 @@ const VideoStreamingPage: React.FC = () => {
   const location = useLocation();
   const state = location.state as LocationState;
 
-  const song = state?.song || {
-    title: 'Unknown Song',
-    artist: 'Unknown Artist',
-    thumbnail: 'src/assets/노래.jpg',
-  };
   const videoUrl = state?.videoUrl || 'src/assets/sample-video.mp4';
 
   return (
-    <div className="bg-zinc-900 min-h-screen flex flex-col">
-      <button onClick={() => navigate(-1)} className="text-orange-500 hover:text-orange-600 p-4">
+    <div className="bg-zinc-900 min-h-screen flex flex-col px-8 py-6">
+      {/* 뒤로가기 버튼 */}
+      <button
+        onClick={() => navigate(-1)}
+        className="text-amber-500 hover:text-amber-600 mb-4 self-start"
+      >
         뒤로가기
       </button>
-      <div className="flex-grow flex justify-center items-center">
-        <div className="w-full max-w-4xl bg-black rounded-lg overflow-hidden shadow-lg">
-          <video src={videoUrl} controls autoPlay className="w-full h-auto object-cover">
+
+      {/* 메인 레이아웃 */}
+      <div className="flex flex-grow gap-6">
+        {/* 왼쪽: 영상 */}
+        <div className="flex-1 bg-black rounded-lg overflow-hidden shadow-lg">
+          <video src={videoUrl} controls autoPlay className="w-full h-full object-cover">
             동영상을 지원하지 않는 브라우저입니다.
           </video>
         </div>
+
+        {/* 오른쪽: 현재 코드 */}
+        <div className="flex-1 bg-zinc-800 rounded-lg p-4 shadow-md">
+          <h3 className="text-lg font-bold text-white mb-4">현재 코드</h3>
+          <div className="bg-zinc-700 rounded-lg p-4 text-sm text-gray-300 overflow-y-auto h-[60%]">
+            {/* 여기에 기타 코드 또는 악보 데이터를 렌더링 */}
+            <p>코드 데이터가 여기에 표시됩니다.</p>
+          </div>
+        </div>
       </div>
-      <div className="p-6 bg-zinc-800">
-        <div className="text-xl font-bold text-white">{song.title}</div>
-        <div className="text-sm text-gray-400">{song.artist}</div>
+
+      {/* 아래쪽: 악보 */}
+      <div className="mt-4 flex-grow bg-zinc-800 rounded-lg p-4 shadow-md">
+        <h3 className="text-lg font-bold text-white mb-4">현재 악보</h3>
+        <div className="bg-zinc-700 rounded-lg p-4 text-sm text-gray-300 overflow-x-auto h-full">
+          {/* 여기에 악보 데이터를 렌더링 */}
+          <p>악보 데이터가 여기에 표시됩니다.</p>
+        </div>
       </div>
     </div>
   );
