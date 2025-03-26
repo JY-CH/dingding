@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.CloseStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketSession;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,7 +33,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
 		try {
 			if (message instanceof TextMessage) {
 				// 클라이언트가 보낸 메시지를 처리하는 부분
-				String payload = ((TextMessage) message).getPayload();
+				String payload = ((TextMessage)message).getPayload();
 				System.out.println("수신자: " + session + "\nReceived message: " + payload);
 				// 클라이언트에게 메시지를 보내는 부분
 				session.sendMessage(new TextMessage("Server received: " + payload));

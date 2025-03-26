@@ -17,34 +17,36 @@ import com.ssafy.ddingga.global.security.jwt.JwtAuthenticationFilter;
 // WebSecurity 활성화 아노테이션
 @EnableWebSecurity
 public class SecurityConfig {
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws
+		Exception {
 
-        http
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers(
-                            "/v3/api-docs/**",
-                            "/swagger-ui/**",
-                            "/swagger-ui.html",
-                            "/swagger-resources/**",
-                            "/webjars/**"
-                        ).permitAll()
-                        .requestMatchers("/api/auth/signup","/api/auth/login").permitAll()
-                        .anyRequest().authenticated()
-                );
-        http
-                .csrf((auth) -> auth.disable());
-        http
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        http
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+		http
+			.authorizeHttpRequests((auth) -> auth
+				.requestMatchers(
+					"/v3/api-docs/**",
+					"/swagger-ui/**",
+					"/swagger-ui.html",
+					"/swagger-resources/**",
+					"/webjars/**"
+				).permitAll()
+				.requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
+				.anyRequest().authenticated()
+			);
+		http
+			.csrf((auth) -> auth.disable());
+		http
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+		http
+			.sessionManagement(session -> session
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        return http.build();
-    }
-    // 비밀번호 암호화
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+		return http.build();
+	}
+
+	// 비밀번호 암호화
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

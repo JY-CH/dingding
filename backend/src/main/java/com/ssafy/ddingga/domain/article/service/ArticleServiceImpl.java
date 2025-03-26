@@ -9,7 +9,6 @@ import com.ssafy.ddingga.domain.article.entity.Article;
 import com.ssafy.ddingga.domain.article.repository.ArticleRepository;
 import com.ssafy.ddingga.domain.user.entity.User;
 import com.ssafy.ddingga.domain.user.service.UserService;
-import com.ssafy.ddingga.global.error.GlobalExceptionHandler;
 import com.ssafy.ddingga.global.error.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -98,7 +97,7 @@ public class ArticleServiceImpl implements ArticleService {
 		Article article = articleRepository.findByArticleId(articleId)
 			.orElseThrow(() -> new NotFoundException("없는 게시글 id 입니다."));
 
-		if(checkUserId!=article.getUser().getUserId()){
+		if (checkUserId != article.getUser().getUserId()) {
 		}
 
 		// 해당 article이 존재하면 삭제

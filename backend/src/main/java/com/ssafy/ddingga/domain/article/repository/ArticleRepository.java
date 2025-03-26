@@ -12,6 +12,7 @@ import com.ssafy.ddingga.domain.article.entity.Article;
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Integer> {
 	List<Article> findAll();
+
 	Optional<Article> findByArticleId(int articleId);
 
 	// title 또는 content에 keyword가 포함된 Article을 찾는 쿼리
