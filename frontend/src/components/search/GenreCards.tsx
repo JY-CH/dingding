@@ -21,10 +21,10 @@ const GenreCards: React.FC<GenreCardsProps> = ({ genres }) => {
     <div className="px-6 py-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <BookHeadphones className="w-5 h-5 text-orange-500" />
+          <BookHeadphones className="w-5 h-5 text-amber-500" />
           <h3 className="text-lg font-bold text-white">장르 탐색</h3>
         </div>
-        <button className="text-sm text-orange-500 hover:underline">모두 보기</button>
+        <button className="text-sm text-amber-500 hover:underline">모두 보기</button>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {genres.map((genre) => (

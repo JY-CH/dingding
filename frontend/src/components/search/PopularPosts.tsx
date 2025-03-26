@@ -20,7 +20,7 @@ const PopularPosts: React.FC<PopularPostsProps> = ({ posts }) => {
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
-        <MessageSquare className="w-5 h-5 text-orange-500" />
+        <MessageSquare className="w-5 h-5 text-amber-500" />
         <h3 className="text-lg font-bold text-white">인기 게시글</h3>
       </div>
       <div className="bg-zinc-800 rounded-xl overflow-hidden">

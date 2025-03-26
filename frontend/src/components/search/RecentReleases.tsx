@@ -17,7 +17,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({ releases }) => {
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
-        <Calendar className="w-5 h-5 text-orange-500" />
+        <Calendar className="w-5 h-5 text-amber-500" />
         <h3 className="text-lg font-bold text-white">최신 발매</h3>
       </div>
       <div className="bg-zinc-800 rounded-xl overflow-hidden">
@@ -35,7 +35,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({ releases }) => {
               <div className="text-sm font-medium text-white truncate">{song.title}</div>
               <div className="text-xs text-gray-400 mt-1">{song.artist}</div>
             </div>
-            <div className="bg-orange-500/20 text-xs font-medium text-orange-500 px-2 py-1 rounded-full ml-2">
+            <div className="bg-orange-500/20 text-xs font-medium text-amber-500 px-2 py-1 rounded-full ml-2">
               NEW
             </div>
           </div>
