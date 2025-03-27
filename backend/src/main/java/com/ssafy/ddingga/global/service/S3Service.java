@@ -33,18 +33,19 @@ public class S3Service {
 		return bucket;
 	}
 
-	// 파일 업로드 (자동 디렉토리 구분)
+	// 파일 업로드 (자동 디렉토리 구분) -> 파일만 받음
 	public String uploadFile(MultipartFile file) throws IOException {
 		String contentType = file.getContentType();
 		String dirName = getDirectoryByContentType(contentType);
-		return uploadFile(file, dirName);
+		return uploadFile(file, dirName); // 두 번째 uploadFile 호출
 	}
 
-	// 파일 업로드 (지정된 디렉토리)
+	//파일 업로드 (지정된 디렉토리) - 파일과 디렉토리 이름을 받음
 	public String uploadFile(MultipartFile file, String dirName) throws IOException {
 		String fileName = createFileName(file.getOriginalFilename());
 		String fileKey = dirName + "/" + fileName;
 
+		// 업로드 로직
 		PutObjectRequest putObjectRequest = PutObjectRequest.builder()
 			.bucket(bucket)
 			.key(fileKey)
@@ -125,12 +126,10 @@ public class S3Service {
 			return "others";
 		}
 
-		if (contentType.startsWith("image/")) {
-			return "images";
-		} else if (contentType.startsWith("video/")) {
-			return "videos";
-		} else if (contentType.startsWith("audio/")) {
-			return "audios";
+		if (contentType.startsWith("profile/")) {
+			return "profileImages";
+		} else if (contentType.startsWith("replay/")) {
+			return "replays";
 		} else {
 			return "others";
 		}
