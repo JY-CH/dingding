@@ -28,7 +28,15 @@ pipeline {
                 }
             }
         }
-
+        stage('Copy application.yml') {
+            steps {
+                script {
+                    sh '''
+                    cp backend/src/main/resources/application.yml backend/build/libs/
+                    '''
+                }
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
