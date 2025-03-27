@@ -15,4 +15,5 @@ public interface AuthRepository extends JpaRepository<User, Integer> {
 
 	Optional<User> findByUserId(Integer userId);
 
+	boolean existsByUserId(Integer userId);
 }

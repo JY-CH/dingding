@@ -40,6 +40,7 @@ public class JwtServiceImpl implements JwtService {
 	}
 
 	@Override
+	@Transactional
 	public TokenResponseDto issueToken(User user, AuthProvider provider) {
 		String accessToken = jwtTokenProvider.createAccessToken(user);
 		String refreshToken = jwtTokenProvider.createRefreshToken(user);

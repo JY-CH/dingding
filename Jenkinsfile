@@ -64,7 +64,8 @@ pipeline {
                     withCredentials([
                         string(credentialsId: 'MySQL-Username', variable: 'MYSQL_USERNAME'),
                         string(credentialsId: 'MySQL-Password', variable: 'MYSQL_PASSWORD'),
-                        string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD')
+                        string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD'),
+                        string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
                     ]) {
                         script {
                             sh """
@@ -81,15 +82,20 @@ pipeline {
                             export MYSQL_USERNAME="${MYSQL_USERNAME}"
                             export MYSQL_PASSWORD="${MYSQL_PASSWORD}"
                             export REDIS_PASSWORD="${REDIS_PASSWORD}"
+                            export JWT_SECRET="${JWT_SECRET}"
+
 
                             echo "MYSQL_USERNAME=${MYSQL_USERNAME}" >> .env
                             echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env
                             echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
+                            echo "JWT_SECRET=${JWT_SECRET}" >> .env
+                            
 
                             docker-compose down --remove-orphans
                             MYSQL_USERNAME=${MYSQL_USERNAME} \
                             MYSQL_PASSWORD=${MYSQL_PASSWORD} \
                             REDIS_PASSWORD=${REDIS_PASSWORD} \
+                            JWT_SECRET=${JWT_SECRET} \
                             docker-compose up -d --force-recreate
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"

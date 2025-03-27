@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ssafy.ddingga.domain.auth.entity.User;
 import com.ssafy.ddingga.facade.auth.dto.request.LoginRequestDto;
-import com.ssafy.ddingga.facade.auth.dto.request.RefreshTokenRequestDto;
 import com.ssafy.ddingga.facade.auth.dto.request.SignUpRequestDto;
 import com.ssafy.ddingga.facade.auth.dto.request.UserUpdateRequestDto;
 import com.ssafy.ddingga.facade.auth.dto.response.AuthDeleteResponseDto;
@@ -32,6 +31,7 @@ import com.ssafy.ddingga.facade.auth.dto.response.LogoutResponseDto;
 import com.ssafy.ddingga.facade.auth.dto.response.SignUpResponseDto;
 import com.ssafy.ddingga.facade.auth.dto.response.TokenResponseDto;
 import com.ssafy.ddingga.facade.auth.service.AuthFacadeService;
+import com.ssafy.ddingga.global.error.exception.InvalidTokenException;
 import com.ssafy.ddingga.global.security.jwt.JwtProperties;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -122,12 +122,14 @@ public class AuthController {
 	})
 	@PostMapping("/refresh")
 	public ResponseEntity<TokenResponseDto> refreshToken(
-		@CookieValue(name = "refreshToken", required = false) String refreshToken,
-		@RequestBody(required = false) RefreshTokenRequestDto requestDto) {
+		@CookieValue(name = "refreshToken", required = false) String refreshToken) {
 
-		if (refreshToken == null && requestDto == null) {
-			throw new RuntimeException("리프레시 토큰이 없습니다.");
+		logger.debug("Raw Cookie Value: {}", refreshToken);
+
+		if (refreshToken == null) {
+			throw new InvalidTokenException("리프레시 토큰이 없습니다.");
 		}
+		logger.debug("refreshToken:{}", refreshToken);
 		TokenResponseDto tokenResponse = authFacadeService.refreshToken(refreshToken);
 
 		ResponseCookie cookie = ResponseCookie.from("refreshToken", tokenResponse.getRefreshToken())
