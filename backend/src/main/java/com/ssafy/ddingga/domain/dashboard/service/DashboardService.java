@@ -3,8 +3,8 @@ package com.ssafy.ddingga.domain.dashboard.service;
 import java.util.List;
 
 import com.ssafy.ddingga.domain.song.entity.ChordScore;
-import com.ssafy.ddingga.facade.dashboard.dto.response.ReplayDto;
 import com.ssafy.ddingga.facade.rank.dto.RankingInfo;
+import com.ssafy.ddingga.facade.replay.dto.response.ReplayDto;
 
 public interface DashboardService {
 	RankingInfo getRankingInfo(Integer userId);
