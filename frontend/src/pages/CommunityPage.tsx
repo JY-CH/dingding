@@ -1,8 +1,10 @@
+// c:\Users\SSAFY\Desktop\jy\J-Project\study\S12P21D105\frontend\src\pages\CommunityPage.tsx
 import { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
 import { CommunityCreate } from '../components/community/CommunityCreate';
+import { CommunityList } from '../components/community/CommunityList';
 
 // Mock Data (Replace with API calls later)
 interface Post {
@@ -60,10 +62,6 @@ export const CommunityPage: React.FC = () => {
     setShowCreate(!showCreate); // Toggle the showCreate state
   };
 
-  const filteredPosts = posts.filter((post) =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
   // Function to add a new post
   const addNewPost = (newPost: Post) => {
     setPosts([...posts, newPost]);
@@ -116,29 +114,7 @@ export const CommunityPage: React.FC = () => {
 
         {/* Posts Section */}
         {!showCreate && (
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">Posts</h2>
-            {filteredPosts.map((post) => (
-              <div
-                key={post.id}
-                className="bg-zinc-800/90 backdrop-blur-sm border border-white/10 rounded-xl p-6"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium">{post.title}</h3>
-                  <span className="text-sm text-zinc-400">by {post.author}</span>
-                </div>
-                <p className="mb-4">{post.content}</p>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => handleViewDetails(post.id)}
-                    className="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
-            ))}
-          </section>
+          <CommunityList filteredPosts={posts} handleViewDetails={handleViewDetails} />
         )}
       </div>
     </div>

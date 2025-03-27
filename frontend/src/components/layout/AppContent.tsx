@@ -1,6 +1,8 @@
 import { useLocation } from 'react-router-dom';
 import { Routes, Route } from 'react-router-dom';
 
+import { CommunityPage } from '@/pages/CommunityPage';
+
 import { mockSongs } from '../../data/mockData';
 import DashboardPage from '../../pages/dashboard/DashboardPage';
 import DetailPage from '../../pages/DetailPage';
@@ -10,8 +12,7 @@ import LoginPage from '../../pages/LoginPage';
 import MainPage from '../../pages/MainPage';
 import NotFoundPage from '../../pages/NotFoundPage';
 import MusicPlayer from '../common/MusicPlayer';
-
-import { CommunityPage } from '@/pages/CommunityPage';
+import { CommunityDetail } from '../community/CommunityDetail';
 
 interface AppContentProps {
   isExpanded: boolean;
@@ -38,7 +39,8 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<NotFoundPage />} />
-          <Route path="/community" element={<CommunityPage />}/>
+          <Route path="/community" element={<CommunityPage />} />
+          <Route path="/community/detail/:id" element={<CommunityDetail />} />
         </Routes>
       </div>
       {!hidePlayerPaths.includes(location.pathname) && (
