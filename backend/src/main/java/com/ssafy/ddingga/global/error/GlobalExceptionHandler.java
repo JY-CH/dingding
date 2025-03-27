@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import com.ssafy.ddingga.global.error.dto.ErrorResponse;
+import com.ssafy.ddingga.global.error.exception.DatabaseException;
 import com.ssafy.ddingga.global.error.exception.DuplicateException;
 import com.ssafy.ddingga.global.error.exception.FileUploadException;
 import com.ssafy.ddingga.global.error.exception.InvalidPasswordException;
 import com.ssafy.ddingga.global.error.exception.InvalidTokenException;
 import com.ssafy.ddingga.global.error.exception.NotFoundException;
+import com.ssafy.ddingga.global.error.exception.ServiceException;
 import com.ssafy.ddingga.global.error.exception.TokenExpiredException;
 import com.ssafy.ddingga.global.error.exception.UserAlreadyDeletedException;
 import com.ssafy.ddingga.global.error.exception.UserNotFoundException;
@@ -185,5 +187,31 @@ public class GlobalExceptionHandler {
 			HttpStatus.NOT_FOUND.value()
 		);
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+	}
+
+	/**
+	 * 데이터베이스 관련 예외 처리 (500 Internal Server Error)
+	 */
+	@ExceptionHandler(DatabaseException.class)
+	public ResponseEntity<ErrorResponse> handleDatabaseException(DatabaseException e) {
+		ErrorResponse response = new ErrorResponse(
+			e.getMessage(),
+			"Database Error",
+			HttpStatus.INTERNAL_SERVER_ERROR.value()
+		);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	}
+
+	/**
+	 * 서비스 레이어 예외 처리 (500 Internal Server Error)
+	 */
+	@ExceptionHandler(ServiceException.class)
+	public ResponseEntity<ErrorResponse> handleServiceException(ServiceException e) {
+		ErrorResponse response = new ErrorResponse(
+			e.getMessage(),
+			"Service Error",
+			HttpStatus.INTERNAL_SERVER_ERROR.value()
+		);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 	}
 }
