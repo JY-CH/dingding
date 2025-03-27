@@ -3,18 +3,12 @@ import { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { Post, Comment } from '@/types/index';
+
 import { CommunityCreate } from '../components/community/CommunityCreate';
 import { CommunityList } from '../components/community/CommunityList';
 
 // Mock Data (Replace with API calls later)
-interface Post {
-  id: number;
-  author: string;
-  title: string;
-  content: string;
-  likes: number;
-  comments: Comment[];
-}
 
 interface Comment {
   id: number;
@@ -33,6 +27,7 @@ const mockPosts: Post[] = [
       { id: 1, author: 'User2', content: 'I love music too!' },
       { id: 2, author: 'User3', content: 'Me too!' },
     ],
+    createdAt: new Date(),
   },
   {
     id: 2,
@@ -41,6 +36,7 @@ const mockPosts: Post[] = [
     content: 'I just found a new technology. It is amazing!',
     likes: 5,
     comments: [{ id: 3, author: 'User1', content: 'What is it?' }],
+    createdAt: new Date(),
   },
 ];
 

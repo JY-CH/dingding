@@ -1,17 +1,17 @@
 // 예시 사용자 타입
 export interface User {
-    id: string;
-    name: string;
-    email: string;
-  }
-  
-  // 기타 필요한 타입 정의
-  export interface ThingItem {
-    id: string;
-    title: string;
-    description: string;
-    createdAt: Date;
-  }
+  id: string;
+  name: string;
+  email: string;
+}
+
+// 기타 필요한 타입 정의
+export interface ThingItem {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: Date;
+}
 
 export interface Song {
   id: string;
@@ -46,4 +46,40 @@ export interface Category {
   cover: string;
   color: string;
   count: number;
+}
+
+export interface Post {
+  articleId: number;
+  userId: number;
+  username: string;
+  title: string;
+  content?: string;
+  createdAt: Date;
+  category: string;
+  popular_post: boolean;
+  recommend: number;
+  boardCreatedMemberId?: string;
+  picked?: boolean;
+}
+
+export interface NestedComment {
+  commentId: number;
+  id: number;
+  username: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  comment_id2: number;
+}
+
+export interface Comment {
+  commentId: number;
+  id: number;
+  username: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  is_deleted: boolean;
+  comments: NestedComment[];
 }
