@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ssafy.ddingga.domain.auth.entity.User;
@@ -22,7 +23,6 @@ import com.ssafy.ddingga.global.error.exception.InvalidPasswordException;
 import com.ssafy.ddingga.global.error.exception.UserAlreadyDeletedException;
 import com.ssafy.ddingga.global.error.exception.UserNotFoundException;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -68,11 +68,14 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	@Transactional
 	public User registerUser(String loginId, String password, String username) {
+		log.info("회원가입 시도 - loginId: {}, username: {}", loginId, username);
 
 		// 중복 검사
 		if (authRepository.existsByLoginId(loginId)) {
+			log.error("회원가입 실패 - 중복된 아이디: {}", loginId);
 			throw new DuplicateException("이미 사용중인 아이디 입니다.");
 		}
+
 		// entity 생성
 		User user = User.builder()
 			.loginId(loginId)                        // 사용자 ID
@@ -85,10 +88,13 @@ public class AuthServiceImpl implements AuthService {
 			.build();
 
 		// 저장
-		return authRepository.save(user);
+		User savedUser = authRepository.save(user);
+		log.info("회원가입 성공 - userId: {}, loginId: {}", savedUser.getUserId(), savedUser.getLoginId());
+		return savedUser;
 	}
 
 	@Override
+	@Transactional
 	public User authenticateUser(String loginId, String password) {
 		log.info("로그인 시도 - loginId: {}", loginId);
 		User user = authRepository.findByLoginId(loginId)
@@ -113,18 +119,25 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	@Transactional
 	public User updateUser(Integer userId, String username, MultipartFile profileImage) {
+		log.info("사용자 정보 수정 요청 - userId: {}, username: {}", userId, username);
 
 		// 1. 사용자 찾기
 		User user = authRepository.findByUserId(userId)
-			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+			.orElseThrow(() -> {
+				log.error("사용자를 찾을 수 없음 - userId: {}", userId);
+				return new UserNotFoundException("사용자를 찾을 수 없습니다.");
+			});
 
 		// 2.이름 업데이트(이름이 제공된 경우에만)
 		if (username != null && !username.trim().isEmpty()) {
+			log.info("사용자 이름 수정 - userId: {}, oldName: {}, newName: {}",
+				userId, user.getUsername(), username);
 			user.setUsername(username);
 		}
 
 		// 3. 프로필 이미지 업데이트(이미지가 제공된 경우에만)
 		if (profileImage != null && !profileImage.isEmpty()) {
+			log.info("프로필 이미지 수정 시작 - userId: {}", userId);
 			try {
 				// 3-1. 업로드 디렉토리 생성
 				File uploadPath = new File(uploadDir);
@@ -153,37 +166,55 @@ public class AuthServiceImpl implements AuthService {
 					}
 				}
 				// 3-5. 새 이미지 경로 저장
-				user.setProfileImage("/uploads/" + fileName);
+				String newImagePath = "/uploads/" + fileName;
+				log.info("프로필 이미지 수정 완료 - userId: {}, newImagePath: {}", userId, newImagePath);
+				user.setProfileImage(newImagePath);
 			} catch (IOException e) {
+				log.error("프로필 이미지 업로드 실패 - userId: {}, error: {}", userId, e.getMessage());
 				throw new FileUploadException("프로필 이미지 저장에 실패했습니다.", e);
 			}
 		}
 
 		// 변경사항 저장
-		return authRepository.save(user);
+		User updatedUser = authRepository.save(user);
+		log.info("사용자 정보 수정 완료 - userId: {}", userId);
+		return updatedUser;
 	}
 
 	@Override
-	@Transactional
+	@Transactional(readOnly = true)
 	public User deleteUser(Integer userId) {
+		log.info("회원 탈퇴 요청 - userId: {}", userId);
 
 		User user = authRepository.findByUserId(userId)
-			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+			.orElseThrow(() -> {
+				log.error("사용자를 찾을 수 없음 - userId: {}", userId);
+				return new UserNotFoundException("사용자를 찾을 수 없습니다.");
+			});
 
 		if (user.getIsDeleted()) {
+			log.error("이미 탈퇴한 계정 - userId: {}", userId);
 			throw new UserAlreadyDeletedException("이미 탈퇴한 계정입니다.");
 		}
 
 		user.setIsDeleted(true);
-
-		return authRepository.save(user);
+		User deletedUser = authRepository.save(user);
+		log.info("회원 탈퇴 완료 - userId: {}", userId);
+		return deletedUser;
 	}
 
 	@Override
+	@Transactional
 	public User getUser(int userId) {
+		log.info("사용자 정보 조회 요청 - userId: {}", userId);
+
 		User user = authRepository.findByUserId(userId)
-			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
-		;
+			.orElseThrow(() -> {
+				log.error("사용자를 찾을 수 없음 - userId: {}", userId);
+				return new UserNotFoundException("사용자를 찾을 수 없습니다.");
+			});
+
+		log.info("사용자 정보 조회 완료 - userId: {}, loginId: {}", userId, user.getLoginId());
 		return user;
 	}
 }
