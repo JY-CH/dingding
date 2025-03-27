@@ -20,7 +20,7 @@ public class ChordScoreServiceImpl implements ChordScoreService {
 
 	@Override
 	public List<ChordScoreDto> getChordScores(Integer userId) {
-		List<ChordScore> chordScores = chordScoreRepository.findByUserId(userId);
+		List<ChordScore> chordScores = chordScoreRepository.findByUser_UserId(userId);
 
 		return chordScores.stream()
 			.map(chordScore -> ChordScoreDto.builder()

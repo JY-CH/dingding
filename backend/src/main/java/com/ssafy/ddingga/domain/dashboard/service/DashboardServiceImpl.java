@@ -1,16 +1,15 @@
 package com.ssafy.ddingga.domain.dashboard.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ssafy.ddingga.domain.rank.repository.RankingRepository;
-import com.ssafy.ddingga.domain.replay.entity.Replay;
-import com.ssafy.ddingga.domain.replay.repository.ReplayRepository;
+import com.ssafy.ddingga.domain.replay.service.ReplayService;
 import com.ssafy.ddingga.domain.song.entity.ChordScore;
 import com.ssafy.ddingga.domain.song.repository.ChordScoreRepository;
+import com.ssafy.ddingga.facade.dashboard.dto.response.ReplayDto;
 import com.ssafy.ddingga.facade.rank.dto.RankingInfo;
 
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ public class DashboardServiceImpl implements DashboardService {
 
 	private final RankingRepository rankingRepository;
 	private final ChordScoreRepository chordScoreRepository;
-	private final ReplayRepository replayRepository;
+	private final ReplayService replayService;
 
 	@Override
 	public RankingInfo getRankingInfo(Integer userId) {
@@ -31,11 +30,11 @@ public class DashboardServiceImpl implements DashboardService {
 
 	@Override
 	public List<ChordScore> getChordScores(Integer userId) {
-		return chordScoreRepository.findByUserId(userId);
+		return chordScoreRepository.findByUser_UserId(userId);
 	}
 
 	@Override
-	public List<Replay> getThisWeekReplays(Integer userId, LocalDateTime weekStart, LocalDateTime weekEnd) {
-		return replayRepository.findThisWeekReplayByUserId(userId, weekStart, weekEnd);
+	public List<ReplayDto> getThisWeekReplays(Integer userId) {
+		return replayService.getLastWeekReplays(userId);
 	}
 }
