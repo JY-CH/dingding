@@ -90,15 +90,23 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	public User authenticateUser(String loginId, String password) {
+		log.info("로그인 시도 - loginId: {}", loginId);
 		User user = authRepository.findByLoginId(loginId)
-			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다,.."));
+			.orElseThrow(() -> {
+				log.error("사용자를 찾을 수 없음 - loginId: {}", loginId);
+				return new UserNotFoundException("사용자를 찾을 수 없습니다,..");
+			});
+		log.info("사용자 찾음 - userId: {}, loginId: {}", user.getUserId(), user.getLoginId());
 
 		if (!passwordEncoder.matches(password, user.getPassword())) {
+			log.error("비밀번호 불일치 - loginId: {}", loginId);
 			throw new InvalidPasswordException("비밀번호가 일치하지 않습니다");
 		}
 		if (user.getIsDeleted()) {
+			log.error("탈퇴한 계정 - loginId: {}", loginId);
 			throw new UserAlreadyDeletedException("탈퇴한 계정입니다.");
 		}
+		log.info("로그인 성공 - userId: {}, loginId: {}", user.getUserId(), user.getLoginId());
 		return user;
 	}
 
