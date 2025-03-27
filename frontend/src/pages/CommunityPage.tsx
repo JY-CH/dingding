@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CommunityCreate } from '../components/community/CommunityCreate';
 
+import { useNavigate } from 'react-router-dom';
+
+import { CommunityCreate } from '../components/community/CommunityCreate';
 // Mock Data (Replace with API calls later)
 interface Post {
   id: number;
@@ -36,9 +37,7 @@ const mockPosts: Post[] = [
     title: 'New Technology',
     content: 'I just found a new technology. It is amazing!',
     likes: 5,
-    comments: [
-      { id: 3, author: 'User1', content: 'What is it?' },
-    ],
+    comments: [{ id: 3, author: 'User1', content: 'What is it?' }],
   },
 ];
 
@@ -109,29 +108,31 @@ export const CommunityPage: React.FC = () => {
         {showCreate && <CommunityCreate posts={posts} setPosts={setPosts} />}
 
         {/* Posts Section */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold">Posts</h2>
-          {filteredPosts.map((post) => (
-            <div
-              key={post.id}
-              className="bg-zinc-800/90 backdrop-blur-sm border border-white/10 rounded-xl p-6"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium">{post.title}</h3>
-                <span className="text-sm text-zinc-400">by {post.author}</span>
+        {!showCreate && (
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold">Posts</h2>
+            {filteredPosts.map((post) => (
+              <div
+                key={post.id}
+                className="bg-zinc-800/90 backdrop-blur-sm border border-white/10 rounded-xl p-6"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium">{post.title}</h3>
+                  <span className="text-sm text-zinc-400">by {post.author}</span>
+                </div>
+                <p className="mb-4">{post.content}</p>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => handleViewDetails(post.id)}
+                    className="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  >
+                    View Details
+                  </button>
+                </div>
               </div>
-              <p className="mb-4">{post.content}</p>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => handleViewDetails(post.id)}
-                  className="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                >
-                  View Details
-                </button>
-              </div>
-            </div>
-          ))}
-        </section>
+            ))}
+          </section>
+        )}
       </div>
     </div>
   );
