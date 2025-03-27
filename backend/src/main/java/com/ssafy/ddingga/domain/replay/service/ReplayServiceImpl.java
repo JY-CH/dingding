@@ -49,8 +49,9 @@ public class ReplayServiceImpl implements ReplayService {
 			List<Replay> replays = replayRepository.findThisWeekReplayByUserId(userId, weekStart, weekEnd);
 			log.info("리플레이 - 이번주 리플레이 조회 완료: userId={}, replayCount={}", userId, replays.size());
 
-			List<ReplayDto> result = replays.stream()
-				.map(replay -> ReplayDto.builder()
+			// Replay 엔티티 리스트를 ReplayDto 리스트로 변환
+			List<ReplayDto> result = replays.stream()// List를 Steam으로 변환, Stream은 데이터의 흐름을 의미 여러 데이터를 순차적으로 처리할 수 있게해준다
+				.map(replay -> ReplayDto.builder()// map은 Stream의 각 요소를 다른 형태로 변환 여기서는 replay의 엔티티를 ReplayDto로 변환
 					.replayId(replay.getReplayId())
 					.songTitle(replay.getSong().getSongTitle())
 					.score(replay.getScore())
