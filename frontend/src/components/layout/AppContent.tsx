@@ -11,6 +11,8 @@ import MainPage from '../../pages/MainPage';
 import NotFoundPage from '../../pages/NotFoundPage';
 import MusicPlayer from '../common/MusicPlayer';
 
+import { CommunityPage } from '@/pages/CommunityPage';
+
 interface AppContentProps {
   isExpanded: boolean;
 }
@@ -36,6 +38,7 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<NotFoundPage />} />
+          <Route path="/community" element={<CommunityPage />}/>
         </Routes>
       </div>
       {!hidePlayerPaths.includes(location.pathname) && (
