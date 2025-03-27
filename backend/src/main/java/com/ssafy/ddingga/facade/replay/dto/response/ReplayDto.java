@@ -1,4 +1,4 @@
-package com.ssafy.ddingga.facade.dashboard.dto.response;
+package com.ssafy.ddingga.facade.replay.dto.response;
 
 import java.time.LocalDateTime;
 

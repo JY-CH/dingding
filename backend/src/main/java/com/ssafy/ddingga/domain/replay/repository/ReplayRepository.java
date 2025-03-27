@@ -19,4 +19,6 @@ public interface ReplayRepository extends JpaRepository<Replay, Integer> {
 		@Param("weekStart") LocalDateTime weekStart,
 		@Param("weekEnd") LocalDateTime weekEnd
 	);
+
+	List<Replay> findReplaysByUser_UserId(Integer userId);
 }
