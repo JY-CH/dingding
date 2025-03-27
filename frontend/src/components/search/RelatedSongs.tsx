@@ -18,10 +18,10 @@ const RelatedSongs: React.FC<RelatedSongsProps> = ({ songs }) => {
     <div>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Music className="w-5 h-5 text-orange-500" />
+          <Music className="w-5 h-5 text-amber-500" />
           <h4 className="text-lg font-bold text-white">연관 노래</h4>
         </div>
-        <button className="text-sm text-orange-500">모두 보기</button>
+        <button className="text-sm text-amber-500">모두 보기</button>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {songs.map((song) => (

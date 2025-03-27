@@ -19,7 +19,7 @@ const HotSongs: React.FC<HotSongsProps> = ({ songs }) => {
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
-        <TrendingUp className="w-5 h-5 text-orange-500" />
+        <TrendingUp className="w-5 h-5 text-amber-500" />
         <h3 className="text-lg font-bold text-white">트렌딩 노래</h3>
       </div>
       <div className="bg-zinc-800 rounded-xl overflow-hidden">

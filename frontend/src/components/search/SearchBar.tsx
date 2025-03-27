@@ -41,7 +41,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery }) => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div className="px-6 py-4 bg-zinc-900">
+      <div className="px-8 pb-4  bg-zinc-900">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Search className="w-5 h-5 text-gray-400" />
@@ -54,7 +54,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery }) => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
-            className="w-full py-2 pl-10 pr-4 bg-zinc-800 text-white placeholder-gray-400 rounded-full border border-zinc-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all duration-200"
+            className="w-full py-2 pl-10 pr-4 bg-zinc-800 text-white placeholder-gray-400 rounded-full border border-zinc-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all duration-200"
           />
 
           {query && (
@@ -89,7 +89,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery }) => {
                   </div>
                   <button
                     onClick={(e) => removeSearchTerm(term, e)}
-                    className="text-gray-400 hover:text-orange-500 transition-colors"
+                    className="text-gray-400 hover:text-amber-500 transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
