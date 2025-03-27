@@ -101,7 +101,7 @@ export const CommunityPage: React.FC = () => {
           onClick={handleToggleCreate}
           className="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
         >
-          {showCreate ? 'Hide Create' : 'Create Post'}
+          {showCreate ? 'Back' : 'Create Post'}
         </button>
 
         {/* Create Post Section (Conditionally Rendered) */}

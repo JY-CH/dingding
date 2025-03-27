@@ -20,10 +20,7 @@ interface CommunityCreateProps {
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
 }
 
-export const CommunityCreate: React.FC<CommunityCreateProps> = ({
-  posts,
-  setPosts,
-}) => {
+export const CommunityCreate: React.FC<CommunityCreateProps> = ({ posts, setPosts }) => {
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState('');
   const mockCategories = [
@@ -58,7 +55,8 @@ export const CommunityCreate: React.FC<CommunityCreateProps> = ({
   };
 
   return (
-    <>
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold">Create</h2>
       <section className="bg-zinc-800/90 backdrop-blur-sm border border-white/10 rounded-xl p-6">
         <h2 className="text-xl font-semibold mb-4">Create a New Post</h2>
         <input
@@ -96,6 +94,6 @@ export const CommunityCreate: React.FC<CommunityCreateProps> = ({
           ))}
         </div>
       </section>
-    </>
+    </div>
   );
 };
