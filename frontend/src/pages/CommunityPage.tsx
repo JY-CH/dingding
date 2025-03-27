@@ -55,7 +55,7 @@ export const CommunityPage: React.FC = () => {
   };
 
   const handleViewDetails = (postId: number) => {
-    navigate(`/community/detail/${postId}`);
+    navigate(`/community/detail/${postId}`, { state: { postId } });
   };
 
   const handleToggleCreate = () => {
@@ -113,9 +113,7 @@ export const CommunityPage: React.FC = () => {
         {showCreate && <CommunityCreate posts={posts} setPosts={addNewPost} />}
 
         {/* Posts Section */}
-        {!showCreate && (
-          <CommunityList filteredPosts={posts} handleViewDetails={handleViewDetails} />
-        )}
+        {!showCreate && <CommunityList posts={posts} handleViewDetails={handleViewDetails} />}
       </div>
     </div>
   );

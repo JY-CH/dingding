@@ -17,19 +17,16 @@ interface Comment {
 }
 
 interface CommunityListProps {
-  filteredPosts: Post[];
+  posts: Post[];
   handleViewDetails: (postId: number) => void;
 }
 
-export const CommunityList: React.FC<CommunityListProps> = ({
-  filteredPosts,
-  handleViewDetails,
-}) => {
-  console.log(filteredPosts);
+export const CommunityList: React.FC<CommunityListProps> = ({ posts, handleViewDetails }) => {
+  console.log(posts);
   return (
     <section className="space-y-4">
       <h2 className="text-xl font-semibold">Posts</h2>
-      {filteredPosts.map((post) => (
+      {posts.map((post) => (
         <div
           key={post.id}
           className="bg-zinc-800/90 backdrop-blur-sm border border-white/10 rounded-xl p-6"
