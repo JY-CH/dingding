@@ -163,10 +163,10 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleInvalidTokenException(InvalidTokenException e) {
 		ErrorResponse response = new ErrorResponse(
 			e.getMessage(),
-			"INVALID_TOKEN",
-			HttpStatus.UNAUTHORIZED.value()
+			"BAD_REQUEST",
+			HttpStatus.BAD_REQUEST.value()
 		);
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 	}
 
 	@ExceptionHandler(TokenExpiredException.class)
