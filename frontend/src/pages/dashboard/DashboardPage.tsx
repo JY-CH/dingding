@@ -1,4 +1,3 @@
-// src/pages/Dashboard.tsx
 import React from 'react';
 
 import BarChartTile from '@/components/dashboard/BarChartTile';
@@ -10,7 +9,9 @@ import StatsTile from '@/components/dashboard/StatsTile';
 const profileData = {
   name: '임재열',
   email: 'dingding@gmail.com',
-  rank: '9999 등',
+  playtimerank: '9999 등',
+  avgscorerank: '123 등',
+  totaltryrank: '999 등',
   profileImageUrl: 'src/assets/띵까띵까.png',
   backgroundImageUrl: 'src/assets/띵까띵까.png',
 };
@@ -87,7 +88,9 @@ const DashboardPage: React.FC = () => {
           <ProfileTile
             name={profileData.name}
             email={profileData.email}
-            rank={profileData.rank}
+            playtimerank={profileData.playtimerank}
+            avgscorerank={profileData.avgscorerank}
+            totaltryrank={profileData.totaltryrank}
             profileImageUrl={profileData.profileImageUrl}
             backgroundImageUrl={profileData.backgroundImageUrl}
           />

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-
+import { Clock, Star, Repeat } from 'lucide-react';
 import ProfileEditModal from './ProfileEditModal';
 
 interface ProfileTileProps {
   name: string;
   email: string;
-  rank: string;
+  playtimerank: string;
+  avgscorerank: string;
+  totaltryrank: string;
   profileImageUrl: string;
   backgroundImageUrl: string;
 }
@@ -13,7 +15,9 @@ interface ProfileTileProps {
 const ProfileTile: React.FC<ProfileTileProps> = ({
   name,
   email,
-  rank,
+  playtimerank,
+  avgscorerank,
+  totaltryrank,
   profileImageUrl,
   backgroundImageUrl,
 }) => {
@@ -23,7 +27,7 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
     <div className="bg-zinc-800 rounded-lg shadow-md overflow-hidden">
       {/* 배경 이미지와 내용을 함께 포함하는 컨테이너 */}
       <div className="relative">
-        {/* 배경 이미지를 오른쪽에 배치 */}
+        {/* 배경 이미지 */}
         <div className="absolute top-0 right-0 h-full">
           <img
             src={backgroundImageUrl}
@@ -48,14 +52,38 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
             <div className="mt-4 md:mt-0 md:ml-6">
               <h3 className="text-xl font-bold text-white">{name}</h3>
               <p className="text-sm text-gray-400 mt-1">{email}</p>
-              <div className="flex items-center gap-2 mt-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-zinc-700 text-white">
-                  🎸
+              {/* 랭킹 정보 */}
+              <div className="mt-4 flex space-x-4">
+                {/* 플레이 시간 랭킹 */}
+                <div className="flex items-center">
+                  <div className="flex items-center gap-1 group relative">
+                    <Clock size={16} className="text-amber-500" />
+                    <span className="text-sm text-white font-semibold bg-zinc-700 px-2 py-1 rounded-md">{playtimerank}</span>
+                    <div className="absolute hidden group-hover:block top-6 left-1/2 -translate-x-1/2 bg-zinc-700 text-white text-xs p-2 rounded-md whitespace-nowrap">
+                      플레이 시간 랭킹
+                    </div>
+                  </div>
                 </div>
-                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-zinc-700 text-white">
-                  🏆
+                {/* 평균 점수 랭킹 */}
+                <div className="flex items-center">
+                  <div className="flex items-center gap-1 group relative">
+                    <Star size={16} className="text-amber-500" />
+                    <span className="text-sm text-white font-semibold bg-zinc-700 px-2 py-1 rounded-md">{avgscorerank}</span>
+                    <div className="absolute hidden group-hover:block top-6 left-1/2 -translate-x-1/2 bg-zinc-700 text-white text-xs p-2 rounded-md whitespace-nowrap">
+                      평균 점수 랭킹
+                    </div>
+                  </div>
                 </div>
-                <span className="text-lg font-semibold text-white">{rank}</span>
+                {/* 총 시도 횟수 랭킹 */}
+                <div className="flex items-center">
+                  <div className="flex items-center gap-1 group relative">
+                    <Repeat size={16} className="text-amber-500" />
+                    <span className="text-sm text-white font-semibold bg-zinc-700 px-2 py-1 rounded-md">{totaltryrank}</span>
+                    <div className="absolute hidden group-hover:block top-6 left-1/2 -translate-x-1/2 bg-zinc-700 text-white text-xs p-2 rounded-md whitespace-nowrap">
+                      총 시도 횟수 랭킹
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
