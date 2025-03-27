@@ -25,19 +25,19 @@ public interface AuthService {
 
 	/**
 	 * 사용자 정보 변경
-	 * @param loginId 사용자 고유 ID
+	 * @param userId 사용자 고유 ID
 	 * @param username 변경할 사용자 이름 사용자 이름 (null인경우 기존 이름 유지)
 	 * @param profileImage 변경할 프로필 이미지 파일 ((null인경우 기존 이름 유지)
 	 * @return 정보가 수정된 사용자 엔티티
 	 */
-	User updateUser(String loginId, String username, MultipartFile profileImage);
+	User updateUser(Integer userId, String username, MultipartFile profileImage);
 
 	/**
 	 * 회원 탈퇴 처리
-	 * @param loginId 탈퇴할 사용자의 id
+	 * @param userId 탈퇴할 사용자의 id
 	 * @return 탈퇴 처리된 사용자의 엔티티
 	 */
-	User deleteUser(String loginId);
+	User deleteUser(Integer userId);
 
 	User getUser(int userId);
 }

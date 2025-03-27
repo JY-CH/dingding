@@ -1,8 +1,13 @@
 package com.ssafy.ddingga.domain.song.entity;
 
-
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -11,11 +16,11 @@ import lombok.*;
 @AllArgsConstructor
 public class SheetMusic {
 
-    @Id
-    @ManyToOne  // 악보 조회 시 곡 정보도 필요하니 EAGER
-    private Song song;
+	@Id
+	@ManyToOne  // 악보 조회 시 곡 정보도 필요하니 EAGER
+	private Song song;
 
-    private String sheetImage;
-    private Integer sheetOrder;
+	private String sheetImage;
+	private Integer sheetOrder;
 
 }

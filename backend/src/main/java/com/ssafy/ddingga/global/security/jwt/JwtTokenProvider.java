@@ -36,7 +36,7 @@ public class JwtTokenProvider {
 
 		return Jwts.builder()
 			.setSubject(user.getLoginId())
-			.claim("loginId", user.getLoginId())
+			.claim("userId", user.getUserId()) // loginId-> userId
 			.claim("username", user.getUsername())
 			.setIssuedAt(now)
 			.setExpiration(validity)
@@ -73,6 +73,16 @@ public class JwtTokenProvider {
 			.parseClaimsJws(token)
 			.getBody()
 			.getSubject();
+	}
+
+	// 토큰에 추가한 userId(pk)를 추출하기 위함
+	public Integer getUserId(String token) {
+		return Jwts.parserBuilder()
+			.setSigningKey(getSigningKey())
+			.build()
+			.parseClaimsJws(token)
+			.getBody()
+			.get("userId", Integer.class);
 	}
 
 	/**

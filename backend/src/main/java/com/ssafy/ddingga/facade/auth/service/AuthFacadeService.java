@@ -26,16 +26,16 @@ public interface AuthFacadeService {
 
 	/**
 	 * 사용자 정보 수정을 처리하는 메서드
-	 * @param loginId 수정할 사용자의 아이디
+	 * @param userId 수정할 사용자의 아이디
 	 * @param request 수정할 회원 정보가 담긴 DTO
 	 * @return 수정된 회원정보 DTO
 	 */
-	AuthUpdateResponseDto updateUserInfo(String loginId, UserUpdateRequestDto request);
+	AuthUpdateResponseDto updateUserInfo(Integer userId, UserUpdateRequestDto request);
 
 	/**
 	 * 회원 탈퇴 처리
-	 * @param loginId 탈퇴할 사용자의 ID
+	 * @param userId 탈퇴할 사용자의 ID
 	 * @return 탈퇴 처리 결과 DTO
 	 */
-	AuthDeleteResponseDto deleteUser(String loginId);
+	AuthDeleteResponseDto deleteUser(Integer userId);
 }

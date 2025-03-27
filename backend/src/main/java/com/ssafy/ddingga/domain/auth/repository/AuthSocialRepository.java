@@ -8,7 +8,7 @@ import com.ssafy.ddingga.domain.auth.entity.AuthProvider;
 import com.ssafy.ddingga.domain.auth.entity.User;
 import com.ssafy.ddingga.domain.auth.entity.UserSocial;
 
-public interface UserSocialRepository extends JpaRepository<UserSocial, Integer> {
+public interface AuthSocialRepository extends JpaRepository<UserSocial, Integer> {
 
 	Optional<UserSocial> findByUser(User user);
 
