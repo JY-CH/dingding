@@ -30,7 +30,7 @@ public class SecurityConfig {
 					"/swagger-resources/**",
 					"/webjars/**"
 				).permitAll()
-				.requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
+				.requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/refresh").permitAll()
 				.anyRequest().authenticated()
 			);
 		http
