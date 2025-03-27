@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ssafy.ddingga.domain.auth.entity.User;
 import com.ssafy.ddingga.facade.auth.dto.request.LoginRequestDto;
-import com.ssafy.ddingga.facade.auth.dto.request.RefreshTokenRequestDto;
 import com.ssafy.ddingga.facade.auth.dto.request.SignUpRequestDto;
 import com.ssafy.ddingga.facade.auth.dto.request.UserUpdateRequestDto;
 import com.ssafy.ddingga.facade.auth.dto.response.AuthDeleteResponseDto;
@@ -123,16 +122,14 @@ public class AuthController {
 	})
 	@PostMapping("/refresh")
 	public ResponseEntity<TokenResponseDto> refreshToken(
-		@CookieValue(name = "refreshToken", required = false) String refreshToken,
-		@RequestBody(required = false) RefreshTokenRequestDto requestDto) {
+		@CookieValue(name = "refreshToken", required = false) String refreshToken) {
 
 		logger.debug("Raw Cookie Value: {}", refreshToken);
 
-		if (refreshToken == null && (requestDto == null || requestDto.getRefreshToken() == null)) {
+		if (refreshToken == null) {
 			throw new InvalidTokenException("리프레시 토큰이 없습니다.");
 		}
 		logger.debug("refreshToken:{}", refreshToken);
-		logger.debug("requestDto: {}", requestDto);
 		TokenResponseDto tokenResponse = authFacadeService.refreshToken(refreshToken);
 
 		ResponseCookie cookie = ResponseCookie.from("refreshToken", tokenResponse.getRefreshToken())
