@@ -48,7 +48,7 @@ public class ArticleController {
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "게시글 전체 조회 성공"),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 게시판입니다.")})
-	@GetMapping(value = "/")
+	@GetMapping(value = "")
 	public ResponseEntity<List<ArticleGetAllResponseDto>> articleGetALL() {
 		// 게시판 전체 조회 로직 호출
 		List<ArticleGetAllResponseDto> response = articleFacadeService.allGetArticleList();
@@ -64,7 +64,7 @@ public class ArticleController {
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "게시글 조회 성공"),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 게시판입니다.")})
-	@GetMapping(value = "/{articleId}/")
+	@GetMapping(value = "/{articleId}")
 	public ResponseEntity<ArticleDetailResponseDto> articleDetail(@PathVariable int articleId) {
 		// 게시판 전체 조회 로직 호출
 		ArticleDetailResponseDto response = articleFacadeService.getArticle(articleId);
@@ -79,7 +79,7 @@ public class ArticleController {
 	@ApiResponses({@ApiResponse(responseCode = "201", description = "게시글 생성 성공"),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 게시판입니다.")})
-	@PostMapping(value = "/")
+	@PostMapping(value = "")
 	public ResponseEntity<Void> articleCreate(@AuthenticationPrincipal User user,
 		@RequestBody ArticleCreateRequestDto request) {
 		articleFacadeService.createArticle(user.getUserId(), request);
@@ -95,7 +95,7 @@ public class ArticleController {
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "게시글 수정 성공"),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 게시판입니다.")})
-	@PutMapping(value = "/{articleId}/")
+	@PutMapping(value = "/{articleId}")
 	public ResponseEntity<Void> articleUpdate(@AuthenticationPrincipal User user, @PathVariable int articleId,
 		@RequestBody ArticleUpdateRequestDto request) {
 		articleFacadeService.updateArticle(user.getUserId(), articleId, request);
@@ -110,7 +110,7 @@ public class ArticleController {
 	@ApiResponses({@ApiResponse(responseCode = "204", description = "게시글 삭제 성공"),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 게시판입니다.")})
-	@DeleteMapping(value = "/{articleId}/")
+	@DeleteMapping(value = "/{articleId}")
 	public ResponseEntity<Void> articleDelete(@AuthenticationPrincipal User user, @PathVariable int articleId) {
 		articleFacadeService.deleteArticle(user.getUserId(), articleId);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();    // 응답 본문 없이 상태 코드만 반환-
@@ -124,7 +124,7 @@ public class ArticleController {
 	@ApiResponses({@ApiResponse(responseCode = "200", description = "게시글 검색 성공"),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 게시판입니다.")})
-	@GetMapping(value = "/search/")
+	@GetMapping(value = "/search")
 	public ResponseEntity<List<ArticleSearchResponseDto>> articleSearch(@RequestParam String keyword) {
 		List<ArticleSearchResponseDto> articles = articleFacadeService.searchArticleList(keyword);
 		return ResponseEntity.ok().body(articles);

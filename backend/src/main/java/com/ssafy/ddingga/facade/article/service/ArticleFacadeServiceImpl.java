@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.ssafy.ddingga.domain.article.entity.Article;
 import com.ssafy.ddingga.domain.article.service.ArticleService;
-import com.ssafy.ddingga.domain.auth.service.AuthService;
 import com.ssafy.ddingga.facade.article.dto.request.ArticleCreateRequestDto;
 import com.ssafy.ddingga.facade.article.dto.request.ArticleUpdateRequestDto;
 import com.ssafy.ddingga.facade.article.dto.response.ArticleDetailResponseDto;
@@ -20,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ArticleFacadeServiceImpl implements ArticleFacadeService {
 	private final ArticleService articleService;
-	private final AuthService authService;
 
 	@Override
 	public List<ArticleGetAllResponseDto> allGetArticleList() {
