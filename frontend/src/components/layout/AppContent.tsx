@@ -10,6 +10,7 @@ import LoginPage from '../../pages/LoginPage';
 import MainPage from '../../pages/MainPage';
 import NotFoundPage from '../../pages/NotFoundPage';
 import MusicPlayer from '../common/MusicPlayer';
+import PlayPage from '../../pages/PlayPage';
 
 interface AppContentProps {
   isExpanded: boolean;
@@ -17,17 +18,11 @@ interface AppContentProps {
 
 const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
   const location = useLocation();
-  const hidePlayerPaths = ['/login', '/signup'];
+  const isPlayPage = location.pathname === '/play';
 
   return (
-    <div
-      className={`
-      flex-1 flex flex-col
-      transition-[margin] duration-300 ease-in-out
-      ${isExpanded ? 'ml-64' : 'ml-20'}
-    `}
-    >
-      <div className="flex-1 overflow-auto pb-20">
+    <main className={`flex-1 flex flex-col ${isPlayPage ? 'h-full' : 'pb-20'}`}>
+      <div className="flex-1 overflow-auto">
         <Routes>
           <Route path="/" element={<MainPage />} />
           <Route path="/home" element={<HomePage />} />
@@ -35,13 +30,12 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
           <Route path="/edit/:id" element={<EditPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/play" element={<PlayPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
-      {!hidePlayerPaths.includes(location.pathname) && (
-        <MusicPlayer songs={mockSongs} isExpanded={isExpanded} />
-      )}
-    </div>
+      {!isPlayPage && <MusicPlayer songs={mockSongs} isExpanded={isExpanded} />}
+    </main>
   );
 };
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
+import { login } from '@/services/api';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -7,20 +8,31 @@ interface LoginModalProps {
 }
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
-  const [email, setEmail] = useState('');
+  const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
     try {
-      // 실제 로그인 로직 구현 필요
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await login({
+        loginId,
+        password
+      });
+
+      // 로그인 성공 처리
+      localStorage.setItem('accessToken', response.accesToken);
+      localStorage.setItem('username', response.username);
+      
       onClose();
+      window.location.href = '/dashboard'; // 또는 원하는 페이지로 리다이렉트
     } catch (error) {
       console.error('Login failed:', error);
+      setError(error instanceof Error ? error.message : '로그인에 실패했습니다');
     } finally {
       setIsLoading(false);
     }
@@ -51,18 +63,18 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-1.5">
-              이메일
+            <label htmlFor="loginId" className="block text-sm font-medium text-zinc-300 mb-1.5">
+              아이디
             </label>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              id="loginId"
+              value={loginId}
+              onChange={(e) => setLoginId(e.target.value)}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-zinc-500
                 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500
                 transition-colors"
-              placeholder="name@example.com"
+              placeholder="아이디를 입력하세요"
               required
             />
           </div>
@@ -100,6 +112,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               비밀번호 찾기
             </button>
           </div>
+
+          {error && (
+            <div className="text-red-500 text-sm text-center">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"

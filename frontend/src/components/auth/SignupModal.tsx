@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
+import { signup } from '@/services/api';
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -7,22 +8,30 @@ interface SignupModalProps {
 }
 
 const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose }) => {
-  const [email, setEmail] = useState('');
+  const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [nickname, setNickname] = useState('');
+  const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
     try {
-      // 실제 회원가입 로직 구현 필요
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await signup({
+        loginId,
+        password,
+        username
+      });
+
+      // 회원가입 성공
       onClose();
+      // 선택적: 회원가입 성공 후 로그인 모달로 전환하거나 자동 로그인
+      alert(`${response.username}님, 환영합니다!`);
     } catch (error) {
-      console.error('Signup failed:', error);
+      setError(error instanceof Error ? error.message : '회원가입에 실패했습니다');
     } finally {
       setIsLoading(false);
     }
@@ -53,31 +62,31 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose }) => {
 
         <form onSubmit={handleSignup} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-1.5">
-              이메일
+            <label htmlFor="loginId" className="block text-sm font-medium text-zinc-300 mb-1.5">
+              아이디
             </label>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              id="loginId"
+              value={loginId}
+              onChange={(e) => setLoginId(e.target.value)}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-zinc-500
                 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500
                 transition-colors"
-              placeholder="name@example.com"
+              placeholder="아이디를 입력하세요"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="nickname" className="block text-sm font-medium text-zinc-300 mb-1.5">
+            <label htmlFor="username" className="block text-sm font-medium text-zinc-300 mb-1.5">
               닉네임
             </label>
             <input
               type="text"
-              id="nickname"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-zinc-500
                 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500
                 transition-colors"
@@ -103,22 +112,11 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose }) => {
             />
           </div>
 
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-zinc-300 mb-1.5">
-              비밀번호 확인
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-zinc-500
-                focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500
-                transition-colors"
-              placeholder="••••••••"
-              required
-            />
-          </div>
+          {error && (
+            <div className="text-red-500 text-sm text-center">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"
