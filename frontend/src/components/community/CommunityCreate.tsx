@@ -36,9 +36,9 @@ export const CommunityCreate: React.FC<CommunityCreateProps> = ({ posts, setPost
       username: 'CurrentUser',
       title: newPostTitle,
       content: newPostContent,
-      createdAt: new Date(), // Add createAt
+      createdAt: new Date(),
       category: 'Music',
-      popular_post: false,
+      popularPost: false,
       recommend: 3,
     };
 

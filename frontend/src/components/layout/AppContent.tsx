@@ -12,7 +12,6 @@ import LoginPage from '../../pages/LoginPage';
 import MainPage from '../../pages/MainPage';
 import NotFoundPage from '../../pages/NotFoundPage';
 import MusicPlayer from '../common/MusicPlayer';
-import { CommunityDetail } from '../community/CommunityDetail';
 
 interface AppContentProps {
   isExpanded: boolean;
@@ -40,7 +39,6 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<NotFoundPage />} />
           <Route path="/community" element={<CommunityPage />} />
-          <Route path="/community/detail/:id" element={<CommunityDetail />} />
         </Routes>
       </div>
       {!hidePlayerPaths.includes(location.pathname) && (

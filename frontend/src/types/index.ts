@@ -47,7 +47,6 @@ export interface Category {
   color: string;
   count: number;
 }
-
 export interface Post {
   articleId: number;
   userId: number;
@@ -56,10 +55,11 @@ export interface Post {
   content?: string;
   createdAt: Date;
   category: string;
-  popular_post: boolean;
+  popularPost: boolean;
   recommend: number;
   boardCreatedMemberId?: string;
   picked?: boolean;
+  comments?: Comment[];
 }
 
 export interface NestedComment {
@@ -67,10 +67,10 @@ export interface NestedComment {
   id: number;
   username: string;
   content: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   isDeleted: boolean;
-  comment_id2: number;
+  commentId2: number;
 }
 
 export interface Comment {
@@ -78,8 +78,12 @@ export interface Comment {
   id: number;
   username: string;
   content: string;
-  created_at: string;
-  updated_at: string;
-  is_deleted: boolean;
-  comments: NestedComment[];
+  createdAt: Date;
+  updatedAt: Date;
+  isDeleted: boolean;
+  comments?: NestedComment[];
+}
+
+export interface CommunityListProps {
+  post: Post;
 }

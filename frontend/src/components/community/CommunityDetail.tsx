@@ -2,73 +2,59 @@ import React, { useState, useEffect } from 'react';
 
 import { useNavigate, useParams } from 'react-router-dom';
 
-// You'll need to define these interfaces based on your actual data structure
-interface Comment {
-  id: number;
-  author: string;
-  content: string;
-  createdAt: string; // Or Date if you're using Date objects
-  // Add other properties as needed
-}
+import { Post, Comment, NestedComment } from '@/types/index';
 
-interface Post {
-  id: number;
-  author: string;
-  title: string;
-  content: string;
-  createdAt: string; // Or Date if you're using Date objects
-  comments: Comment[];
-  boardCreatedMemberId: string;
-  picked?: boolean;
-  // Add other properties as needed
-}
-
-// Placeholder for QuestionContentCard - you'll need to create this component
-const QuestionContentCard: React.FC<{
-  comment: Comment;
-  boardId: string;
-  picked?: boolean;
-}> = ({ comment }) => {
+const QuestionContentCard: React.FC<{ comment: NestedComment }> = ({ comment }) => {
   return (
     <div className="border border-gray-300 p-4 rounded-lg">
-      <p className="font-bold">{comment.author}</p>
+      <p className="font-bold">{comment.username}</p>
       <p className="text-gray-600">{comment.content}</p>
       <p className="text-gray-400 text-sm">
-        {new Date(comment.createdAt).toISOString().replace('T', ' ').slice(0, 16)}
+        {comment.createdAt.toISOString().replace('T', ' ').slice(0, 16)}
       </p>
       {/* Add more details here */}
     </div>
   );
 };
 
-export const CommunityDetail: React.FC = () => {
+interface CommunityDetailProps {
+  board: Post | null;
+  handleCloseDetails: () => void;
+}
+
+export const CommunityDetail: React.FC<CommunityDetailProps> = ({ board, handleCloseDetails }) => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>(); // Get the id from the URL
-  const [board, setBoard] = useState<Post | null>(null);
   const [answer, setAnswer] = useState('');
-  const [boardComments, setBoardComments] = useState<Comment[]>([]);
+  const [boardComments, setBoardComments] = useState<NestedComment[]>([]);
   const [visibleCount, setVisibleCount] = useState(5); // Initial number of comments to show
-  const [boardCreatedMemberId, setBoardCreatedMemberId] = useState('');
-  const [lectureInstructorInfoId, setLectureInstructorInfoId] = useState(''); // 게시글 작성한 유저의 id값임임
-  const [userId, setUserId] = useState(''); // 나중에 로그인한 유저로 넣을것임
+  const [boardCreatedUserId, setBoardCreatedUserId] = useState<number>(0);
+  const [lectureInstructorInfoId, setLectureInstructorInfoId] = useState(0); // 게시글 작성한 유저의 id값임임
+  const [userId, setUserId] = useState(0); // 나중에 로그인한 유저로 넣을것임
+  const [handleCloseDetails, setHandleCloseDetails] = useState(handleCloseDetails);
 
   // Mock data for demonstration
   const mockBoard: Post = {
-    id: 1,
-    author: 'User1',
+    articleId: 1,
+    userId: 1,
+    username: 'User1',
     title: 'My Question',
     content: 'This is the content of my question.',
-    createdAt: '2023-11-20T10:00:00',
+    createdAt: new Date(),
+    category: 'Music',
+    popularPost: false,
+    recommend: 0,
     comments: [
-      { id: 1, author: 'User2', content: 'Answer 1', createdAt: '2023-11-20T11:00:00' },
-      { id: 2, author: 'User3', content: 'Answer 2', createdAt: '2023-11-20T12:00:00' },
-      { id: 3, author: 'User4', content: 'Answer 3', createdAt: '2023-11-20T13:00:00' },
-      { id: 4, author: 'User5', content: 'Answer 4', createdAt: '2023-11-20T14:00:00' },
-      { id: 5, author: 'User6', content: 'Answer 5', createdAt: '2023-11-20T15:00:00' },
-      { id: 6, author: 'User7', content: 'Answer 6', createdAt: '2023-11-20T16:00:00' },
+      {
+        commentId: 1,
+        id: 2,
+        username: 'User2',
+        content: 'Answer 1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isDeleted: false,
+      },
     ],
-    boardCreatedMemberId: 'User1',
-    picked: false,
   };
 
   useEffect(() => {
@@ -77,8 +63,8 @@ export const CommunityDetail: React.FC = () => {
     if (id) {
       // Example using mock data
       setBoard(mockBoard);
-      setBoardComments(mockBoard.comments);
-      setBoardCreatedMemberId(mockBoard.boardCreatedMemberId);
+      setBoardComments(mockBoard?.comments);
+      setBoardCreatedUserId(mockBoard.userId);
       // setLectureInstructorInfoId(mockBoard.lectureInstructorInfoId); // Assuming you have this in your data
       // setUserId(mockBoard.id); // Assuming you have this in your data
     }
@@ -97,11 +83,15 @@ export const CommunityDetail: React.FC = () => {
     mutate: () => {
       // Simulate adding a comment
       if (answer.trim() !== '') {
-        const newComment: Comment = {
-          id: boardComments.length + 1,
-          author: 'CurrentUser', // Replace with actual user
+        const newComment: NestedComment = {
+          commentId: boardComments.length + 1,
+          id: userId, // Replace with actual user
+          username: 'CurrentUser', // Replace with actual user
           content: answer,
-          createdAt: new Date().toISOString(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          isDeleted: false,
+          commentId2: 0, // Replace with actual comment_id2
         };
         setBoardComments([...boardComments, newComment]);
         setAnswer('');
@@ -128,14 +118,14 @@ export const CommunityDetail: React.FC = () => {
           <h1 className="text-[32px] font-bold">{board.title || ''}</h1>
           <div className="text-[14px] text-[#868296]">
             {board?.createdAt
-              ? new Date(board.createdAt).toISOString().replace('T', ' ').slice(0, 16)
+              ? board.createdAt.toISOString().replace('T', ' ').slice(0, 16)
               : '날짜 없음'}
           </div>
           <div className="ml-[10px] mt-[20px]">
             <p className="whitespace-pre-line text-[18px]">{board.content || ''}</p>
           </div>
           <div className="flex w-full justify-end">
-            작성자 :&nbsp;<span className="font-bold"> {boardCreatedMemberId}</span>
+            작성자 :&nbsp;<span className="font-bold"> {board.username}</span>
           </div>
         </div>
         <hr />
@@ -196,12 +186,7 @@ export const CommunityDetail: React.FC = () => {
               <div className="space-y-3">
                 {boardComments.slice(0, visibleCount).map((comment, index) => (
                   <div key={index} className="flex h-full flex-col">
-                    <QuestionContentCard
-                      key={index}
-                      comment={comment}
-                      boardId={board?.boardCreatedMemberId}
-                      picked={board?.picked}
-                    />
+                    <QuestionContentCard key={index} comment={comment} />
                   </div>
                 ))}
                 {/* 🔥 '더보기' 버튼 추가 (모든 댓글이 표시되면 숨김) */}
