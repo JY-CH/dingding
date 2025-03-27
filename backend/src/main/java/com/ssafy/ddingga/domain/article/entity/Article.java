@@ -4,9 +4,8 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.ssafy.ddingga.domain.user.entity.User;
+import com.ssafy.ddingga.domain.auth.entity.User;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +13,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,7 +22,7 @@ import lombok.Setter;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Setter
 @Getter
 @Builder
@@ -40,6 +38,7 @@ public class Article {
 	private String title; // 게시판 제목
 	private String content;    // 게시판 내용
 	private LocalDateTime createdAt; // 생성일자
+	private LocalDateTime updatedAt; // 수정일자
 	private String category;    // 카테고리
 	private Boolean popularPost;  // 인기글
 	private Integer recommend;  // 추천수

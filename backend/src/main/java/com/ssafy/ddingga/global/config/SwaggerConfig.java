@@ -12,27 +12,27 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 @Configuration
 public class SwaggerConfig {
 
-    @Bean
-    public OpenAPI openAPI() {
-        Info info = new Info()
-                .title("띵가 프로젝트 API Document")
-                .version("v0.0.1")
-                .description("띵가 프로젝트의 API 명세서입니다.");
+	@Bean
+	public OpenAPI openAPI() {
+		Info info = new Info()
+			.title("띵가 프로젝트 API Document")
+			.version("v0.0.1")
+			.description("띵가 프로젝트의 API 명세서입니다.");
 
-        // JWT SecurityScheme 설정
-        SecurityScheme securityScheme = new SecurityScheme()
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")
-                .in(SecurityScheme.In.HEADER)
-                .name("Authorization");
+		// JWT SecurityScheme 설정
+		SecurityScheme securityScheme = new SecurityScheme()
+			.type(SecurityScheme.Type.HTTP)
+			.scheme("bearer")
+			.bearerFormat("JWT")
+			.in(SecurityScheme.In.HEADER)
+			.name("Authorization");
 
-        SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
+		SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
 
-        return new OpenAPI()
-                .info(info)
-                .addSecurityItem(securityRequirement)
-                .components(new Components()
-                        .addSecuritySchemes("bearerAuth", securityScheme));
-    }
+		return new OpenAPI()
+			.info(info)
+			.addSecurityItem(securityRequirement)
+			.components(new Components()
+				.addSecuritySchemes("bearerAuth", securityScheme));
+	}
 } 
