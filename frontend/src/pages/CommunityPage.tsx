@@ -110,11 +110,14 @@ export const CommunityPage: React.FC = () => {
   );
 
   return (
-    <div className="h-full bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white p-8">
+    <div className="h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <header className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold">Community</h1>
+            <div className='flex flex-col'>
+                <h1 className="text-3xl font-bold">Community</h1>
+                <h5 className='text-zinc-400'> Welcome To The Community</h5>
+            </div>
           <div className="relative">
             <input
               type="text"
