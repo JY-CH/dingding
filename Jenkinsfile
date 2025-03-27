@@ -8,7 +8,6 @@ pipeline {
         DOCKER_HUB_ID = "jaeyeolyim"  // Docker Hub 아이디
         MATTERMOST_WEBHOOK_URL = 'https://meeting.ssafy.com/hooks/9xbbpnkbqfyo3nzxjrkaib8xbc'  // Mattermost Incoming Webhook URL
         MATTERMOST_CHANNEL = 'd105-jenkins-alarm'  // Mattermost 채널
-        JWT_SECRET = credentials('JWT_SECRET')
     }
 
     stages {
@@ -65,7 +64,8 @@ pipeline {
                     withCredentials([
                         string(credentialsId: 'MySQL-Username', variable: 'MYSQL_USERNAME'),
                         string(credentialsId: 'MySQL-Password', variable: 'MYSQL_PASSWORD'),
-                        string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD')
+                        string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD'),
+                        string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
                     ]) {
                         script {
                             sh """
