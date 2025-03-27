@@ -8,6 +8,7 @@ pipeline {
         DOCKER_HUB_ID = "jaeyeolyim"  // Docker Hub 아이디
         MATTERMOST_WEBHOOK_URL = 'https://meeting.ssafy.com/hooks/9xbbpnkbqfyo3nzxjrkaib8xbc'  // Mattermost Incoming Webhook URL
         MATTERMOST_CHANNEL = 'd105-jenkins-alarm'  // Mattermost 채널
+        JWT_SECRET = credentials('JWT_SECRET')
     }
 
     stages {
@@ -81,15 +82,20 @@ pipeline {
                             export MYSQL_USERNAME="${MYSQL_USERNAME}"
                             export MYSQL_PASSWORD="${MYSQL_PASSWORD}"
                             export REDIS_PASSWORD="${REDIS_PASSWORD}"
+                            export JWT_SECRET="${JWT_SECRET}"
+
 
                             echo "MYSQL_USERNAME=${MYSQL_USERNAME}" >> .env
                             echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env
                             echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
+                            echo "JWT_SECRET=${JWT_SECRET}" >> .env
+                            
 
                             docker-compose down --remove-orphans
                             MYSQL_USERNAME=${MYSQL_USERNAME} \
                             MYSQL_PASSWORD=${MYSQL_PASSWORD} \
                             REDIS_PASSWORD=${REDIS_PASSWORD} \
+                            JWT_SECRET=${JWT_SECRET} \
                             docker-compose up -d --force-recreate
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
