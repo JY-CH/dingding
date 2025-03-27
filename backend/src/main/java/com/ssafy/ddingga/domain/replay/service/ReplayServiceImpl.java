@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.ssafy.ddingga.domain.auth.repository.AuthRepository;
 import com.ssafy.ddingga.domain.replay.entity.Replay;
 import com.ssafy.ddingga.domain.replay.repository.ReplayRepository;
-import com.ssafy.ddingga.facade.dashboard.dto.response.ReplayDto;
+import com.ssafy.ddingga.facade.replay.dto.response.ReplayDto;
 import com.ssafy.ddingga.global.error.exception.ServiceException;
 import com.ssafy.ddingga.global.error.exception.UserNotFoundException;
 
@@ -65,6 +65,37 @@ public class ReplayServiceImpl implements ReplayService {
 			return result;
 		} catch (Exception e) {
 			log.error("리플레이 - 이번주 리플레이 조회 실패: userId={}, error={}", userId, e.getMessage());
+			throw new ServiceException("리플레이 조회 중 오류가 발생했습니다.", e);
+		}
+	}
+
+	@Override
+	public List<ReplayDto> getAllReplays(Integer userId) {
+		if (!authRepository.existsById(userId)) {
+			log.error("리플레이 - 사용자를 찾을 수 없음: userId={}", userId);
+			throw new UserNotFoundException("사용자를 찾을 수 없습니다.");
+		}
+		try {
+			List<Replay> replays = replayRepository.findReplaysByUser_UserId(userId);
+			log.info("리플레이 - 유저별 리플레이 조회 성공 : userId = {}, replayCount = {}", userId, replays.size());
+
+			// replay 엔티티를 Dto로 변환
+			List<ReplayDto> result = replays.stream()
+				.map(replay -> ReplayDto.builder()
+					.replayId(replay.getReplayId())
+					.songTitle(replay.getSong().getSongTitle())
+					.score(replay.getScore())
+					.mode(replay.getMode())
+					.videoPath(replay.getVideoPath())
+					.practiceDate(replay.getPracticeDate())
+					.build())
+				.toList();
+
+			log.info("리플레이 - DTO 변환 완료 : userId={},replayCount={}", userId, result.size());
+			return result;
+
+		} catch (Exception e) {
+			log.error("리플레이 - 유저별 리플레이 조회 실패 : userId={}, error={}", userId, e.getMessage());
 			throw new ServiceException("리플레이 조회 중 오류가 발생했습니다.", e);
 		}
 	}
