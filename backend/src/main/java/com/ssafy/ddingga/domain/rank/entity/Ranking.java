@@ -6,7 +6,10 @@ import com.ssafy.ddingga.domain.auth.entity.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,7 +27,11 @@ public class Ranking {
 	// DB에 저장하면 개손해
 	// Redis 사용하는 방법도 존재함 구현할때 생각해보기
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer rankingId;
+
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false) // 한 유저가 여러개의 랭킹을 가지니까 기본키로 못씀
 	private User user;
 
 	private LocalTime playTime;

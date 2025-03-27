@@ -1,3 +1,4 @@
+// backend jenkinsfile
 pipeline {
     agent any
 
@@ -27,7 +28,15 @@ pipeline {
                 }
             }
         }
-
+        stage('Copy application.yml') {
+            steps {
+                script {
+                    sh '''
+                    cp backend/src/main/resources/application.yml backend/build/libs/
+                    '''
+                }
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
@@ -49,7 +58,7 @@ pipeline {
             }
         }
 
-        stage('Deploy (Blue-Green Deployment)') {
+        stage('Deploy (Backend-1, Backend-2, MySQL, Redis)') {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
                     withCredentials([
@@ -58,81 +67,53 @@ pipeline {
                         string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD')
                     ]) {
                         script {
-                            sh '''
+                            sh """
                             ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                             cd /home/ubuntu/j12d105
 
-                            # 현재 실행 중인 백엔드 컨테이너 확인a
-                            CURRENT_BACKEND_1=$(docker ps --format '{{.Names}}' | grep -E '^backend-[1-4]$' | head -n 1)
-                            CURRENT_BACKEND_2=$(docker ps --format '{{.Names}}' | grep -E '^backend-[1-4]$' | head -n 2 | tail -n 1)
+                            echo "🛑 기존 백엔드, MySQL, Redis 컨테이너 중단 & 삭제"
+                            docker-compose down
 
-                            # 새로운 백엔드 컨테이너 결정
-                            if [ -z "$CURRENT_BACKEND_1" ] || [ -z "$CURRENT_BACKEND_2" ]; then
-                                NEW_BACKEND_1="backend-1"
-                                NEW_BACKEND_2="backend-2"
-                            elif [ "$CURRENT_BACKEND_1" == "backend-1" ] && [ "$CURRENT_BACKEND_2" == "backend-2" ]; then
-                                NEW_BACKEND_1="backend-3"
-                                NEW_BACKEND_2="backend-4"
-                            elif [ "$CURRENT_BACKEND_1" == "backend-3" ] && [ "$CURRENT_BACKEND_2" == "backend-4" ]; then
-                                NEW_BACKEND_1="backend-1"
-                                NEW_BACKEND_2="backend-2"
-                            else
-                                NEW_BACKEND_1="backend-1"
-                                NEW_BACKEND_2="backend-2"
-                            fi
+                            echo "🚀 최신 백엔드 이미지 가져오기"
+                            docker-compose pull backend-1 backend-2
 
-                            echo "🚀 새로운 컨테이너: $NEW_BACKEND_1, $NEW_BACKEND_2"
+                            echo "🚀 환경 변수 설정 후 컨테이너 실행"
+                            export MYSQL_USERNAME="${MYSQL_USERNAME}"
+                            export MYSQL_PASSWORD="${MYSQL_PASSWORD}"
+                            export REDIS_PASSWORD="${REDIS_PASSWORD}"
 
-                            # 이미지 풀
+                            echo "MYSQL_USERNAME=${MYSQL_USERNAME}" >> .env
+                            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env
+                            echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
+
+                            docker-compose down --remove-orphans
                             MYSQL_USERNAME=${MYSQL_USERNAME} \
                             MYSQL_PASSWORD=${MYSQL_PASSWORD} \
                             REDIS_PASSWORD=${REDIS_PASSWORD} \
-                            docker-compose pull $NEW_BACKEND_1 $NEW_BACKEND_2
+                            docker-compose up -d --force-recreate
 
-                            # 새 컨테이너 실행
-                            MYSQL_USERNAME=${MYSQL_USERNAME} \
-                            MYSQL_PASSWORD=${MYSQL_PASSWORD} \
-                            REDIS_PASSWORD=${REDIS_PASSWORD} \
-                            docker-compose up -d --force-recreate $NEW_BACKEND_1 $NEW_BACKEND_2
-
-                            # 10초 대기 후 상태 확인
-                            sleep 10
-
-                            # 컨테이너 상태 확인
-                            docker ps
-                            docker-compose ps
-
-                            # Nginx 설정 업데이트
-                            if [ -n "$CURRENT_BACKEND_1" ] && [ -n "$CURRENT_BACKEND_2" ]; then
-                                sudo sed -i "s/$CURRENT_BACKEND_1/$NEW_BACKEND_1/g" /home/ubuntu/j12d105/nginx/nginx.conf
-                                sudo sed -i "s/$CURRENT_BACKEND_2/$NEW_BACKEND_2/g" /home/ubuntu/j12d105/nginx/nginx.conf
-                                sudo systemctl restart nginx
-                                
-                                # 이전 컨테이너 중지 및 삭제
-                                docker stop "$CURRENT_BACKEND_1" "$CURRENT_BACKEND_2"
-                                docker rm "$CURRENT_BACKEND_1" "$CURRENT_BACKEND_2"
-                            fi
-
-                            echo "✅ 배포 완료!"
+                            echo "✅ 배포 완료! 현재 컨테이너 상태:"
+                            docker ps -a
                             exit 0
                             EOF
-                            '''
+                            """
                         }
                     }
                 }
             }
         }
     }
-    
     post {
         success {
             echo "✅ Deployment Successful!"
             
+            // GitLab 커밋 기록에서 배포한 사람의 GitLab 아이디 추출
             script {
                 def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
                 def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
                 def Name = Author_ID.substring(1)
 
+                // Mattermost 알림 전송 (빌드 성공 시)
                 mattermostSend(
                     color: 'good',
                     message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 성공했습니다! \n배포한 사람: ${Name} ㅋㅋ좀치노 \n브랜치: ${env.GIT_BRANCH} \n(<${env.BUILD_URL}|상세 보기>)",
@@ -145,10 +126,12 @@ pipeline {
             echo "❌ Deployment Failed."
             
             script {
+                // GitLab 커밋 기록에서 배포한 사람의 GitLab 아이디 추출
                 def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
                 def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
                 def Name = Author_ID.substring(1)
 
+                // Mattermost 알림 전송 (빌드 실패 시)
                 mattermostSend(
                     color: 'danger',
                     message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 실패했습니다. \n배포한 사람: ${Name} 뭐함? \n${env.GIT_BRANCH}에서 오류가 발생했습니다. \n(<${env.BUILD_URL}|상세 보기>)",
@@ -159,3 +142,4 @@ pipeline {
         }
     }
 }
+

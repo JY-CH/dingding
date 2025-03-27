@@ -57,10 +57,10 @@ public class AuthFacadeServiceImpl implements AuthFacadeService {
 	}
 
 	@Override
-	public AuthUpdateResponseDto updateUserInfo(String loginId, UserUpdateRequestDto request) {
+	public AuthUpdateResponseDto updateUserInfo(Integer userId, UserUpdateRequestDto request) {
 		//UserService를 통해 사용자 정보 업데이트
 		User updateUser = authService.updateUser(
-			loginId,
+			userId,
 			request.getUsername(),
 			request.getProfileImage()
 		);
@@ -78,10 +78,10 @@ public class AuthFacadeServiceImpl implements AuthFacadeService {
 	@Override
 	public LogoutResponseDto logout(String accessToken) {
 		// 토큰에서 사용자 정보 추출
-		String loginId = jwtTokenProvider.getLoginId(accessToken);
+		Integer userId = jwtTokenProvider.getUserId(accessToken);
 
 		// 로그아웃 기능 호출
-		jwtService.invalidateRefreshToken(loginId);
+		jwtService.invalidateRefreshToken(userId);
 
 		return LogoutResponseDto.builder()
 			.message("로그아웃이 완료되었습니다.")
@@ -94,11 +94,11 @@ public class AuthFacadeServiceImpl implements AuthFacadeService {
 	}
 
 	@Override
-	public AuthDeleteResponseDto deleteUser(String loginId) {
+	public AuthDeleteResponseDto deleteUser(Integer userId) {
 		//회원 탈퇴 처리
-		User deletedUser = authService.deleteUser(loginId);
+		User deletedUser = authService.deleteUser(userId);
 		//로그아웃과 동일하게 토큰 무효화 처리
-		jwtService.invalidateRefreshToken(loginId);
+		jwtService.invalidateRefreshToken(userId);
 		// 응답 생성
 		return new AuthDeleteResponseDto(
 			"회원탈퇴가 완료되었습니다.",
