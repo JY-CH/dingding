@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+
 import { Clock, Star, Repeat } from 'lucide-react';
+
 import ProfileEditModal from './ProfileEditModal';
 
 interface ProfileTileProps {
@@ -58,7 +60,9 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
                 <div className="flex items-center">
                   <div className="flex items-center gap-1 group relative">
                     <Clock size={16} className="text-amber-500" />
-                    <span className="text-sm text-white font-semibold bg-zinc-700 px-2 py-1 rounded-md">{playtimerank}</span>
+                    <span className="text-sm text-white font-semibold bg-zinc-700 px-2 py-1 rounded-md">
+                      {playtimerank}
+                    </span>
                     <div className="absolute hidden group-hover:block top-6 left-1/2 -translate-x-1/2 bg-zinc-700 text-white text-xs p-2 rounded-md whitespace-nowrap">
                       플레이 시간 랭킹
                     </div>
@@ -68,7 +72,9 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
                 <div className="flex items-center">
                   <div className="flex items-center gap-1 group relative">
                     <Star size={16} className="text-amber-500" />
-                    <span className="text-sm text-white font-semibold bg-zinc-700 px-2 py-1 rounded-md">{avgscorerank}</span>
+                    <span className="text-sm text-white font-semibold bg-zinc-700 px-2 py-1 rounded-md">
+                      {avgscorerank}
+                    </span>
                     <div className="absolute hidden group-hover:block top-6 left-1/2 -translate-x-1/2 bg-zinc-700 text-white text-xs p-2 rounded-md whitespace-nowrap">
                       평균 점수 랭킹
                     </div>
@@ -78,7 +84,9 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
                 <div className="flex items-center">
                   <div className="flex items-center gap-1 group relative">
                     <Repeat size={16} className="text-amber-500" />
-                    <span className="text-sm text-white font-semibold bg-zinc-700 px-2 py-1 rounded-md">{totaltryrank}</span>
+                    <span className="text-sm text-white font-semibold bg-zinc-700 px-2 py-1 rounded-md">
+                      {totaltryrank}
+                    </span>
                     <div className="absolute hidden group-hover:block top-6 left-1/2 -translate-x-1/2 bg-zinc-700 text-white text-xs p-2 rounded-md whitespace-nowrap">
                       총 시도 횟수 랭킹
                     </div>

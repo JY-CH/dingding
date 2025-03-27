@@ -17,9 +17,9 @@ const profileData = {
 };
 
 const statsData = [
-  { label: '이번 주 최고 점수', value: '075점', change: '+10.01%', positive: true },
+  { label: '평균 정확도도', value: '075%', change: '+10.01%', positive: true },
   { label: '누적시간', value: '2,318시간', change: '', positive: null },
-  { label: '이번 주 연습량', value: '671회', change: '-0.03%', positive: false },
+  { label: '누적 연습량', value: '671회', change: '-0.03%', positive: false },
 ];
 
 const barChartData = [
