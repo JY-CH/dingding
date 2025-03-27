@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { CommunityCreate } from '../components/community/CommunityCreate';
+
 // Mock Data (Replace with API calls later)
 interface Post {
   id: number;
@@ -63,8 +64,14 @@ export const CommunityPage: React.FC = () => {
     post.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  // Function to add a new post
+  const addNewPost = (newPost: Post) => {
+    setPosts([...posts, newPost]);
+    setShowCreate(false); // Hide the create form after adding the post
+  };
+
   return (
-    <div className="h-full bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white p-8">
+    <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <header className="flex justify-between items-center mb-4">
@@ -105,7 +112,7 @@ export const CommunityPage: React.FC = () => {
         </button>
 
         {/* Create Post Section (Conditionally Rendered) */}
-        {showCreate && <CommunityCreate posts={posts} setPosts={setPosts} />}
+        {showCreate && <CommunityCreate posts={posts} setPosts={addNewPost} />}
 
         {/* Posts Section */}
         {!showCreate && (

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 interface Post {
   id: number;
   author: string;
@@ -17,10 +19,11 @@ interface Comment {
 
 interface CommunityCreateProps {
   posts: Post[];
-  setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
+  setPosts: (newPost: Post) => void; // Change the type of setPosts
 }
 
 export const CommunityCreate: React.FC<CommunityCreateProps> = ({ posts, setPosts }) => {
+  const navigate = useNavigate();
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState('');
   const mockCategories = [
@@ -42,16 +45,20 @@ export const CommunityCreate: React.FC<CommunityCreateProps> = ({ posts, setPost
 
     const newPost: Post = {
       id: posts.length + 1,
-      author: 'CurrentUser', // Replace with actual current user
+      author: 'CurrentUser',
       title: newPostTitle,
       content: newPostContent,
       likes: 0,
       comments: [],
     };
 
-    setPosts([...posts, newPost]);
+    setPosts(newPost); // Call the setPosts function with the new post
     setNewPostTitle('');
     setNewPostContent('');
+  };
+
+  const handleGoBack = () => {
+    navigate('/community');
   };
 
   return (
@@ -72,12 +79,20 @@ export const CommunityCreate: React.FC<CommunityCreateProps> = ({ posts, setPost
           value={newPostContent}
           onChange={(e) => setNewPostContent(e.target.value)}
         />
-        <button
-          onClick={handleCreatePost}
-          className="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-        >
-          Post
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleCreatePost}
+            className="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            Post
+          </button>
+          <button
+            onClick={handleGoBack}
+            className="bg-zinc-600 hover:bg-zinc-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            Back
+          </button>
+        </div>
       </section>
 
       {/* Categories Section */}
