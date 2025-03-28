@@ -28,7 +28,9 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public List<Comment> getComments(int articleId) {
-		return commentRepository.findByArticleArticleId(articleId);
+		Article article = articleService.getArticle(articleId);
+
+		return commentRepository.findByArticle(article);
 	}
 
 	@Override
@@ -36,16 +38,6 @@ public class CommentServiceImpl implements CommentService {
 		try {
 			User user = authService.getUser(userId);
 			Article article = articleService.getArticle(articleId);
-
-			if (user == null) {
-				// 유저가 없으면 404 오류 발생
-				throw new NotFoundException("댓글을 쓴 유저는 찾을수 없는 유저입니다....");
-			}
-
-			if (article == null) {
-				// 게시물이 없으면 404 오류 발생
-				throw new NotFoundException("게시물을 찾을 수 없습니다....");
-			}
 
 			Comment comment = Comment.builder()
 				.user(user)
@@ -72,16 +64,6 @@ public class CommentServiceImpl implements CommentService {
 			Article article = articleService.getArticle(articleId);
 			Comment parentComment = commentRepository.findById(commentId)
 				.orElseThrow(() -> new IllegalArgumentException("부모 댓글을 찾을 수 없습니다., commentId: " + commentId));
-
-			if (user == null) {
-				// 유저가 없으면 404 오류 발생
-				throw new NotFoundException("댓글을 쓴 유저는 찾을수 없는 유저입니다....");
-			}
-
-			if (article == null) {
-				// 게시물이 없으면 404 오류 발생
-				throw new NotFoundException("게시물을 찾을 수 없습니다....");
-			}
 
 			if (parentComment.getIsDeleted()) {
 				throw new NotFoundException("이미 삭제된 댓글입니다..");
