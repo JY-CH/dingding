@@ -1,5 +1,4 @@
-// src/services/api.ts
-const API_URL = 'https://j12d105.p.ssafy.io/api';
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface LoginRequest {
   loginId: string;
@@ -235,3 +234,4 @@ export const fetchProtectedData = async () => {
 };
 
 // 나머지 API 호출 함수들...
+
