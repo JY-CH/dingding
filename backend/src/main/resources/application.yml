@@ -32,12 +32,20 @@ spring:
   # 파일 업로드를 위한 설정
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 100MB
+      max-request-size: 100MB
       enabled: true
-  # 파일 업로드 경로 설정
-  file:
-    upload-dir: /var/www/uploads # 절대 경로 설정 추천
+  # AWS S3 설정
+  cloud:
+    aws:
+      s3:
+        bucket: ddingga
+      region:
+        static: ap-northeast-2
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+
 
 jwt:
   # JWT 토큰 생성 및 검증에 사용되는 비밀키
