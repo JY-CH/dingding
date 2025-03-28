@@ -69,7 +69,7 @@ export const CommunityPage: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<number | null>(null);
 
   if (selectedPost !== null) {
-    return <CommunityDetail articleId={selectedPost} />;
+    return <CommunityDetail articleId={selectedPost} setSelectedPost={setSelectedPost} />;
   }
 
   const handleToggleCreate = () => {
