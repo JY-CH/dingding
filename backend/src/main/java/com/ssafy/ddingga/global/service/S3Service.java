@@ -126,9 +126,9 @@ public class S3Service {
 			return "others";
 		}
 
-		if (contentType.startsWith("profile/")) {
+		if (contentType.startsWith("image/")) {
 			return "profileImages";
-		} else if (contentType.startsWith("replay/")) {
+		} else if (contentType.startsWith("video/")) {
 			return "replays";
 		} else {
 			return "others";
