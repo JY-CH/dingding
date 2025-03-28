@@ -1,5 +1,7 @@
 package com.ssafy.ddingga.global.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -8,6 +10,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 
 @Configuration
 public class SwaggerConfig {
@@ -31,6 +34,11 @@ public class SwaggerConfig {
 
 		return new OpenAPI()
 			.info(info)
+			// 서버 정보 추가
+			.servers(List.of(
+				new Server().url("https://j12d105.p.ssafy.io/api/").description("EC2 Server"),
+				new Server().url("http://localhost:8090").description("Local Server")
+					.description("Production server (HTTPS)")))
 			.addSecurityItem(securityRequirement)
 			.components(new Components()
 				.addSecuritySchemes("bearerAuth", securityScheme));
