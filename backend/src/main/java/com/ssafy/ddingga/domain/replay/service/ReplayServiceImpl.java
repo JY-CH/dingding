@@ -1,5 +1,6 @@
 package com.ssafy.ddingga.domain.replay.service;
 
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
@@ -7,12 +8,19 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.ssafy.ddingga.domain.auth.entity.User;
 import com.ssafy.ddingga.domain.auth.repository.AuthRepository;
 import com.ssafy.ddingga.domain.replay.entity.Replay;
 import com.ssafy.ddingga.domain.replay.repository.ReplayRepository;
+import com.ssafy.ddingga.domain.song.entity.Song;
+import com.ssafy.ddingga.domain.song.repository.SongRepository;
+import com.ssafy.ddingga.facade.replay.dto.request.ReplayCreateRequestDto;
 import com.ssafy.ddingga.facade.replay.dto.response.ReplayDto;
+import com.ssafy.ddingga.global.error.exception.FileUploadException;
 import com.ssafy.ddingga.global.error.exception.ServiceException;
+import com.ssafy.ddingga.global.error.exception.SongNotFoundException;
 import com.ssafy.ddingga.global.error.exception.UserNotFoundException;
+import com.ssafy.ddingga.global.service.S3Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +32,9 @@ public class ReplayServiceImpl implements ReplayService {
 
 	private final ReplayRepository replayRepository;
 	private final AuthRepository authRepository;
+	private final SongRepository songRepository;
+	private final S3Service service;
+	private final S3Service s3Service;
 
 	@Override
 	public List<ReplayDto> getLastWeekReplays(Integer userId) {
@@ -97,6 +108,42 @@ public class ReplayServiceImpl implements ReplayService {
 		} catch (Exception e) {
 			log.error("리플레이 - 유저별 리플레이 조회 실패 : userId={}, error={}", userId, e.getMessage());
 			throw new ServiceException("리플레이 조회 중 오류가 발생했습니다.", e);
+		}
+	}
+
+	@Override
+	public Replay createReplay(Integer userId, ReplayCreateRequestDto requestDto) {
+		// 1. 사용자와 곡 정보 조회
+
+		User user = authRepository.findById(userId)
+			.orElseThrow(() -> {
+				log.error("리플레이 - 사용자를 찾을 수 없음 : userId= {}", userId);
+				return new UserNotFoundException("사용자를 찾을 수 없습니다.");
+			});
+		Song song = songRepository.findById(requestDto.getSongId())
+			.orElseThrow(() -> {
+				log.error("리플레이 - 곡 정보를 찾을 수 없음 : songId = {}", requestDto.getSongId());
+				return new SongNotFoundException("곡을 찾을 수 없습니다.");
+			});
+
+		try {
+			// 2. S3에 비디오 파일 업로드
+			String videoUrl = s3Service.uploadFile(requestDto.getVideoFile(), "replays");
+
+			// 3. Replay 엔티티 생성 및 저장
+			Replay replay = Replay.builder()
+				.user(user)
+				.song(song)
+				.score(requestDto.getScore())
+				.mode(requestDto.getMode())
+				.videoPath(videoUrl)
+				.practiceDate(LocalDateTime.now())
+				.build();
+
+			return replayRepository.save(replay);
+		} catch (IOException e) {
+			log.error("리플레이 - 파일 업로드 실패 : {}", e.getMessage());
+			throw new FileUploadException("파일 업로드에 실패했습니다.", e);
 		}
 	}
 }
