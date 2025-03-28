@@ -15,4 +15,7 @@ public interface ReplayService {
 
 	// 리플레이 생성
 	Replay createReplay(Integer userId, ReplayCreateRequestDto replayCreateRequestDto);
+
+	//리플레이 삭제
+	void deleteReplay(Integer replayId, Integer userId);
 }

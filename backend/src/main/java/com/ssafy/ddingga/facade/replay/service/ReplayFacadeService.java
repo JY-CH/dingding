@@ -7,4 +7,6 @@ public interface ReplayFacadeService {
 	ReplayResponse getReplay(Integer userId);
 
 	void createReplay(Integer userId, ReplayCreateRequestDto requestDto);
+
+	void deleteReplay(Integer replayId, Integer userId);
 }

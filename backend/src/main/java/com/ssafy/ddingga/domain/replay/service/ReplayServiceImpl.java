@@ -7,7 +7,9 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.github.dockerjava.api.exception.UnauthorizedException;
 import com.ssafy.ddingga.domain.auth.entity.User;
 import com.ssafy.ddingga.domain.auth.repository.AuthRepository;
 import com.ssafy.ddingga.domain.replay.entity.Replay;
@@ -17,6 +19,7 @@ import com.ssafy.ddingga.domain.song.repository.SongRepository;
 import com.ssafy.ddingga.facade.replay.dto.request.ReplayCreateRequestDto;
 import com.ssafy.ddingga.facade.replay.dto.response.ReplayDto;
 import com.ssafy.ddingga.global.error.exception.FileUploadException;
+import com.ssafy.ddingga.global.error.exception.ReplayNotFoundException;
 import com.ssafy.ddingga.global.error.exception.ServiceException;
 import com.ssafy.ddingga.global.error.exception.SongNotFoundException;
 import com.ssafy.ddingga.global.error.exception.UserNotFoundException;
@@ -145,5 +148,21 @@ public class ReplayServiceImpl implements ReplayService {
 			log.error("리플레이 - 파일 업로드 실패 : {}", e.getMessage());
 			throw new FileUploadException("파일 업로드에 실패했습니다.", e);
 		}
+	}
+
+	@Override
+	@Transactional
+	public void deleteReplay(Integer replayId, Integer userId) {
+		Replay replay = replayRepository.findById(replayId)
+			.orElseThrow(() -> new ReplayNotFoundException("리플레이를 찾을 수 없습니다."));
+
+		if (!replay.getUser().getUserId().equals(userId)) {
+			throw new UnauthorizedException("해당 리플레이를 삭제할 권한이 없습니다.");
+		}
+		// S3에서 비디오 파일 삭제
+		s3Service.deleteFile(replay.getVideoPath());
+
+		// 리플레이 삭제
+		replayRepository.delete(replay);
 	}
 }
