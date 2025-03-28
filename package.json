@@ -1,0 +1,7 @@
+{
+	"dependencies": {
+		"@tanstack/react-query": "^5.69.0",
+		"jwt-decode": "^4.0.0",
+		"react-query": "^3.39.3"
+	}
+}
