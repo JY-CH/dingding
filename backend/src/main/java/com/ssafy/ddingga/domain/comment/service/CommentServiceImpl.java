@@ -12,6 +12,7 @@ import com.ssafy.ddingga.domain.auth.entity.User;
 import com.ssafy.ddingga.domain.auth.service.AuthService;
 import com.ssafy.ddingga.domain.comment.entity.Comment;
 import com.ssafy.ddingga.domain.comment.repository.CommentRepository;
+import com.ssafy.ddingga.global.error.exception.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,9 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public List<Comment> getComments(int articleId) {
-		return commentRepository.findByArticleArticleId(articleId);
+		Article article = articleService.getArticle(articleId);
+
+		return commentRepository.findByArticle(article);
 	}
 
 	@Override
@@ -50,7 +53,7 @@ public class CommentServiceImpl implements CommentService {
 			return true;
 		} catch (Exception e) {
 			log.error("Error creating comment", e);
-			return false;
+			throw new RuntimeException("댓글 생성 중 오류가 발생했습니다.", e);
 		}
 	}
 
@@ -60,7 +63,16 @@ public class CommentServiceImpl implements CommentService {
 			User user = authService.getUser(userId);
 			Article article = articleService.getArticle(articleId);
 			Comment parentComment = commentRepository.findById(commentId)
-				.orElseThrow(() -> new IllegalArgumentException("Parent comment not found, commentId: " + commentId));
+				.orElseThrow(() -> new IllegalArgumentException("부모 댓글을 찾을 수 없습니다., commentId: " + commentId));
+
+			if (parentComment.getIsDeleted()) {
+				throw new NotFoundException("이미 삭제된 댓글입니다..");
+			}
+
+			if (parentComment.getParentComment() != null) {
+				// 부모 댓글이 이미 다른 부모 댓글을 가진 경우
+				throw new IllegalArgumentException("답글은 이미 다른 답글이 달린 댓글입니다. 하나의 댓글에만 대댓글을 작성할 수 있습니다.");
+			}
 
 			Comment comment = Comment.builder()
 				.user(user)
@@ -88,10 +100,14 @@ public class CommentServiceImpl implements CommentService {
 	public boolean updateComment(int checkUserId, int commentId, String content) {
 		try {
 			Comment comment = commentRepository.findById(commentId)
-				.orElseThrow(() -> new IllegalArgumentException("comment not found, commentId: " + commentId));
+				.orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다., commentId: " + commentId));
 
 			if (checkUserId != comment.getUser().getUserId()) {
 				throw new AccessDeniedException("접근권한이 없습니다.");
+			}
+
+			if (comment.getIsDeleted()) {
+				throw new NotFoundException("이미 삭제된 댓글입니다..");
 			}
 
 			comment.setContent(content);
@@ -99,7 +115,7 @@ public class CommentServiceImpl implements CommentService {
 
 			return true;
 		} catch (Exception e) {
-			return false;
+			throw new RuntimeException("댓글 수정 중 오류가 발생했습니다.", e);
 		}
 	}
 
@@ -107,17 +123,24 @@ public class CommentServiceImpl implements CommentService {
 	public boolean deleteComment(int checkUserId, int commentId) {
 		try {
 			Comment comment = commentRepository.findById(commentId)
-				.orElseThrow(() -> new IllegalArgumentException("comment not found, commentId: " + commentId));
+				.orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다., commentId: " + commentId));
 
 			if (checkUserId != comment.getUser().getUserId()) {
 				throw new AccessDeniedException("접근권한이 없습니다.");
 			}
 
-			commentRepository.delete(comment);
+			if (comment.getIsDeleted()) {
+				throw new NotFoundException("이미 삭제된 댓글입니다..");
+			}
+
+			comment.setIsDeleted(true);
+			commentRepository.save(comment);
 
 			return true;
 		} catch (Exception e) {
-			return false;
+			log.error("댓글 삭제 실패: checkUserId={}, commentId={}, error={}", checkUserId, commentId,
+				e.getMessage());
+			throw new RuntimeException("댓글 삭제 중 오류가 발생했습니다.", e);
 		}
 	}
 }
