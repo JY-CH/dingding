@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ssafy.ddingga.domain.replay.service.ReplayService;
+import com.ssafy.ddingga.facade.replay.dto.request.ReplayCreateRequestDto;
 import com.ssafy.ddingga.facade.replay.dto.response.ReplayDto;
 import com.ssafy.ddingga.facade.replay.dto.response.ReplayResponse;
 
@@ -25,5 +26,10 @@ public class ReplayFacadeServiceImpl implements ReplayFacadeService {
 		return ReplayResponse.builder()
 			.replaysList(replayDtos)
 			.build();
+	}
+
+	@Override
+	public void createReplay(Integer userId, ReplayCreateRequestDto requestDto) {
+		replayService.createReplay(userId, requestDto);
 	}
 }
