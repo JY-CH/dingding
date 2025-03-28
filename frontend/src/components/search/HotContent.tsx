@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { motion } from 'framer-motion';
 import { BookHeadphones } from 'lucide-react';
 
@@ -183,7 +184,7 @@ const HotContent: React.FC<HotContentsProps> = ({ activeTab }) => {
           <GenreCards genres={genreCards} />
         </motion.div>
       )}
-      
+
       {(activeTab === 'all' || activeTab === 'albums') && (
         <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 트렌딩 노래 */}
@@ -194,7 +195,7 @@ const HotContent: React.FC<HotContentsProps> = ({ activeTab }) => {
           >
             <HotSongs songs={trendingSongs} />
           </motion.div>
-          
+
           {/* 최신 발매 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -205,7 +206,7 @@ const HotContent: React.FC<HotContentsProps> = ({ activeTab }) => {
           </motion.div>
         </div>
       )}
-      
+
       {(activeTab === 'all' || activeTab === 'community') && (
         <motion.div
           className="px-6 py-6"

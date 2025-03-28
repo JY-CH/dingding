@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
+
+import ChordTimeline from '../components/performance/ChordTimeline';
 import PerformanceHeader from '../components/performance/PerformanceHeader';
 import WebcamView from '../components/performance/WebcamView';
-import ChordTimeline from '../components/performance/ChordTimeline';
 import { ChordNote } from '../types/performance';
 
 const PerformancePage: React.FC = () => {
   const [isWebcamOn, setIsWebcamOn] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
+  const [, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [chordNotes, setChordNotes] = useState<ChordNote[]>([]);
-  
+
   const animationRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number | null>(null); 
+  const startTimeRef = useRef<number | null>(null);
 
   // 예시 코드 진행
   const sampleChords: ChordNote[] = [
@@ -60,7 +61,7 @@ const PerformancePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-zinc-900 text-white">
       <PerformanceHeader isPlaying={isPlaying} onTogglePlay={togglePlay} />
-      
+
       <div className="p-8">
         <div className="grid grid-cols-12 gap-6">
           {/* 왼쪽: 웹캠 */}
@@ -78,4 +79,4 @@ const PerformancePage: React.FC = () => {
   );
 };
 
-export default PerformancePage; 
+export default PerformancePage;

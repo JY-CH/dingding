@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { GiGuitar } from 'react-icons/gi';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,4 +38,4 @@ const PerformanceHeader: React.FC<PerformanceHeaderProps> = ({ isPlaying, onTogg
   );
 };
 
-export default PerformanceHeader; 
+export default PerformanceHeader;

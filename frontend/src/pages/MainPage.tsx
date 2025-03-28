@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
 
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+
+import { useAuthStore } from '@/store/useAuthStore';
 
 import ExploreSection from '../components/main/ExploreSection';
 import FeaturedCarousel from '../components/main/FeaturedCarousel';
@@ -12,11 +14,9 @@ import TopArtistSection from '../components/main/TopArtistSection';
 import TopSongSection from '../components/main/TopSongSection';
 import { mockDailyTracks, mockWeeklyTracks, mockMonthlyTracks } from '../data/mockData';
 import { Song } from '../types';
-import { useAuthStore } from '@/store/useAuthStore';
-import SearchResults from '../components/search/SearchResults';
 
 const MainPage = () => {
-  const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const [, setCurrentSong] = useState<Song | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -244,7 +244,7 @@ const MainPage = () => {
                   <div className="absolute right-0 mt-2 w-48 rounded-xl bg-zinc-800/90 backdrop-blur-sm border border-white/10 shadow-xl z-50">
                     <div className="p-3 border-b border-white/10">
                       <p className="text-sm font-medium text-white">{user?.username}님</p>
-                      <p className="text-xs text-zinc-400">{user?.email}</p>
+                      <p className="text-xs text-zinc-400">유저 아이디 추가 필요?</p>
                     </div>
 
                     <div className="p-1">

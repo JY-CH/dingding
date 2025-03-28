@@ -38,10 +38,10 @@ export const setupTokenRefresh = () => {
   let isRefreshing = false;
   let failedQueue: Array<{
     resolve: (token: string) => void;
-    reject: (error: any) => void;
+    reject: (error: unknown) => void;
   }> = [];
 
-  const processQueue = (error: any, token: string | null = null) => {
+  const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue.forEach((prom) => {
       if (error) {
         prom.reject(error);
@@ -55,17 +55,18 @@ export const setupTokenRefresh = () => {
   // API 요청을 보내기 전에 실행되는 함수
   const handleRequest = async (url: string, options: RequestInit = {}) => {
     // 액세스 토큰이 만료되었을 때
-    if (needsTokenRefresh()) {  // 토큰 만료 체크 함수 (별도 구현 필요)
+    if (needsTokenRefresh()) {
+      // 토큰 만료 체크 함수 (별도 구현 필요)
       if (!isRefreshing) {
         isRefreshing = true;
 
         try {
           const response = await refreshAccessToken();
           const { accessToken } = response;
-          
+
           // 새 액세스 토큰 저장
           localStorage.setItem('accessToken', accessToken);
-          
+
           isRefreshing = false;
           processQueue(null, accessToken);
         } catch (error) {
@@ -85,7 +86,7 @@ export const setupTokenRefresh = () => {
       if (!options.headers) {
         options.headers = {};
       }
-      (options.headers as any)['Authorization'] = `Bearer ${token}`;
+      (options.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
     }
 
     return fetch(url, options);
@@ -192,10 +193,10 @@ export const refreshAccessToken = async (): Promise<RefreshTokenResponse> => {
   const response = await fetch(`${API_URL}/auth/refresh`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     // credentials: 'include'를 설정하여 쿠키가 자동으로 전송되도록 함
-    credentials: 'include'
+    credentials: 'include',
   });
 
   // 401 Unauthorized - 리프레시 토큰 만료
@@ -226,10 +227,10 @@ export const refreshAccessToken = async (): Promise<RefreshTokenResponse> => {
 export const fetchProtectedData = async () => {
   const response = await apiClient(`${API_URL}/protected-route`, {
     headers: {
-      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-    }
+      Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+    },
   });
-  
+
   return response.json();
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 
 import HotContent from '@/components/search/HotContent';
 import SearchBar from '@/components/search/SearchBar';
@@ -8,7 +9,7 @@ import SearchResults from '@/components/search/SearchResults';
 import SearchTabs from '@/components/search/SearchTabs';
 
 const SearchPage: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [query, setQuery] = useState<string>(searchParams.get('q') || '');
   const [activeTab, setActiveTab] = useState<string>('all');
 

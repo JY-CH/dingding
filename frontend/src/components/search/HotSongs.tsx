@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { motion } from 'framer-motion';
 import { Headphones, Clock, TrendingUp } from 'lucide-react';
 

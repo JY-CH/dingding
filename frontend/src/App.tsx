@@ -1,10 +1,8 @@
 import './index.css';
 import { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
 
 import Sidebar from './components/common/Sidebar';
 import AppContent from './components/layout/AppContent';
-import LoginPage from './pages/LoginPage';
 
 function App() {
   const [isExpanded, setIsExpanded] = useState(false);

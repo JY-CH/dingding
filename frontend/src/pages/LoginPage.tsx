@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 import LoginModal from '../components/auth/LoginModal';
 import SignupModal from '../components/auth/SignupModal';

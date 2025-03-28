@@ -1,6 +1,7 @@
 import React from 'react';
-import Webcam from 'react-webcam';
+
 import { HiOutlineVideoCamera, HiOutlineVideoCameraSlash } from 'react-icons/hi2';
+import Webcam from 'react-webcam';
 
 interface WebcamViewProps {
   isWebcamOn: boolean;
@@ -13,11 +14,7 @@ const WebcamView: React.FC<WebcamViewProps> = ({ isWebcamOn, setIsWebcamOn }) =>
       <div className="aspect-video relative">
         {isWebcamOn ? (
           <>
-            <Webcam
-              audio={false}
-              className="w-full h-full object-cover"
-              mirrored={true}
-            />
+            <Webcam audio={false} className="w-full h-full object-cover" mirrored={true} />
             <button
               onClick={() => setIsWebcamOn(false)}
               className="absolute top-4 right-4 p-2 bg-red-500/80 hover:bg-red-500 rounded-lg"
@@ -41,4 +38,4 @@ const WebcamView: React.FC<WebcamViewProps> = ({ isWebcamOn, setIsWebcamOn }) =>
   );
 };
 
-export default WebcamView; 
+export default WebcamView;

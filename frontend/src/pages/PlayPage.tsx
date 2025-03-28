@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Webcam from 'react-webcam';
+
 import { motion, AnimatePresence } from 'framer-motion';
-import { HiOutlineVideoCamera, HiOutlineVideoCameraSlash } from 'react-icons/hi2';
 import { GiGuitar } from 'react-icons/gi';
-import { RiMusicLine, RiSettings4Line } from 'react-icons/ri';
+import { HiOutlineVideoCamera, HiOutlineVideoCameraSlash } from 'react-icons/hi2';
 import { IoStatsChartOutline } from 'react-icons/io5';
-import FretboardVisualizer from '../components/guitar/FretboardVisualizer';
+import { RiMusicLine, RiSettings4Line } from 'react-icons/ri';
+import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
+
 import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
+import FretboardVisualizer from '../components/guitar/FretboardVisualizer';
 import PracticeSession from '../components/guitar/PracticeSession';
 import { GuitarString, Visualization, Exercise } from '../types/guitar';
-import { useNavigate } from 'react-router-dom';
 
 const PlayPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,29 +19,29 @@ const PlayPage: React.FC = () => {
   const [isWebcamOn, setIsWebcamOn] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
-  const [currentChord, setCurrentChord] = useState<string | null>(null);
-  const [practiceStreak, setPracticeStreak] = useState(0);
+  const [currentChord] = useState<string | null>(null);
+  const [, setPracticeStreak] = useState(0);
 
   // 기타 줄 상태
-  const [strings, setStrings] = useState<GuitarString[]>([
+  const [strings] = useState<GuitarString[]>([
     { note: 'E', frequency: 82.41, octave: 2, isPlaying: false, intensity: 0 },
-    { note: 'A', frequency: 110.00, octave: 2, isPlaying: false, intensity: 0 },
+    { note: 'A', frequency: 110.0, octave: 2, isPlaying: false, intensity: 0 },
     { note: 'D', frequency: 146.83, octave: 3, isPlaying: false, intensity: 0 },
-    { note: 'G', frequency: 196.00, octave: 3, isPlaying: false, intensity: 0 },
+    { note: 'G', frequency: 196.0, octave: 3, isPlaying: false, intensity: 0 },
     { note: 'B', frequency: 246.94, octave: 3, isPlaying: false, intensity: 0 },
     { note: 'E', frequency: 329.63, octave: 4, isPlaying: false, intensity: 0 },
   ]);
 
   // AudioContext 관련 state들
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
-  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | null>(null);  // null 초기값 추가
+  const [, setAnalyser] = useState<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number | null>(null); // null 초기값 추가
 
   // 시각화 데이터
   const [visualization, setVisualization] = useState<Visualization>({
     type: '3d',
     data: new Array(128).fill(0),
-    peak: 1
+    peak: 1,
   });
 
   // 예시 연습 세션
@@ -54,14 +56,14 @@ const PlayPage: React.FC = () => {
     requirements: [
       '기타 튜닝이 되어있어야 합니다',
       '웹캠이 필요합니다',
-      '조용한 환경이 필요합니다'
+      '조용한 환경이 필요합니다',
     ],
     chords: ['Em', 'C', 'G', 'D'],
-    thumbnail: '/guitar-practice.jpg'
+    thumbnail: '/guitar-practice.jpg',
   };
 
   useEffect(() => {
-    let isActive = true;  // cleanup을 위한 flag
+    let isActive = true; // cleanup을 위한 flag
 
     const initAudio = async () => {
       try {
@@ -69,11 +71,11 @@ const PlayPage: React.FC = () => {
         const analyserNode = context.createAnalyser();
         analyserNode.fftSize = 64;
         analyserNode.smoothingTimeConstant = 0.8;
-        
+
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const source = context.createMediaStreamSource(stream);
         source.connect(analyserNode);
-        
+
         if (isActive) {
           setAudioContext(context);
           setAnalyser(analyserNode);
@@ -84,10 +86,10 @@ const PlayPage: React.FC = () => {
             const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
             analyserNode.getByteFrequencyData(dataArray);
 
-            setVisualization(prev => ({
+            setVisualization((prev) => ({
               ...prev,
-              data: Array.from(dataArray).map(value => (value / 255) * 0.7),
-              peak: Math.max(...dataArray) / 255 || 1
+              data: Array.from(dataArray).map((value) => (value / 255) * 0.7),
+              peak: Math.max(...dataArray) / 255 || 1,
             }));
 
             animationFrameRef.current = requestAnimationFrame(updateVisualization);
@@ -110,7 +112,7 @@ const PlayPage: React.FC = () => {
       }
       audioContext?.close();
     };
-  }, []);  // 빈 의존성 배열 유지
+  }, []); // 빈 의존성 배열 유지
 
   // 새로운 상태들 추가
   const [settings, setSettings] = useState({
@@ -121,12 +123,12 @@ const PlayPage: React.FC = () => {
     webcamMirrored: true,
   });
 
-  const [stats, setStats] = useState({
-    totalPracticeTime: 0,
-    accuracyTrend: [65, 70, 75, 72, 78, 80, 85],
-    completedExercises: 42,
-    currentStreak: 7,
-  });
+  // const stats = useState({
+  //   totalPracticeTime: 0,
+  //   accuracyTrend: [65, 70, 75, 72, 78, 80, 85],
+  //   completedExercises: 42,
+  //   currentStreak: 7,
+  // });
 
   return (
     <div className="flex-1 overflow-auto bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 h-full">
@@ -137,11 +139,9 @@ const PlayPage: React.FC = () => {
             <GiGuitar className="w-6 h-6 text-amber-500" />
             <h1 className="text-xl font-bold text-white">ThingThing Guitar</h1>
           </div>
-          
+
           <div className="flex items-center gap-4">
-            <button
-              className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-700 hover:text-white transition-colors"
-            >
+            <button className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-700 hover:text-white transition-colors">
               <GiGuitar className="w-5 h-5" />
               연습 모드
             </button>
@@ -262,7 +262,9 @@ const PlayPage: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     <div className="absolute bottom-4 right-4 flex items-center gap-2">
                       <button
-                        onClick={() => setSettings(s => ({ ...s, webcamMirrored: !s.webcamMirrored }))}
+                        onClick={() =>
+                          setSettings((s) => ({ ...s, webcamMirrored: !s.webcamMirrored }))
+                        }
                         className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-colors"
                       >
                         미러링 {settings.webcamMirrored ? 'ON' : 'OFF'}
@@ -300,7 +302,7 @@ const PlayPage: React.FC = () => {
                 exercise={sampleExercise}
                 onComplete={(performance) => {
                   console.log('Practice completed:', performance);
-                  setPracticeStreak(prev => prev + 1);
+                  setPracticeStreak((prev) => prev + 1);
                 }}
               />
             </motion.div>
@@ -323,11 +325,7 @@ const PlayPage: React.FC = () => {
                   </span>
                 )}
               </div>
-              <FretboardVisualizer
-                strings={strings}
-                frets={12}
-                activeNotes={['E', 'A', 'D']}
-              />
+              <FretboardVisualizer strings={strings} frets={12} activeNotes={['E', 'A', 'D']} />
             </motion.div>
 
             {/* 음향 시각화 - 위치 이동 */}
@@ -391,14 +389,16 @@ const PlayPage: React.FC = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               className="bg-zinc-900 rounded-xl p-6 w-full max-w-md"
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             >
               <h2 className="text-xl font-bold text-white mb-6">설정</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-white">메트로놈</span>
                   <button
-                    onClick={() => setSettings(s => ({ ...s, metronomeEnabled: !s.metronomeEnabled }))}
+                    onClick={() =>
+                      setSettings((s) => ({ ...s, metronomeEnabled: !s.metronomeEnabled }))
+                    }
                     className={`px-4 py-2 rounded-lg ${
                       settings.metronomeEnabled ? 'bg-amber-500' : 'bg-zinc-700'
                     }`}
@@ -409,7 +409,7 @@ const PlayPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-white">자동 녹화</span>
                   <button
-                    onClick={() => setSettings(s => ({ ...s, autoRecording: !s.autoRecording }))}
+                    onClick={() => setSettings((s) => ({ ...s, autoRecording: !s.autoRecording }))}
                     className={`px-4 py-2 rounded-lg ${
                       settings.autoRecording ? 'bg-amber-500' : 'bg-zinc-700'
                     }`}
@@ -420,7 +420,9 @@ const PlayPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-white">운지법 표시</span>
                   <button
-                    onClick={() => setSettings(s => ({ ...s, showFingerings: !s.showFingerings }))}
+                    onClick={() =>
+                      setSettings((s) => ({ ...s, showFingerings: !s.showFingerings }))
+                    }
                     className={`px-4 py-2 rounded-lg ${
                       settings.showFingerings ? 'bg-amber-500' : 'bg-zinc-700'
                     }`}
@@ -437,4 +439,4 @@ const PlayPage: React.FC = () => {
   );
 };
 
-export default PlayPage; 
+export default PlayPage;

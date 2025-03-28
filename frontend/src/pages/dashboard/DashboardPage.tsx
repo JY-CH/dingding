@@ -1,6 +1,6 @@
 import React from 'react';
+
 import { motion } from 'framer-motion';
-import { useAuthStore } from '@/store/useAuthStore';
 
 import BarChartTile from '@/components/dashboard/BarChartTile';
 import LineChartTile from '@/components/dashboard/LineChartTile';
@@ -72,15 +72,13 @@ const songList = [
 ];
 
 const DashboardPage: React.FC = () => {
-  const { user } = useAuthStore();
-
   const profileData = {
-    name: user?.username || '게스트',
-    email: user?.email || 'guest@example.com',
+    name: '게스트',
+    email: 'guest@example.com',
     playtimerank: '9999 등',
     avgscorerank: '123 등',
     totaltryrank: '999 등',
-    profileImageUrl: user?.profileImage || '/profile-placeholder.png',
+    profileImageUrl: 'profile-placeholder.png',
     backgroundImageUrl: '/dashboard-bg.png',
   };
 

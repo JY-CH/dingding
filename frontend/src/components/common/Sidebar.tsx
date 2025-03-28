@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
+
 import { useAuthStore } from '@/store/useAuthStore';
 
-interface User {
-  isLoggedIn: boolean;
-  profileImage?: string;
-}
+// interface User {
+//   isLoggedIn: boolean;
+//   profileImage?: string;
+// }
 
 interface SidebarProps {
   isExpanded: boolean;
@@ -71,16 +72,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
           {isAuthenticated ? (
             <div className="flex items-center h-10">
               <div className="w-10 h-10 flex-shrink-0">
-                <img 
+                <img
                   src="/profile-placeholder.png"
                   alt={user?.username}
                   className="w-full h-full rounded-full object-cover bg-gradient-to-br from-amber-500/10 to-amber-600/10"
                 />
               </div>
-              <div className={`
+              <div
+                className={`
                 overflow-hidden transition-all duration-300
                 ${isExpanded ? 'w-40 ml-3 opacity-100' : 'w-0 opacity-0'}
-              `}>
+              `}
+              >
                 <span className="text-white text-sm font-medium whitespace-nowrap">
                   {user?.username}님
                 </span>

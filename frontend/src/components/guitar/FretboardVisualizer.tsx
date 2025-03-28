@@ -1,5 +1,7 @@
 import React from 'react';
+
 import { motion, AnimatePresence } from 'framer-motion';
+
 import { GuitarString } from '../../types/guitar';
 
 interface FretboardVisualizerProps {
@@ -11,7 +13,7 @@ interface FretboardVisualizerProps {
 const FretboardVisualizer: React.FC<FretboardVisualizerProps> = ({
   strings,
   frets = 12,
-  activeNotes
+  activeNotes,
 }) => {
   const stringSpacing = 30;
   const fretSpacing = 60;
@@ -47,7 +49,7 @@ const FretboardVisualizer: React.FC<FretboardVisualizerProps> = ({
               stroke={string.isPlaying ? '#f59e0b' : 'rgba(255,255,255,0.4)'}
               strokeWidth={6 - i}
             />
-            
+
             {/* 진동 애니메이션 */}
             {string.isPlaying && (
               <motion.path
@@ -71,7 +73,7 @@ const FretboardVisualizer: React.FC<FretboardVisualizerProps> = ({
           <circle
             key={`marker-${fret}`}
             cx={fret * fretSpacing - fretSpacing / 2}
-            cy={strings.length * stringSpacing / 2}
+            cy={(strings.length * stringSpacing) / 2}
             r={4}
             fill="rgba(255,255,255,0.3)"
           />
@@ -83,7 +85,7 @@ const FretboardVisualizer: React.FC<FretboardVisualizerProps> = ({
             <motion.circle
               key={`note-${i}`}
               cx={i * fretSpacing + fretSpacing / 2}
-              cy={strings.findIndex(s => s.note === note) * stringSpacing + stringSpacing}
+              cy={strings.findIndex((s) => s.note === note) * stringSpacing + stringSpacing}
               r={12}
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -98,4 +100,4 @@ const FretboardVisualizer: React.FC<FretboardVisualizerProps> = ({
   );
 };
 
-export default FretboardVisualizer; 
+export default FretboardVisualizer;

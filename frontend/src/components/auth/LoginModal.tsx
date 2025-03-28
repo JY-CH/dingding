@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+
 import { Dialog } from '@headlessui/react';
+
 import { login } from '@/services/api';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -13,25 +15,27 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const setAuth = useAuthStore(state => state.setAuth);
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await login({
         loginId,
-        password
+        password,
       });
 
       // auth 스토어 업데이트
       setAuth(
-        { username: response.username },
-        response.accesToken
+        {
+          username: response.username,
+        },
+        response.accesToken,
       );
-      
+
       onClose();
       window.location.href = '/dashboard';
     } catch (error) {
@@ -43,20 +47,25 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <Dialog 
-      open={isOpen} 
+    <Dialog
+      open={isOpen}
       onClose={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
-      
+
       <Dialog.Panel className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-zinc-900 p-6 shadow-xl transition-all">
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
 
@@ -112,16 +121,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 로그인 상태 유지
               </label>
             </div>
-            <button type="button" className="text-sm text-amber-400 hover:text-amber-300 transition-colors">
+            <button
+              type="button"
+              className="text-sm text-amber-400 hover:text-amber-300 transition-colors"
+            >
               비밀번호 찾기
             </button>
           </div>
 
-          {error && (
-            <div className="text-red-500 text-sm text-center">
-              {error}
-            </div>
-          )}
+          {error && <div className="text-red-500 text-sm text-center">{error}</div>}
 
           <button
             type="submit"
@@ -133,13 +141,30 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 로그인 중...
               </div>
-            ) : '로그인'}
+            ) : (
+              '로그인'
+            )}
           </button>
         </form>
       </Dialog.Panel>
@@ -147,4 +172,4 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   );
 };
 
-export default LoginModal; 
+export default LoginModal;

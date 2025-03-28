@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+
 import { MetronomeSettings } from '../../types/guitar';
 
 interface MetronomeProps {
@@ -72,22 +73,26 @@ const Metronome: React.FC<MetronomeProps> = ({ settings, onSettingsChange }) => 
               min="40"
               max="208"
               value={settings.bpm}
-              onChange={(e) => onSettingsChange({
-                ...settings,
-                bpm: parseInt(e.target.value)
-              })}
+              onChange={(e) =>
+                onSettingsChange({
+                  ...settings,
+                  bpm: parseInt(e.target.value),
+                })
+              }
               className="flex-1"
             />
             <span className="text-white w-12 text-center">{settings.bpm}</span>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <button
-            onClick={() => onSettingsChange({
-              ...settings,
-              isPlaying: !settings.isPlaying
-            })}
+            onClick={() =>
+              onSettingsChange({
+                ...settings,
+                isPlaying: !settings.isPlaying,
+              })
+            }
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               settings.isPlaying
                 ? 'bg-red-500 hover:bg-red-600 text-white'
@@ -103,7 +108,7 @@ const Metronome: React.FC<MetronomeProps> = ({ settings, onSettingsChange }) => 
               const [beats, beatType] = e.target.value.split('/').map(Number);
               onSettingsChange({
                 ...settings,
-                timeSignature: { beats, beatType }
+                timeSignature: { beats, beatType },
               });
             }}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
@@ -118,4 +123,4 @@ const Metronome: React.FC<MetronomeProps> = ({ settings, onSettingsChange }) => 
   );
 };
 
-export default Metronome; 
+export default Metronome;

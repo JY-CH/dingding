@@ -1,5 +1,7 @@
 import React from 'react';
+
 import { motion, AnimatePresence } from 'framer-motion';
+
 import { ChordNote } from '../../types/performance';
 
 interface ChordTimelineProps {
@@ -14,10 +16,7 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({ chordNotes, isPlaying }) 
         {/* 타임라인 배경 */}
         <div className="absolute inset-0 grid grid-rows-4 gap-4">
           {[1, 2, 3, 4].map((row) => (
-            <div
-              key={row}
-              className="h-full border-b-2 border-zinc-700/50"
-            />
+            <div key={row} className="h-full border-b-2 border-zinc-700/50" />
           ))}
         </div>
 
@@ -32,7 +31,7 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({ chordNotes, isPlaying }) 
                 transition: {
                   duration: 8,
                   ease: 'linear',
-                  paused: !isPlaying
+                  paused: !isPlaying,
                 },
               }}
               exit={{ x: '-110%' }}
@@ -60,4 +59,4 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({ chordNotes, isPlaying }) 
   );
 };
 
-export default ChordTimeline; 
+export default ChordTimeline;
