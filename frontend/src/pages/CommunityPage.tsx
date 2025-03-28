@@ -66,15 +66,11 @@ const mockPosts: Post[] = [
 export const CommunityPage: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [showCreate, setShowCreate] = useState(false);
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [selectedPost, setSelectedPost] = useState<number | null>(null);
 
-  const handleViewDetails = (post: Post) => {
-    setSelectedPost(post);
-  };
-
-  const handleCloseDetails = () => {
-    setSelectedPost(null);
-  };
+  if (selectedPost !== null) {
+    return <CommunityDetail articleId={selectedPost} />;
+  }
 
   const handleToggleCreate = () => {
     setShowCreate(!showCreate);
@@ -107,19 +103,15 @@ export const CommunityPage: React.FC = () => {
         {!showCreate && !selectedPost ? (
           <div>
             {posts.map((post) => (
-              <div onClick={}>
+              <div onClick={() => setSelectedPost(post.articleId)}>
                 <CommunityList
-                  key={post.articleId} // 고유한 key값
+                  key={post?.articleId} // 고유한 key값
                   post={post} // 개별 포스트 객체를 전달
                 />
               </div>
             ))}
           </div>
         ) : null}
-
-        {selectedPost && (
-          <CommunityDetail board={selectedPost} handleCloseDetails={handleCloseDetails} />
-        )}
       </div>
     </div>
   );
