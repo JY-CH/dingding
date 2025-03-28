@@ -1,5 +1,6 @@
 package com.ssafy.ddingga.facade.dashboard.service;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -25,6 +26,15 @@ public class DashboardFacadeServiceImpl implements DashboardFacadeService {
 		// 순위정보 조회
 		RankingInfo rankingInfo = dashboardService.getRankingInfo(userId);
 
+		// rankingInfo가 null인 경우 기본값으로 생성
+		if (rankingInfo == null) {
+			rankingInfo = new RankingInfo(
+				LocalTime.of(0, 0, 0),  // 기본 플레이타임
+				0,                      // 기본 시도 횟수
+				0,                      // 기본 플레이타임 랭크
+				0                       // 기본 시도 횟수 랭크
+			);
+		}
 		// 코드 점수 조회
 		List<ChordScore> chordScores = dashboardService.getChordScores(userId);
 		List<ChordScoreDto> chordScoreDtos = chordScores.stream()
