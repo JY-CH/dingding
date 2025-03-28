@@ -5,11 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { Post } from '@/types/index';
 
 interface CommunityCreateProps {
-  posts: Post[];
-  setPosts: (newPost: Post) => void; // Change the type of setPosts
+  posts: Post[] | undefined;
 }
 
-export const CommunityCreate: React.FC<CommunityCreateProps> = ({ posts, setPosts }) => {
+export const CommunityCreate: React.FC<CommunityCreateProps> = ({ posts }) => {
   const navigate = useNavigate();
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState('');
@@ -29,20 +28,6 @@ export const CommunityCreate: React.FC<CommunityCreateProps> = ({ posts, setPost
       alert('Please fill in both title and content.');
       return;
     }
-    // 임시 데이터
-    const newPost: Post = {
-      articleId: posts.length + 1,
-      userId: 1,
-      username: 'CurrentUser',
-      title: newPostTitle,
-      content: newPostContent,
-      createdAt: new Date(),
-      category: 'Music',
-      popularPost: false,
-      recommend: 3,
-    };
-
-    setPosts(newPost); // Call the setPosts function with the new post
     setNewPostTitle('');
     setNewPostContent('');
   };

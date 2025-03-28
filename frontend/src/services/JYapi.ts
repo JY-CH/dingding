@@ -1,11 +1,18 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+  InternalAxiosRequestConfig,
+} from 'axios';
 
 import { useAuthStore } from '@/store/JyUseAuthStore';
 import { ERROR_CODES } from '@/utils/errorHandler';
 
+// _axios의 타입을 AxiosInstance로 지정
 const _axios = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL as string, // API 서버 주소
-  timeout: 5000, // 요청이 5초(5000ms) 이상 걸릴 경우 자동으로 요청을 중단합니다
+  baseURL: import.meta.env.VITE_BASE_URL, // API 서버 주소
+  timeout: 5000, // 요청이 5초(5000ms) 이상 걸릴 경우 자동으로 요청을 중단
   withCredentials: true, // 쿠키를 주고받기 위한 설정
   headers: {
     'Content-Type': 'application/json', // 요청 본문이 JSON 형식임을 명시
@@ -13,10 +20,17 @@ const _axios = axios.create({
 });
 
 // 로그인 후 사용되는 axios 인스턴스 (access token 포함)
-const _axiosAuth = _axios.create();
+const _axiosAuth: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_BASE_URL, // _axios와 동일한 baseURL
+  timeout: 5000, // 동일한 타임아웃 설정
+  withCredentials: true, // 동일한 쿠키 설정
+  headers: {
+    'Content-Type': 'application/json', // 동일한 요청 헤더 설정
+  },
+});
 
 // 요청 인터셉터 설정
-_axiosAuth.interceptors.request.use((config: AxiosRequestConfig) => {
+_axiosAuth.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('accessToken'); // 토큰 가져오기
   if (token && config.headers) {
     config.headers['X-Access-Token'] = `Bearer ${token}`; // 토큰 헤더 설정
@@ -74,7 +88,8 @@ _axiosAuth.interceptors.response.use(
 
     return response;
   },
-  (error) => {
+  (error: AxiosError) => {
+    console.error('Axios error:', error);
     return Promise.reject(error);
   },
 );

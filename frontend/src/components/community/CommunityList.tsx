@@ -1,6 +1,7 @@
 // c:\Users\SSAFY\Desktop\jy\J-Project\study\S12P21D105\frontend\src\components\community\CommunityList.tsx
 import React from 'react';
 
+
 import { Post } from '@/types/index';
 
 interface CommunityListProps {
@@ -8,7 +9,7 @@ interface CommunityListProps {
 }
 
 export const CommunityList: React.FC<CommunityListProps> = ({ post }) => {
-  console.log(post);
+
   return (
     <section className="space-y-4">
       <h2 className="text-xl font-semibold">Posts</h2>

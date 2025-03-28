@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const API_URL = import.meta.env.VITE_BASE_URL;
 
 interface LoginRequest {
   loginId: string;
@@ -234,4 +234,3 @@ export const fetchProtectedData = async () => {
 };
 
 // 나머지 API 호출 함수들...
-

@@ -1,84 +1,45 @@
 import { useState } from 'react';
 
+import { useQuery } from '@tanstack/react-query';
+
+import { _axiosAuth } from '@/services/JYapi';
 import { Post } from '@/types/index';
 
 import { CommunityCreate } from '../components/community/CommunityCreate';
 import { CommunityDetail } from '../components/community/CommunityDetail';
 import { CommunityList } from '../components/community/CommunityList';
 
-// Mock Data (Replace with API calls later)
-const mockPosts: Post[] = [
-  {
-    articleId: 1,
-    userId: 1,
-    username: 'User1',
-    title: 'My Favorite Music',
-    content: 'I love listening to music. What is your favorite music?',
-    recommend: 10,
-    comments: [
-      {
-        commentId: 1,
-        id: 2,
-        username: 'User2',
-        content: 'I love music too!',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isDeleted: false,
-      },
-      {
-        commentId: 2,
-        id: 3,
-        username: 'User3',
-        content: 'Me too!',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isDeleted: false,
-      },
-    ],
-    createdAt: new Date(),
-    category: 'Music',
-    popularPost: false,
-  },
-  {
-    articleId: 2,
-    userId: 2,
-    username: 'User2',
-    title: 'New Technology',
-    content: 'I just found a new technology. It is amazing!',
-    recommend: 5,
-    comments: [
-      {
-        commentId: 3,
-        id: 1,
-        username: 'User1',
-        content: 'What is it?',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isDeleted: false,
-      },
-    ],
-    createdAt: new Date(),
-    category: 'Technology',
-    popularPost: false,
-  },
-];
+interface CommunityResponse {
+  body: {
+    data: Post[];
+  };
+}
 
 export const CommunityPage: React.FC = () => {
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [showCreate, setShowCreate] = useState(false);
   const [selectedPost, setSelectedPost] = useState<number | null>(null);
 
-  if (selectedPost !== null) {
+  // `useQuery`의 반환 타입을 명확히 `Post[]`로 지정합니다.
+  const { data: posts = [] } = useQuery<Post[], Error>({
+    queryKey: ['articles'],
+    queryFn: async () => {
+      const { data } = await _axiosAuth.get<CommunityResponse>(`/article`);
+      console.log(data);
+      return data?.body?.data ?? []; // CommunityResponse에서 데이터 추출
+    },
+  });
+
+  // 선택된 포스트가 있으면 CommunityDetail 컴포넌트를 렌더링합니다.
+  if (
+    selectedPost !== null &&
+    Array.isArray(posts) &&
+    posts.some((post) => post.articleId === selectedPost)
+  ) {
     return <CommunityDetail articleId={selectedPost} setSelectedPost={setSelectedPost} />;
   }
 
   const handleToggleCreate = () => {
     setShowCreate(!showCreate);
-  };
-
-  const addNewPost = (newPost: Post) => {
-    setPosts([...posts, newPost]);
-    setShowCreate(false);
   };
 
   return (
@@ -98,18 +59,17 @@ export const CommunityPage: React.FC = () => {
           {showCreate ? 'Back' : 'Create Post'}
         </button>
 
-        {showCreate && <CommunityCreate posts={posts} setPosts={addNewPost} />}
+        {showCreate && <CommunityCreate posts={posts} />}
 
         {!showCreate && !selectedPost ? (
           <div>
-            {posts.map((post) => (
-              <div onClick={() => setSelectedPost(post.articleId)}>
-                <CommunityList
-                  key={post?.articleId} // 고유한 key값
-                  post={post} // 개별 포스트 객체를 전달
-                />
-              </div>
-            ))}
+            {/* posts는 Post[] 타입으로, 안전하게 map을 사용할 수 있습니다. */}
+            {Array.isArray(posts) &&
+              posts.map((post) => (
+                <div onClick={() => setSelectedPost(post.articleId)}>
+                  <CommunityList post={post} />
+                </div>
+              ))}
           </div>
         ) : null}
       </div>
