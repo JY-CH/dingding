@@ -65,7 +65,9 @@ pipeline {
                         string(credentialsId: 'MySQL-Username', variable: 'MYSQL_USERNAME'),
                         string(credentialsId: 'MySQL-Password', variable: 'MYSQL_PASSWORD'),
                         string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD'),
-                        string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
+                        string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET'),
+                        string(credentialsId: 'AWS_S3_ACCESS_KEY', variable: 'AWS_S3_ACCESS_KEY'),
+                        string(credentialsId: 'AWS_S3_SECRET_KEY', variable: 'AWS_S3_SECRET_KEY'),
                     ]) {
                         script {
                             sh """
@@ -83,12 +85,16 @@ pipeline {
                             export MYSQL_PASSWORD="${MYSQL_PASSWORD}"
                             export REDIS_PASSWORD="${REDIS_PASSWORD}"
                             export JWT_SECRET="${JWT_SECRET}"
+                            export AWS_ACCESS_KEY="${AWS_ACCESS_KEY}" 
+                            export AWS_SECRET_KEY="${AWS_SECRET_KEY}" 
 
 
                             echo "MYSQL_USERNAME=${MYSQL_USERNAME}" >> .env
                             echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> .env
                             echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
                             echo "JWT_SECRET=${JWT_SECRET}" >> .env
+                            echo "AWS_ACCESS_KEY=${AWS_ACCESS_KEY}" >> .env
+                            echo "AWS_SECRET_KEY=${AWS_SECRET_KEY}" >> .env
                             
 
                             docker-compose down --remove-orphans
@@ -96,6 +102,8 @@ pipeline {
                             MYSQL_PASSWORD=${MYSQL_PASSWORD} \
                             REDIS_PASSWORD=${REDIS_PASSWORD} \
                             JWT_SECRET=${JWT_SECRET} \
+                            AWS_ACCESS_KEY=${AWS_ACCESS_KEY} \
+                            AWS_SECRET_KEY=${AWS_SECRET_KEY} \
                             docker-compose up -d --force-recreate
 
                             echo "✅ 배포 완료! 현재 컨테이너 상태:"
