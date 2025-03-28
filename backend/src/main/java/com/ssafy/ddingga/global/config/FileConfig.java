@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+// 사용하지 않는 파일
+
 @Configuration
 public class FileConfig implements WebMvcConfigurer {
 	/**
