@@ -32,4 +32,9 @@ public class ReplayFacadeServiceImpl implements ReplayFacadeService {
 	public void createReplay(Integer userId, ReplayCreateRequestDto requestDto) {
 		replayService.createReplay(userId, requestDto);
 	}
+
+	@Override
+	public void deleteReplay(Integer replayId, Integer userId) {
+		replayService.deleteReplay(replayId, userId);
+	}
 }

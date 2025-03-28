@@ -17,6 +17,7 @@ import com.ssafy.ddingga.global.error.exception.FileUploadException;
 import com.ssafy.ddingga.global.error.exception.InvalidPasswordException;
 import com.ssafy.ddingga.global.error.exception.InvalidTokenException;
 import com.ssafy.ddingga.global.error.exception.NotFoundException;
+import com.ssafy.ddingga.global.error.exception.ReplayNotFoundException;
 import com.ssafy.ddingga.global.error.exception.ServiceException;
 import com.ssafy.ddingga.global.error.exception.SongNotFoundException;
 import com.ssafy.ddingga.global.error.exception.TokenExpiredException;
@@ -135,6 +136,16 @@ public class GlobalExceptionHandler {
 		ErrorResponse response = new ErrorResponse(
 			e.getMessage(),
 			"SONG_NOT_FOUND",
+			HttpStatus.NOT_FOUND.value()
+		);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+	}
+
+	@ExceptionHandler(ReplayNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ReplayNotFoundException e) {
+		ErrorResponse response = new ErrorResponse(
+			e.getMessage(),
+			"Reply_NOT_FOUND",
 			HttpStatus.NOT_FOUND.value()
 		);
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
