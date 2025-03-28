@@ -11,7 +11,7 @@ const PerformancePage: React.FC = () => {
   const [chordNotes, setChordNotes] = useState<ChordNote[]>([]);
   
   const animationRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null); 
 
   // 예시 코드 진행
   const sampleChords: ChordNote[] = [
