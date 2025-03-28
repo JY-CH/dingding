@@ -7,6 +7,6 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
   return (
     <div>
       <div></div>
-    </div>
+    </div> 
   );
 };

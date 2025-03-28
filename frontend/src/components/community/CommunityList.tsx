@@ -23,10 +23,7 @@ export const CommunityList: React.FC<CommunityListProps> = ({ post }) => {
         </div>
         <p className="mb-10">{post.content}</p>
         <div className="flex items-end justify-between">
-          <button
-            onClick={() => handleViewDetails(post.articleId)}
-            className="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-          >
+          <button className="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
             View Details
           </button>
           <div className="text-zinc-400">
