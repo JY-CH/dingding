@@ -23,7 +23,7 @@ public class SecurityConfig {
 		Exception {
 
 		http
-			.cors(cors -> cors.disable()) // ❗ 우선 CORS를 완전히 비활성화하고 테스트해봐
+			.cors(cors -> cors.configure(http))
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers(
