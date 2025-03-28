@@ -2,6 +2,7 @@ package com.ssafy.ddingga.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,6 +23,7 @@ public class SecurityConfig {
 		Exception {
 
 		http
+			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers(
 					"/v3/api-docs/**",
@@ -30,7 +32,12 @@ public class SecurityConfig {
 					"/swagger-resources/**",
 					"/webjars/**"
 				).permitAll()
-				.requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/refresh").permitAll()
+				.requestMatchers(
+					"/api/auth/signup",
+					"/api/auth/login",
+					"/api/auth/refresh"
+				).permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/article", "/api/article/**").permitAll()  // GET 요청만 허용
 				.anyRequest().authenticated()
 			);
 		http
