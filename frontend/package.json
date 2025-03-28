@@ -12,6 +12,8 @@
   "dependencies": {
     "@headlessui/react": "^2.2.0",
     "@nivo/line": "^0.88.0",
+    "@react-three/drei": "^10.0.5",
+    "@react-three/fiber": "^9.1.0",
     "@tensorflow/tfjs": "^4.22.0",
     "@types/three": "^0.174.0",
     "axios": "^1.8.2",

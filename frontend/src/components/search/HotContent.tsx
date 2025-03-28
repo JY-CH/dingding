@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { motion } from 'framer-motion';
 import { BookHeadphones } from 'lucide-react';
 
 import GenreCards from './GenreCards';
@@ -30,7 +30,7 @@ interface HotContentsProps {
   activeTab: string;
 }
 
-const HptContent: React.FC<HotContentsProps> = ({ activeTab }) => {
+const HotContent: React.FC<HotContentsProps> = ({ activeTab }) => {
   const trendingSongs: Song[] = [
     {
       id: 1,
@@ -174,26 +174,50 @@ const HptContent: React.FC<HotContentsProps> = ({ activeTab }) => {
 
   return (
     <div className="bg-zinc-900 min-h-screen pb-20">
-      {activeTab === 'all' && <GenreCards genres={genreCards} />}
+      {activeTab === 'all' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <GenreCards genres={genreCards} />
+        </motion.div>
+      )}
+      
       {(activeTab === 'all' || activeTab === 'albums') && (
         <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 트렌딩 노래 */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
             <HotSongs songs={trendingSongs} />
-          </div>
+          </motion.div>
+          
           {/* 최신 발매 */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             <RecentReleases releases={recentReleases} />
-          </div>
+          </motion.div>
         </div>
       )}
+      
       {(activeTab === 'all' || activeTab === 'community') && (
-        <div className="px-6 py-6">
+        <motion.div
+          className="px-6 py-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
           <PopularPosts posts={popularPosts} />
-        </div>
+        </motion.div>
       )}
     </div>
   );
 };
 
-export default HptContent;
+export default HotContent;

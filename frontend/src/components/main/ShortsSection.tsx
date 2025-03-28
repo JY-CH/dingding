@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 import { mockShorts } from '../../data/mockData';
 
@@ -6,7 +7,12 @@ const ShortsSection = () => {
   const [hoveredShort, setHoveredShort] = useState<string | null>(null);
 
   return (
-    <div className="mt-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.7 }}
+      className="mt-8"
+    >
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
@@ -44,10 +50,13 @@ const ShortsSection = () => {
       </div>
 
       <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-        {mockShorts.map((short) => (
-          <div
+        {mockShorts.map((short, index) => (
+          <motion.div
             key={short.id}
-            className="group relative"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 + index * 0.1 }}
+            className="relative group"
             onMouseEnter={() => setHoveredShort(short.id)}
             onMouseLeave={() => setHoveredShort(null)}
           >
@@ -160,10 +169,10 @@ const ShortsSection = () => {
                 </svg>
               </button>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

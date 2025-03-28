@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 const ExploreSection = () => {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
@@ -51,7 +52,12 @@ const ExploreSection = () => {
   ];
 
   return (
-    <div className="mt-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+      className="mt-8"
+    >
       <div className="mb-8">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
           Guitar Styles
@@ -60,9 +66,12 @@ const ExploreSection = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {categories.map((category) => (
-          <div
+        {categories.map((category, index) => (
+          <motion.div
             key={category.name}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 + index * 0.1 }}
             className="relative group"
             onMouseEnter={() => setHoveredCategory(category.name)}
             onMouseLeave={() => setHoveredCategory(null)}
@@ -141,10 +150,10 @@ const ExploreSection = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

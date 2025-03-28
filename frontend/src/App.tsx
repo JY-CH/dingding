@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 
 import Sidebar from './components/common/Sidebar';
 import AppContent from './components/layout/AppContent';
+import LoginPage from './pages/LoginPage';
 
 function App() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -11,9 +12,7 @@ function App() {
   return (
     <div className="flex h-screen">
       <Sidebar isExpanded={isExpanded} onToggle={() => setIsExpanded(!isExpanded)} />
-      <Routes>
-        <Route path="/*" element={<AppContent isExpanded={isExpanded} />} />
-      </Routes>
+      <AppContent isExpanded={isExpanded} />
     </div>
   );
 }

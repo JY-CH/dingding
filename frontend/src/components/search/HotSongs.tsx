@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { motion } from 'framer-motion';
 import { Headphones, Clock, TrendingUp } from 'lucide-react';
 
 interface Song {
@@ -18,14 +18,22 @@ interface HotSongsProps {
 const HotSongs: React.FC<HotSongsProps> = ({ songs }) => {
   return (
     <div>
-      <div className="flex items-center gap-2 mb-4">
-        <TrendingUp className="w-5 h-5 text-orange-500" />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="flex items-center gap-2 mb-4"
+      >
+        <TrendingUp className="w-5 h-5 text-amber-500" />
         <h3 className="text-lg font-bold text-white">트렌딩 노래</h3>
-      </div>
+      </motion.div>
       <div className="bg-zinc-800 rounded-xl overflow-hidden">
         {songs.map((song, index) => (
-          <div
+          <motion.div
             key={song.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 + index * 0.1 }}
             className="flex items-center p-4 hover:bg-zinc-700 transition-colors cursor-pointer border-b border-zinc-700 last:border-b-0"
           >
             <div className="w-6 text-center text-gray-400 mr-3">{index + 1}</div>
@@ -48,7 +56,7 @@ const HotSongs: React.FC<HotSongsProps> = ({ songs }) => {
                 <span>{song.duration}</span>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>

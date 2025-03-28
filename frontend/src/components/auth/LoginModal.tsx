@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { login } from '@/services/api';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const setAuth = useAuthStore(state => state.setAuth);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,12 +26,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         password
       });
 
-      // 로그인 성공 처리
-      localStorage.setItem('accessToken', response.accesToken);
-      localStorage.setItem('username', response.username);
+      // auth 스토어 업데이트
+      setAuth(
+        { username: response.username },
+        response.accesToken
+      );
       
       onClose();
-      window.location.href = '/dashboard'; // 또는 원하는 페이지로 리다이렉트
+      window.location.href = '/dashboard';
     } catch (error) {
       console.error('Login failed:', error);
       setError(error instanceof Error ? error.message : '로그인에 실패했습니다');

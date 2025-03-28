@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { ArrowLeft } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface Song {
@@ -16,43 +15,48 @@ const AllSongsPage: React.FC = () => {
   const location = useLocation();
   const songs: Song[] = location.state?.songs || [];
 
-  // 각 노래에 대응하는 임시 동영상 URL (실제 동영상 주소가 있다면 각 노래마다 다르게 지정)
-  const defaultVideoUrl = 'src/assets/sample-video.mp4';
-
   return (
-    <div className="bg-amber-50 px-6 pl-20 min-h-screen flex">
-      {/* 사이드바 공간 */}
-      <div className="w-40" />
-      {/* 메인 컨텐츠 영역 */}
-      <div className="flex-1">
-        <div className="bg-stone-100 p-6 rounded-2xl shadow-md">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center text-amber-500 hover:text-amber-600 mb-4"
+    <div className="bg-zinc-900 min-h-screen px-8 py-6">
+      {/* 뒤로가기 버튼 */}
+      <button
+        onClick={() => navigate(-1)}
+        className="text-amber-500 hover:text-amber-600 mb-6 font-medium"
+      >
+        뒤로가기
+      </button>
+
+      {/* 페이지 타이틀 */}
+      <h2 className="text-2xl font-bold text-white mb-6">모든 노래</h2>
+
+      {/* 노래 카드 그리드 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {songs.map((song, index) => (
+          <div
+            key={index}
+            onClick={() => navigate('/stream', { state: { song } })}
+            className="bg-zinc-800 p-4 rounded-lg shadow-lg hover:bg-zinc-700 transition-colors cursor-pointer group"
           >
-            <ArrowLeft size={16} className="mr-1" /> 뒤로가기
-          </button>
-          <h2 className="text-xl font-bold mb-4">모든 노래</h2>
-          <div className="grid grid-cols-1 gap-4">
-            {songs.map((song, index) => (
-              <div
-                key={index}
-                onClick={() => navigate('/stream', { state: { song, videoUrl: defaultVideoUrl } })}
-                className="bg-white p-4 rounded shadow hover:bg-amber-50 transition-colors flex items-center cursor-pointer"
-              >
-                <img
-                  src={song.thumbnail}
-                  alt="앨범 커버"
-                  className="w-12 h-12 object-cover rounded mr-4"
-                />
-                <div>
-                  <div className="font-bold">{song.title}</div>
-                  <div className="text-sm text-gray-500">{song.artist}</div>
-                </div>
+            {/* 앨범 커버 */}
+            <div className="relative w-full h-40 rounded overflow-hidden mb-4">
+              <img
+                src={song.thumbnail}
+                alt="앨범 커버"
+                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-50 transition-opacity flex items-center justify-center">
+                <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  재생하기
+                </span>
               </div>
-            ))}
+            </div>
+
+            {/* 노래 정보 */}
+            <div className="text-white font-bold text-lg truncate">{song.title}</div>
+            <div className="text-gray-400 text-sm truncate">{song.artist}</div>
+            <div className="text-gray-500 text-xs mt-2">재생 시간: {song.duration}</div>
+            <div className="text-amber-500 text-xs font-medium mt-1">점수: {song.score}</div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

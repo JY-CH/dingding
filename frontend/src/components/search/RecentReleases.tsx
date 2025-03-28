@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { motion } from 'framer-motion';
 import { Calendar } from 'lucide-react';
 
 interface Song {
@@ -16,14 +16,22 @@ interface RecentReleasesProps {
 const RecentReleases: React.FC<RecentReleasesProps> = ({ releases }) => {
   return (
     <div>
-      <div className="flex items-center gap-2 mb-4">
-        <Calendar className="w-5 h-5 text-orange-500" />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="flex items-center gap-2 mb-4"
+      >
+        <Calendar className="w-5 h-5 text-amber-500" />
         <h3 className="text-lg font-bold text-white">최신 발매</h3>
-      </div>
+      </motion.div>
       <div className="bg-zinc-800 rounded-xl overflow-hidden">
-        {releases.map((song) => (
-          <div
+        {releases.map((song, index) => (
+          <motion.div
             key={song.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 + index * 0.1 }}
             className="flex items-center p-4 hover:bg-zinc-700 transition-colors cursor-pointer border-b border-zinc-700 last:border-b-0"
           >
             <img
@@ -35,10 +43,10 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({ releases }) => {
               <div className="text-sm font-medium text-white truncate">{song.title}</div>
               <div className="text-xs text-gray-400 mt-1">{song.artist}</div>
             </div>
-            <div className="bg-orange-500/20 text-xs font-medium text-orange-500 px-2 py-1 rounded-full ml-2">
+            <div className="bg-orange-500/20 text-xs font-medium text-amber-500 px-2 py-1 rounded-full ml-2">
               NEW
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>

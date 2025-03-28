@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 import { mockTopSongs } from '../../data/mockData';
 import { Song } from '../../types';
@@ -9,7 +10,12 @@ interface TopSongSectionProps {
 
 const TopSongSection: React.FC<TopSongSectionProps> = ({ onPlaySong }) => {
   return (
-    <div className="h-[680px]">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5 }}
+      className="h-[680px]"
+    >
       <div className="mb-6">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
           추천 영상
@@ -18,9 +24,12 @@ const TopSongSection: React.FC<TopSongSectionProps> = ({ onPlaySong }) => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 h-[570px]">
-        {mockTopSongs.slice(0, 6).map((song) => (
-          <div
+        {mockTopSongs.slice(0, 6).map((song, index) => (
+          <motion.div
             key={song.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 + index * 0.1 }}
             className="group cursor-pointer h-[180px]"
             onClick={() => onPlaySong(song)}
           >
@@ -45,10 +54,10 @@ const TopSongSection: React.FC<TopSongSectionProps> = ({ onPlaySong }) => {
             </div>
             <h3 className="font-medium text-white text-sm truncate">{song.title}</h3>
             <p className="text-amber-400 text-xs truncate">{song.artist}</p>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

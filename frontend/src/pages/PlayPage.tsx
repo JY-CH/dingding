@@ -9,8 +9,10 @@ import FretboardVisualizer from '../components/guitar/FretboardVisualizer';
 import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
 import PracticeSession from '../components/guitar/PracticeSession';
 import { GuitarString, Visualization, Exercise } from '../types/guitar';
+import { useNavigate } from 'react-router-dom';
 
 const PlayPage: React.FC = () => {
+  const navigate = useNavigate();
   const [selectedMode, setSelectedMode] = useState<'practice' | 'performance'>('practice');
   const [isWebcamOn, setIsWebcamOn] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -65,7 +67,8 @@ const PlayPage: React.FC = () => {
       try {
         const context = new AudioContext();
         const analyserNode = context.createAnalyser();
-        analyserNode.fftSize = 256;
+        analyserNode.fftSize = 64;
+        analyserNode.smoothingTimeConstant = 0.8;
         
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const source = context.createMediaStreamSource(stream);
@@ -75,7 +78,6 @@ const PlayPage: React.FC = () => {
           setAudioContext(context);
           setAnalyser(analyserNode);
 
-          // 실시간 시각화 업데이트
           const updateVisualization = () => {
             if (!isActive) return;
 
@@ -84,7 +86,7 @@ const PlayPage: React.FC = () => {
 
             setVisualization(prev => ({
               ...prev,
-              data: Array.from(dataArray).map(value => value / 255),
+              data: Array.from(dataArray).map(value => (value / 255) * 0.7),
               peak: Math.max(...dataArray) / 255 || 1
             }));
 
@@ -138,6 +140,19 @@ const PlayPage: React.FC = () => {
           
           <div className="flex items-center gap-4">
             <button
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-700 hover:text-white transition-colors"
+            >
+              <GiGuitar className="w-5 h-5" />
+              연습 모드
+            </button>
+            <button
+              onClick={() => navigate('/performance')}
+              className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+            >
+              <RiMusicLine className="w-5 h-5" />
+              연주 모드
+            </button>
+            <button
               onClick={() => setShowStats(!showStats)}
               className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
             >
@@ -174,56 +189,37 @@ const PlayPage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white/5 rounded-xl overflow-hidden"
             >
-              {['practice', 'performance'].map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => setSelectedMode(mode as 'practice' | 'performance')}
-                  className={`w-full p-4 flex items-center gap-3 transition-all ${
-                    selectedMode === mode
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
-                      : 'hover:bg-white/5 text-zinc-400'
-                  }`}
-                >
-                  {mode === 'practice' ? (
-                    <GiGuitar className="w-5 h-5" />
-                  ) : (
-                    <RiMusicLine className="w-5 h-5" />
-                  )}
-                  <div className="text-left">
-                    <div className="font-medium">
-                      {mode === 'practice' ? '연습 모드' : '연주 모드'}
-                    </div>
-                    <div className="text-sm opacity-80">
-                      {mode === 'practice' 
-                        ? '단계별 연습과 피드백' 
-                        : '실시간 연주 분석'
-                      }
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </motion.div>
-
-            {/* 프렛보드 시각화 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white/5 rounded-xl p-6"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">프렛보드</h3>
-                {currentChord && (
-                  <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-500 text-sm">
-                    {currentChord}
-                  </span>
-                )}
-              </div>
-              <FretboardVisualizer
-                strings={strings}
-                frets={12}
-                activeNotes={['E', 'A', 'D']}
-              />
+              <button
+                onClick={() => setSelectedMode('practice')}
+                className={`w-full p-4 flex items-center gap-3 transition-all ${
+                  selectedMode === 'practice'
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
+                    : 'hover:bg-white/5 text-zinc-400'
+                }`}
+              >
+                <GiGuitar className="w-5 h-5" />
+                <div className="text-left">
+                  <div className="font-medium">연습 모드</div>
+                  <div className="text-sm opacity-80">단계별 연습과 피드백</div>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedMode('performance');
+                  navigate('/performance');
+                }}
+                className={`w-full p-4 flex items-center gap-3 transition-all ${
+                  selectedMode === 'performance'
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
+                    : 'hover:bg-white/5 text-zinc-400'
+                }`}
+              >
+                <RiMusicLine className="w-5 h-5" />
+                <div className="text-left">
+                  <div className="font-medium">연주 모드</div>
+                  <div className="text-sm opacity-80">실시간 연주 분석</div>
+                </div>
+              </button>
             </motion.div>
 
             {/* 통계 카드 */}
@@ -312,11 +308,33 @@ const PlayPage: React.FC = () => {
 
           {/* 오른쪽 패널 */}
           <div className="col-span-3 space-y-6">
-            {/* 3D 시각화 */}
+            {/* 프렛보드 시각화 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
+              className="bg-white/5 rounded-xl p-6"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">프렛보드</h3>
+                {currentChord && (
+                  <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-500 text-sm">
+                    {currentChord}
+                  </span>
+                )}
+              </div>
+              <FretboardVisualizer
+                strings={strings}
+                frets={12}
+                activeNotes={['E', 'A', 'D']}
+              />
+            </motion.div>
+
+            {/* 음향 시각화 - 위치 이동 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
               className="bg-white/5 rounded-xl p-6"
             >
               <h3 className="text-lg font-semibold text-white mb-4">음향 시각화</h3>
@@ -375,7 +393,42 @@ const PlayPage: React.FC = () => {
               className="bg-zinc-900 rounded-xl p-6 w-full max-w-md"
               onClick={e => e.stopPropagation()}
             >
-              {/* 설정 내용 */}
+              <h2 className="text-xl font-bold text-white mb-6">설정</h2>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-white">메트로놈</span>
+                  <button
+                    onClick={() => setSettings(s => ({ ...s, metronomeEnabled: !s.metronomeEnabled }))}
+                    className={`px-4 py-2 rounded-lg ${
+                      settings.metronomeEnabled ? 'bg-amber-500' : 'bg-zinc-700'
+                    }`}
+                  >
+                    {settings.metronomeEnabled ? '켜짐' : '꺼짐'}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-white">자동 녹화</span>
+                  <button
+                    onClick={() => setSettings(s => ({ ...s, autoRecording: !s.autoRecording }))}
+                    className={`px-4 py-2 rounded-lg ${
+                      settings.autoRecording ? 'bg-amber-500' : 'bg-zinc-700'
+                    }`}
+                  >
+                    {settings.autoRecording ? '켜짐' : '꺼짐'}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-white">운지법 표시</span>
+                  <button
+                    onClick={() => setSettings(s => ({ ...s, showFingerings: !s.showFingerings }))}
+                    className={`px-4 py-2 rounded-lg ${
+                      settings.showFingerings ? 'bg-amber-500' : 'bg-zinc-700'
+                    }`}
+                  >
+                    {settings.showFingerings ? '켜짐' : '꺼짐'}
+                  </button>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         )}

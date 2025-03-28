@@ -18,7 +18,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({ posts }) => {
     <div>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <MessageSquareText className="w-5 h-5 text-orange-500" />
+          <MessageSquareText className="w-5 h-5 text-amber-500" />
           <h4 className="text-lg font-bold text-white">연관 게시글</h4>
         </div>
         <button className="text-sm text-orange-500">모두 보기</button>
