@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { motion } from 'framer-motion';
+
 import RelatedPosts from './RelatedPosts';
 import RelatedSongs from './RelatedSongs';
 
@@ -47,26 +49,57 @@ const SearchResults: React.FC<SearchResultsProps> = ({ activeTab }) => {
   if (activeTab === 'all') {
     return (
       <div className="px-6 py-4 bg-zinc-900 min-h-screen space-y-8">
-        <RelatedSongs songs={relatedSongs} />
-        <RelatedPosts posts={relatedPosts} />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <RelatedSongs songs={relatedSongs} />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <RelatedPosts posts={relatedPosts} />
+        </motion.div>
       </div>
     );
   } else if (activeTab === 'albums') {
     return (
       <div className="px-6 py-4 bg-zinc-900 min-h-screen">
-        <RelatedSongs songs={relatedSongs} />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <RelatedSongs songs={relatedSongs} />
+        </motion.div>
       </div>
     );
   } else if (activeTab === 'community') {
     return (
       <div className="px-6 py-4 bg-zinc-900 min-h-screen">
-        <RelatedPosts posts={relatedPosts} />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <RelatedPosts posts={relatedPosts} />
+        </motion.div>
       </div>
     );
   } else if (activeTab === 'artists') {
     return (
       <div className="px-6 py-4 bg-zinc-900 min-h-screen">
-        <p className="text-white text-center">관련 데이터가 없습니다.</p>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-white text-center"
+        >
+          관련 데이터가 없습니다.
+        </motion.p>
       </div>
     );
   }

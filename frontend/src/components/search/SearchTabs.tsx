@@ -22,7 +22,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({ activeTab, setActiveTab }) => {
             onClick={() => setActiveTab(tab.key)}
             className={`text-sm whitespace-nowrap pb-2 transition-colors ${
               activeTab === tab.key
-                ? 'text-orange-500 border-b-2 border-orange-500 font-medium'
+                ? 'text-amber-500 border-b-2 border-amber-500 font-medium'
                 : 'text-gray-400'
             }`}
           >

@@ -9,12 +9,12 @@ interface StatsTileProps {
 
 const StatsTile: React.FC<StatsTileProps> = ({ label, value, change, positive }) => {
   return (
-    <div className="bg-amber-400 rounded-lg p-4 shadow-sm">
-      <p className="text-amber-800 text-sm">{label}</p>
-      <div className="flex items-end mt-1">
-        <span className="text-2xl font-bold">{value}</span>
+    <div className="bg-zinc-800 rounded-lg p-4 shadow-md">
+      <p className="text-gray-400 text-sm">{label}</p>
+      <div className="flex items-end mt-2">
+        <span className="text-white text-2xl font-bold">{value}</span>
         {change && (
-          <span className={`ml-2 text-sm ${positive ? 'text-green-700' : 'text-red-700'}`}>
+          <span className={`ml-2 text-sm ${positive ? 'text-green-500' : 'text-red-500'}`}>
             {change} {positive ? '↗' : '↘'}
           </span>
         )}

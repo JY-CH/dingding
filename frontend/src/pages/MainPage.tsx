@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+
+import { useAuthStore } from '@/store/useAuthStore';
 
 import ExploreSection from '../components/main/ExploreSection';
 import FeaturedCarousel from '../components/main/FeaturedCarousel';
@@ -20,6 +23,8 @@ const MainPage = () => {
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [isAllNotificationsModalOpen, setIsAllNotificationsModalOpen] = useState(false);
+  const { isAuthenticated, user, clearAuth } = useAuthStore();
+  const [query, setQuery] = useState<string>('');
 
   // 프로필 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -41,11 +46,15 @@ const MainPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white">
-      {/* 메인 콘텐츠 */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
+    <div className="h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white overflow-y-auto custom-scrollbar">
+      <div className="p-8 pb-28">
         <div className="max-w-7xl mx-auto space-y-8">
-          <header className="flex justify-between items-center mb-4">
+          <motion.header
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="flex justify-between items-center mb-4"
+          >
             <div>
               <h1 className="text-3xl font-bold">Discover</h1>
               <p className="text-zinc-400">Listen to the best music for your mood</p>
@@ -55,10 +64,17 @@ const MainPage = () => {
                 <input
                   type="text"
                   placeholder="Search for songs, artists..."
-                  className="py-2 px-4 pl-10 bg-white/5 border border-white/10 rounded-full text-sm focus:outline-none focus:border-amber-500 w-64 transition-all"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && query.trim()) {
+                      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+                    }
+                  }}
+                  className="py-2 px-4 pl-10 bg-white/5 border border-white/10 rounded-full text-sm text-white placeholder-gray-400 focus:outline-none focus:border-amber-500 w-64 transition-all"
                 />
                 <svg
-                  className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2"
+                  className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -202,21 +218,33 @@ const MainPage = () => {
                 )}
               </div>
               <div className="relative" ref={profileRef}>
-                <button
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="h-10 w-10 rounded-full overflow-hidden ring-2 ring-white/10 hover:ring-amber-500 transition-all"
-                >
-                  <img
-                    src="https://i.pravatar.cc/100?img=5"
-                    alt="User profile"
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-                {isProfileOpen && (
+                {isAuthenticated ? (
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="h-10 w-10 rounded-full overflow-hidden ring-2 ring-white/10 hover:ring-amber-500 transition-all"
+                  >
+                    <div className="w-full h-full bg-gradient-to-br from-amber-500/10 to-amber-600/10 flex items-center justify-center">
+                      <img
+                        src="/profile-placeholder.png"
+                        alt={user?.username}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                  >
+                    로그인
+                  </button>
+                )}
+
+                {isProfileOpen && isAuthenticated && (
                   <div className="absolute right-0 mt-2 w-48 rounded-xl bg-zinc-800/90 backdrop-blur-sm border border-white/10 shadow-xl z-50">
                     <div className="p-3 border-b border-white/10">
-                      <p className="text-sm font-medium text-white">사용자님</p>
-                      <p className="text-xs text-zinc-400">user@example.com</p>
+                      <p className="text-sm font-medium text-white">{user?.username}님</p>
+                      <p className="text-xs text-zinc-400">유저 아이디 추가 필요?</p>
                     </div>
 
                     <div className="p-1">
@@ -276,8 +304,9 @@ const MainPage = () => {
                     <div className="p-1 border-t border-white/10">
                       <button
                         onClick={() => {
-                          // 로그아웃 처리
+                          clearAuth();
                           setIsProfileOpen(false);
+                          navigate('/');
                         }}
                         className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                       >
@@ -301,28 +330,60 @@ const MainPage = () => {
                 )}
               </div>
             </div>
-          </header>
+          </motion.header>
 
-          {/* Featured Carousel */}
-          <FeaturedCarousel />
-
-          {/* Explore Section */}
-          <ExploreSection />
-
-          {/* Main Content Sections */}
+          {/* 캐러셀 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <FeaturedCarousel />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <ExploreSection />
+          </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             <div className="col-span-2">
-              <TopSongSection onPlaySong={handlePlaySong} />
-              <ShortsSection />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <TopSongSection onPlaySong={handlePlaySong} />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <ShortsSection />
+              </motion.div>
             </div>
             <div>
-              <RankingSection
-                dailyTracks={mockDailyTracks}
-                weeklyTracks={mockWeeklyTracks}
-                monthlyTracks={mockMonthlyTracks}
-                onPlayTrack={handlePlaySong}
-              />
-              <TopArtistSection />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <RankingSection
+                  dailyTracks={mockDailyTracks}
+                  weeklyTracks={mockWeeklyTracks}
+                  monthlyTracks={mockMonthlyTracks}
+                  onPlayTrack={handlePlaySong}
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <TopArtistSection />
+              </motion.div>
             </div>
           </div>
         </div>
@@ -330,7 +391,12 @@ const MainPage = () => {
 
       {/* 알림 모달 */}
       {isAllNotificationsModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
           <div
             className="bg-gradient-to-b from-zinc-800/95 to-zinc-900/95 border border-white/10 rounded-2xl 
             w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl animate-modalShow"
@@ -483,7 +549,7 @@ const MainPage = () => {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );

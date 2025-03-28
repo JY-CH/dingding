@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-interface User {
-  isLoggedIn: boolean;
-  profileImage?: string;
-}
+import { useAuthStore } from '@/store/useAuthStore';
+
+// interface User {
+//   isLoggedIn: boolean;
+//   profileImage?: string;
+// }
 
 interface SidebarProps {
   isExpanded: boolean;
@@ -14,11 +16,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
   const [activeItem, setActiveItem] = useState<number | null>(null);
-  // 임시 유저 상태 (실제로는 전역 상태 관리나 context를 사용해야 함)
-  const [user, setUser] = useState<User>({
-    isLoggedIn: false,
-    profileImage: 'https://via.placeholder.com/40',
-  });
+  const { isAuthenticated, user, clearAuth } = useAuthStore();
   const navigate = useNavigate();
 
   const menuItems = [
@@ -54,13 +52,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
     navigate(path);
   };
 
-  // const handleLogin = () => {
-  //   // 실제 로그인 로직으로 대체 필요
-  //   setUser({ isLoggedIn: true, profileImage: 'https://via.placeholder.com/40' });
-  // };
-
   const handleLogout = () => {
-    setUser({ isLoggedIn: false });
+    clearAuth();
     navigate('/');
   };
 
@@ -76,10 +69,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
       <div className="flex flex-col h-full">
         {/* 로그인/프로필 영역 */}
         <div className="p-4 border-b border-gray-800">
-          {user.isLoggedIn ? (
+          {isAuthenticated ? (
             <div className="flex items-center h-10">
               <div className="w-10 h-10 flex-shrink-0">
-                <img src={user.profileImage} alt="Profile" className="w-full h-full rounded-full" />
+                <img
+                  src="/profile-placeholder.png"
+                  alt={user?.username}
+                  className="w-full h-full rounded-full object-cover bg-gradient-to-br from-amber-500/10 to-amber-600/10"
+                />
               </div>
               <div
                 className={`
@@ -87,7 +84,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
                 ${isExpanded ? 'w-40 ml-3 opacity-100' : 'w-0 opacity-0'}
               `}
               >
-                <span className="text-white text-sm font-medium whitespace-nowrap">사용자님</span>
+                <span className="text-white text-sm font-medium whitespace-nowrap">
+                  {user?.username}님
+                </span>
               </div>
             </div>
           ) : (
@@ -153,8 +152,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
 
         {/* 하단 버튼 영역 */}
         <div className="p-4 space-y-2">
-          {/* 로그아웃 버튼 (로그인 시에만 표시) */}
-          {user.isLoggedIn && (
+          {isAuthenticated && (
             <button
               onClick={handleLogout}
               className="w-full h-10 flex items-center justify-center rounded

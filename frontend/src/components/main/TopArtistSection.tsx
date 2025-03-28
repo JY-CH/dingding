@@ -1,12 +1,19 @@
 import { useState } from 'react';
 
+import { motion } from 'framer-motion';
+
 import { mockArtists } from '../../data/mockData';
 
 const TopArtistSection = () => {
   const [hoveredArtist, setHoveredArtist] = useState<string | null>(null);
 
   return (
-    <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 mt-6 shadow-lg">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1.1 }}
+      className="bg-white/5 backdrop-blur-md rounded-xl p-6 mt-6 shadow-lg"
+    >
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
@@ -18,8 +25,11 @@ const TopArtistSection = () => {
 
       <div className="space-y-4">
         {mockArtists.slice(0, 5).map((artist, index) => (
-          <div
+          <motion.div
             key={artist.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 + index * 0.1 }}
             className="relative group"
             onMouseEnter={() => setHoveredArtist(artist.id)}
             onMouseLeave={() => setHoveredArtist(null)}
@@ -100,10 +110,10 @@ const TopArtistSection = () => {
               `}
               />
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
