@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 import LoginModal from '../components/auth/LoginModal';
 import SignupModal from '../components/auth/SignupModal';
@@ -20,7 +20,12 @@ const LoginPage = () => {
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-zinc-900 via-zinc-900 to-black">
       {/* 배경 이미지 */}
-      <div className="absolute inset-0 transition-opacity duration-1000 flex items-center justify-center bg-black">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        className="absolute inset-0 transition-opacity duration-1000 flex items-center justify-center bg-black"
+      >
         <img
           src={`/src/assets/bg${currentBg}.jpg`}
           alt="background"
@@ -34,12 +39,17 @@ const LoginPage = () => {
             img.src = `/src/assets/bg${newBg}.jpg`;
           }}
         />
-      </div>
+      </motion.div>
 
       {/* 컨텐츠 */}
       <div className="absolute inset-0 flex flex-col">
         {/* 헤더 */}
-        <nav className="p-8 pl-24">
+        <motion.nav
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="p-8 pl-24"
+        >
           <div className="inline-flex items-center">
             <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
               <svg
@@ -58,20 +68,35 @@ const LoginPage = () => {
               <span className="ml-2 text-2xl font-bold text-white">ThingThing</span>
             </div>
           </div>
-        </nav>
+        </motion.nav>
 
         {/* 메인 콘텐츠 */}
         <main className="flex-1 flex items-center justify-center px-8">
           <div className="w-full max-w-md space-y-8">
-            <div className="text-center">
+            {/* 타이틀 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-center"
+            >
               <h1 className="text-4xl font-bold text-white drop-shadow-lg">로그인</h1>
               <p className="mt-2 text-white/90 text-lg drop-shadow">
                 ThingThing에서 음악을 시작하세요
               </p>
-            </div>
+            </motion.div>
 
-            <div className="bg-black/30 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20">
-              <button
+            {/* 로그인 카드 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-black/30 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20"
+            >
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
                 onClick={() => setIsLoginModalOpen(true)}
                 className="w-full py-4 px-6 bg-gradient-to-r from-amber-500 to-amber-600 
                   text-white rounded-lg font-medium text-lg
@@ -81,7 +106,7 @@ const LoginPage = () => {
                   transition-all shadow-lg"
               >
                 로그인하기
-              </button>
+              </motion.button>
 
               <div className="relative my-8">
                 <div className="absolute inset-0 flex items-center">
@@ -93,7 +118,10 @@ const LoginPage = () => {
               </div>
 
               <div className="space-y-4">
-                <button
+                <motion.button
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.7 }}
                   className="w-full py-3 px-4 bg-white/10 border border-white/20 rounded-lg
                   text-white font-medium flex items-center justify-center gap-3
                   hover:bg-white/20 transition-colors shadow-md"
@@ -117,8 +145,11 @@ const LoginPage = () => {
                     />
                   </svg>
                   Google로 계속하기
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.8 }}
                   className="w-full py-3 px-4 bg-white/10 border border-white/20 rounded-lg
                   text-white font-medium flex items-center justify-center gap-3
                   hover:bg-white/20 transition-colors shadow-md"
@@ -127,11 +158,17 @@ const LoginPage = () => {
                     <path d="M13.488 4.79c.257-1.068.64-2.137 1.175-3.206-1.092.308-2.129.78-3.037 1.405a8.77 8.77 0 00-1.994 1.964c-.88 1.184-1.472 2.576-1.472 4.047 0 1.555.52 3.018 1.475 4.176.955 1.158 2.254 1.962 3.754 2.212a4.356 4.356 0 01-.123-1.012c0-1.024.363-1.964.97-2.684.606-.72 1.425-1.224 2.34-1.224.915 0 1.734.504 2.34 1.224.607.72.97 1.66.97 2.684 0 .34-.041.676-.123 1.012 1.5-.25 2.799-1.054 3.754-2.212.955-1.158 1.475-2.621 1.475-4.176 0-1.471-.592-2.863-1.472-4.047a8.77 8.77 0 00-1.994-1.964c-.908-.625-1.945-1.097-3.037-1.405.535 1.069.918 2.138 1.175 3.206.362 1.507.362 3.049 0 4.556-.362-1.507-.918-2.897-1.668-4.167-.75-1.27-1.667-2.38-2.751-3.327-1.084.947-2.001 2.057-2.751 3.327-.75 1.27-1.306 2.66-1.668 4.167-.362-1.507-.362-3.049 0-4.556z" />
                   </svg>
                   Apple로 계속하기
-                </button>
+                </motion.button>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="text-center space-y-4">
+            {/* 하단 텍스트 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+              className="text-center space-y-4"
+            >
               <p className="text-white/90 drop-shadow">
                 계정이 없으신가요?{' '}
                 <button
@@ -152,7 +189,7 @@ const LoginPage = () => {
                 </a>
                 에 동의하는 것으로 간주됩니다.
               </p>
-            </div>
+            </motion.div>
           </div>
         </main>
       </div>

@@ -111,8 +111,12 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ songs, initialSongIndex = 0, 
   return (
     <div
       className={`
-      fixed bottom-0 right-0 bg-gradient-to-r from-zinc-900 to-zinc-800 h-20 px-4 
-      flex items-center gap-4 z-40 border-t border-white/5
+      fixed bottom-0 right-0 
+      bg-gradient-to-r from-zinc-900/80 to-zinc-800/80 
+      backdrop-blur-md
+      h-20 px-4 
+      flex items-center gap-4 z-40 
+      border-t border-white/5
       transition-[left] duration-300 ease-in-out
       ${isExpanded ? 'left-64' : 'left-20'}
     `}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
 import { Song } from '../../types';
 
@@ -30,7 +31,12 @@ const RankingSection: React.FC<RankingSectionProps> = ({
   };
 
   return (
-    <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 shadow-lg">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.9 }}
+      className="bg-white/5 backdrop-blur-md rounded-xl p-6 shadow-lg"
+    >
       <div className="mb-6">
         <h2 className="text-xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
           인기 차트
@@ -69,8 +75,11 @@ const RankingSection: React.FC<RankingSectionProps> = ({
       {/* 트랙 리스트 */}
       <div className="space-y-2 max-h-[320px] overflow-y-auto pr-2 custom-scrollbar">
         {getTracks().map((track, index) => (
-          <div
+          <motion.div
             key={track.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.0 + index * 0.1 }}
             className="relative group"
             onMouseEnter={() => setHoveredTrack(track.id)}
             onMouseLeave={() => setHoveredTrack(null)}
@@ -156,10 +165,10 @@ const RankingSection: React.FC<RankingSectionProps> = ({
               `}
               />
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

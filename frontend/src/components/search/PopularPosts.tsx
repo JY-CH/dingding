@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { motion } from 'framer-motion';
 import { MessageSquare, UserCircle } from 'lucide-react';
 
 interface Post {
@@ -19,14 +19,22 @@ interface PopularPostsProps {
 const PopularPosts: React.FC<PopularPostsProps> = ({ posts }) => {
   return (
     <div>
-      <div className="flex items-center gap-2 mb-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+        className="flex items-center gap-2 mb-4"
+      >
         <MessageSquare className="w-5 h-5 text-amber-500" />
         <h3 className="text-lg font-bold text-white">인기 게시글</h3>
-      </div>
+      </motion.div>
       <div className="bg-zinc-800 rounded-xl overflow-hidden">
-        {posts.map((post) => (
-          <div
+        {posts.map((post, index) => (
+          <motion.div
             key={post.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 + index * 0.1 }}
             className="p-4 hover:bg-zinc-700 transition-colors cursor-pointer border-b border-zinc-700 last:border-b-0"
           >
             <div className="flex items-center">
@@ -46,7 +54,7 @@ const PopularPosts: React.FC<PopularPostsProps> = ({ posts }) => {
               </div>
             </div>
             <div className="mt-2 text-xs text-gray-300 line-clamp-2">{post.excerpt}</div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
