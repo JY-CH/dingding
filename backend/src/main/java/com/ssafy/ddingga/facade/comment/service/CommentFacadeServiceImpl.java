@@ -17,15 +17,6 @@ public class CommentFacadeServiceImpl implements CommentFacadeService {
 
 	private final CommentService commentService;
 
-	// Integer commentId;
-	// Integer userId;
-	// String username;
-	// String content;
-	// String createdAt;
-	// String updateAt;
-	// Boolean isDeleted;
-	// List<Comment> comments;
-
 	@Override
 	public List<GetCommentsResponseDto> getComments(int articleId) {
 		List<Comment> comments = commentService.getComments(articleId);
