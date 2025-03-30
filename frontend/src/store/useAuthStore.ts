@@ -3,7 +3,6 @@ import { persist } from 'zustand/middleware';
 
 interface User {
   username: string;
-  // userId: string;
   // 필요한 다른 사용자 정보들 추가
 }
 
@@ -21,21 +20,19 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       accessToken: null,
       isAuthenticated: false,
-      setAuth: (user, token) =>
-        set({
-          user,
-          accessToken: token,
-          isAuthenticated: true,
-        }),
-      clearAuth: () =>
-        set({
-          user: null,
-          accessToken: null,
-          isAuthenticated: false,
-        }),
+      setAuth: (user, token) => set({
+        user,
+        accessToken: token,
+        isAuthenticated: true,
+      }),
+      clearAuth: () => set({
+        user: null,
+        accessToken: null,
+        isAuthenticated: false,
+      }),
     }),
     {
       name: 'auth-storage',
-    },
-  ),
-);
+    }
+  )
+); 
