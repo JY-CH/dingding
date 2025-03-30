@@ -1,4 +1,4 @@
-package com.ssafy.ddingga.facade.rank.dto;
+package com.ssafy.ddingga.facade.rank.dto.response;
 
 import java.time.LocalTime;
 
