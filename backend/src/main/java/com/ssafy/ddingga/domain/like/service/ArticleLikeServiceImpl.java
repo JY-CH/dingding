@@ -23,6 +23,15 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
 	private final ArticleRepository articleRepository;
 
 	@Override
+	public boolean checkLikeArticle(int userId, int articleId) {
+		User user = authService.getUser(userId);
+		Article article = articleService.getArticle(articleId);
+		ArticleLike like = articleLikeRepository.findByUserAndArticle(user, article);
+
+		return like != null; // null이 아니면 좋아요인상태 null이면 좋아요 아닌상태
+	}
+
+	@Override
 	public boolean likeArticle(int userId, int articleId) {
 		User user = authService.getUser(userId);
 		Article article = articleService.getArticle(articleId);

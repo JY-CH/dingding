@@ -22,21 +22,42 @@ public class CommentFacadeServiceImpl implements CommentFacadeService {
 		List<Comment> comments = commentService.getComments(articleId);
 		List<GetCommentsResponseDto> responseDtoList = new ArrayList<>();
 		for (Comment comment : comments) {
-			GetCommentsResponseDto responseDto = GetCommentsResponseDto.builder()
-				.commentId(comment.getCommentId())
-				.userId(comment.getUser().getUserId())
-				.username(comment.getUser().getUsername())
-				.content(comment.getContent())
-				.createdAt(comment.getCreatedAt())
-				.updateAt(comment.getUpdatedAt())
-				.isDeleted(comment.getIsDeleted())
-				.comments(comment.getReplies())
-				.build();
+			if (comment.getParentComment() == null) {
+				GetCommentsResponseDto responseDto = GetCommentsResponseDto.builder()
+					.commentId(comment.getCommentId())
+					.userId(comment.getUser().getUserId())
+					.username(comment.getUser().getUsername())
+					.content(comment.getContent())
+					.createdAt(comment.getCreatedAt())
+					.updateAt(comment.getUpdatedAt())
+					.isDeleted(comment.getIsDeleted())
+					.comments(getRepliesRecursive(comment.getReplies()))
+					.build();
 
-			responseDtoList.add(responseDto);
+				responseDtoList.add(responseDto);
+			}
 		}
 
 		return responseDtoList;
+	}
+
+	private List<GetCommentsResponseDto> getRepliesRecursive(List<Comment> replies) {
+		List<GetCommentsResponseDto> replyDtoList = new ArrayList<>();
+		for (Comment reply : replies) {
+			GetCommentsResponseDto replyDto = GetCommentsResponseDto.builder()
+				.commentId(reply.getCommentId())
+				.userId(reply.getUser().getUserId())
+				.username(reply.getUser().getUsername())
+				.content(reply.getContent())
+				.createdAt(reply.getCreatedAt())
+				.updateAt(reply.getUpdatedAt())
+				.isDeleted(reply.getIsDeleted())
+				.comments(getRepliesRecursive(reply.getReplies()))  // 대댓글 재귀적으로 조회
+				.build();
+
+			replyDtoList.add(replyDto);
+		}
+		return replyDtoList;
 	}
 
 	@Override

@@ -12,7 +12,7 @@ public interface ArticleFacadeService {
 
 	List<ArticleGetAllResponseDto> allGetArticleList();
 
-	ArticleDetailResponseDto getArticle(int articleId);
+	ArticleDetailResponseDto getArticle(int userId, int articleId);
 
 	void createArticle(int userId, ArticleCreateRequestDto request);
 

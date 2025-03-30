@@ -1,6 +1,9 @@
 package com.ssafy.ddingga.facade.article.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.ssafy.ddingga.facade.comment.dto.response.GetCommentsResponseDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,4 +26,6 @@ public class ArticleDetailResponseDto {
 	private String category;    // 카테고리
 	private Boolean popularPost;  // 인기글
 	private Integer recommend;  // 추천수
+	private Boolean isLike; // 해당 유저가 좋아요 중인지
+	private List<GetCommentsResponseDto> comments; // 게시판 댓글
 }

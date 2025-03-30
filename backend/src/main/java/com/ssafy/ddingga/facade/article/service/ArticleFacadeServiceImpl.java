@@ -7,11 +7,13 @@ import org.springframework.stereotype.Service;
 
 import com.ssafy.ddingga.domain.article.entity.Article;
 import com.ssafy.ddingga.domain.article.service.ArticleService;
+import com.ssafy.ddingga.domain.like.service.ArticleLikeService;
 import com.ssafy.ddingga.facade.article.dto.request.ArticleCreateRequestDto;
 import com.ssafy.ddingga.facade.article.dto.request.ArticleUpdateRequestDto;
 import com.ssafy.ddingga.facade.article.dto.response.ArticleDetailResponseDto;
 import com.ssafy.ddingga.facade.article.dto.response.ArticleGetAllResponseDto;
 import com.ssafy.ddingga.facade.article.dto.response.ArticleSearchResponseDto;
+import com.ssafy.ddingga.facade.comment.service.CommentFacadeServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ArticleFacadeServiceImpl implements ArticleFacadeService {
 	private final ArticleService articleService;
+	private final CommentFacadeServiceImpl commentFacadeService;
+	private final ArticleLikeService articleLikeService;
 
 	@Override
 	public List<ArticleGetAllResponseDto> allGetArticleList() {
@@ -43,7 +47,7 @@ public class ArticleFacadeServiceImpl implements ArticleFacadeService {
 	}
 
 	@Override
-	public ArticleDetailResponseDto getArticle(int articleId) {
+	public ArticleDetailResponseDto getArticle(int userId, int articleId) {
 		Article article = articleService.getArticle(articleId);
 		ArticleDetailResponseDto responseDto = ArticleDetailResponseDto.builder()
 			.articleId(article.getArticleId())
@@ -55,6 +59,8 @@ public class ArticleFacadeServiceImpl implements ArticleFacadeService {
 			.updatedAt(article.getUpdatedAt())
 			.popularPost(article.getPopularPost())
 			.recommend(article.getRecommend())
+			.isLike(articleLikeService.checkLikeArticle(userId, articleId))
+			.comments(commentFacadeService.getComments(articleId))
 			.build();
 
 		return responseDto;
