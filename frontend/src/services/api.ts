@@ -135,6 +135,7 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(credentials),
+      credentials: 'include', // 쿠키를 포함하도록 설정
     });
 
     const data = await response.json();
