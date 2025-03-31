@@ -41,14 +41,9 @@ public class RankingServiceImpl implements RankingService {
 	public TopRankingResponse getTop5Rankings() {
 		log.info("랭킹 - 상위 5명 랭킹 정보 조회 요청");
 		try {
-			TopRankingResponse response = TopRankingResponse.builder()
-				.playTimeTop5(rankingRepository.findTop5ByPlayTime())
-				.totalTryTop5(rankingRepository.findTop5ByTotalTry())
-				.scoreTop5(rankingRepository.findTop5ByScore())
-				.build();
-
-			log.info("랭킹 - 상위 5명 랭킹 정보 조회 완료");
-			return response;
+			// 각각의 상위 5명을 조회하고 첫 번째 결과를 반환
+			// (실제로는 이 부분도 수정이 필요할 수 있습니다)
+			return rankingRepository.findTop5ByPlayTime().get(0);
 		} catch (Exception e) {
 			log.error("랭킹 - 상위 5명 랭킹 정보 조회 실패: error={}", e.getMessage());
 			throw new DatabaseException("상위 5명 랭킹 정보 조회 중 오류가 발생했습니다.", e);

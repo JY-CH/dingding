@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ssafy.ddingga.domain.auth.repository.AuthRepository;
-import com.ssafy.ddingga.domain.rank.repository.RankingRepository;
+import com.ssafy.ddingga.domain.rank.service.RankingService;
 import com.ssafy.ddingga.domain.replay.service.ReplayService;
 import com.ssafy.ddingga.domain.song.entity.ChordScore;
 import com.ssafy.ddingga.domain.song.repository.ChordScoreRepository;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 public class DashboardServiceImpl implements DashboardService {
 
-	private final RankingRepository rankingRepository;
+	private final RankingService rankingService;
 	private final ChordScoreRepository chordScoreRepository;
 	private final ReplayService replayService;
 	private final AuthRepository authRepository;
@@ -38,7 +38,7 @@ public class DashboardServiceImpl implements DashboardService {
 			throw new UserNotFoundException("사용자를 찾을 수 없습니다.");
 		}
 		try {
-			RankingInfo result = rankingRepository.findRankingByUserId(userId);
+			RankingInfo result = rankingService.getRankingInfo(userId);  // 이 줄을
 			log.info("대시보드 - 랭킹 정보 조회 완료: userId={}, result={}", userId, result);
 			return result;
 		} catch (Exception e) {

@@ -31,8 +31,10 @@ public class DashboardFacadeServiceImpl implements DashboardFacadeService {
 			rankingInfo = new RankingInfo(
 				LocalTime.of(0, 0, 0),  // 기본 플레이타임
 				0,                      // 기본 시도 횟수
+				0.0f,                   // 기본 평균 점수
 				0,                      // 기본 플레이타임 랭크
-				0                       // 기본 시도 횟수 랭크
+				0,                       // 기본 시도 횟수 랭크
+				0                        // 기본 점수 랭크
 			);
 		}
 		// 코드 점수 조회
@@ -52,6 +54,8 @@ public class DashboardFacadeServiceImpl implements DashboardFacadeService {
 			.username(username)
 			.playtime(rankingInfo.getPlayTime())
 			.playtimeRank(rankingInfo.getPlayTimeRank())
+			.score(rankingInfo.getScore())
+			.scoreRank(rankingInfo.getScoreRank())
 			.totalTry(rankingInfo.getTotalTry())
 			.totalTryRank(rankingInfo.getTotalTryRank())
 			.chordScoreDtos(chordScoreDtos)

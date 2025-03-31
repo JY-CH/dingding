@@ -16,9 +16,10 @@ import com.ssafy.ddingga.facade.rank.dto.response.TopRankingResponse;
 public interface RankingRepository extends JpaRepository<Ranking, User> {
 
 	@Query(value = "SELECT new com.ssafy.ddingga.facade.rank.dto.response.RankingInfo("
-		+ "r.playTime, r.totalTry, "
+		+ "r.playTime, r.totalTry, r.score, "
 		+ "CAST((SELECT COUNT(r2) + 1 FROM Ranking r2 WHERE r2.playTime > r.playTime) AS Integer), "
-		+ "CAST((SELECT COUNT(r2) + 1 FROM Ranking r2 WHERE r2.totalTry > r.totalTry) AS Integer)) "
+		+ "CAST((SELECT COUNT(r2) + 1 FROM Ranking r2 WHERE r2.totalTry > r.totalTry) AS Integer), "
+		+ "CAST((SELECT COUNT(r2) + 1 FROM Ranking r2 WHERE r2.score > r.score) AS Integer)) "
 		+ "FROM Ranking r "
 		+ "WHERE r.user.userId = :userId")
 	RankingInfo findRankingByUserId(@Param("userId") Integer userId);

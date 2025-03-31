@@ -22,6 +22,8 @@ public class DashboardResponse {
 	private Integer playtimeRank;
 	private Integer totalTry;
 	private Integer totalTryRank;
+	private Float score;
+	private Integer scoreRank;
 	private List<ChordScoreDto> chordScoreDtos;
 	private List<ReplayDto> replays;
 }
