@@ -25,8 +25,10 @@ public class SecurityConfig {
 		http
 			.cors(cors -> cors.configure(http))
 			.csrf(csrf -> csrf.disable())
+
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers(
+					HttpMethod.OPTIONS,
 					"/v3/api-docs/**",
 					"/swagger-ui/**",
 					"/swagger-ui.html",
