@@ -1,18 +1,17 @@
 // c:\Users\SSAFY\Desktop\jy\J-Project\study\S12P21D105\frontend\src\components\community\CommunityList.tsx
 import React from 'react';
 
-
-import { Post } from '@/types/index';
+import { CommunityPost } from '@/types/index';
 
 interface CommunityListProps {
-  post: Post;
+  post: CommunityPost;
 }
 
 export const CommunityList: React.FC<CommunityListProps> = ({ post }) => {
-
+  console.log(post);
   return (
-    <section className="space-y-4">
-      <h2 className="text-xl font-semibold">Posts</h2>
+    <section>
+      {/* <h2 className="text-xl font-semibold">Posts</h2> */}
 
       <div
         key={post.articleId}
@@ -27,9 +26,7 @@ export const CommunityList: React.FC<CommunityListProps> = ({ post }) => {
           <button className="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
             View Details
           </button>
-          <div className="text-zinc-400">
-            {post.createdAt.toISOString().replace('T', ' ').slice(0, 16)}
-          </div>
+          <div className="text-zinc-400">{post.createdAt.replace('T', ' ').slice(0, 16)}</div>
         </div>
       </div>
     </section>

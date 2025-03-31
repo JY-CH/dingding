@@ -87,3 +87,16 @@ export interface Comment {
 export interface CommunityListProps {
   post: Post;
 }
+
+export interface CommunityPost {
+  articleId: number;
+  userId: number;
+  username: string;
+  title: string;
+  createdAt: string;
+  content?: string;
+  category?: string;
+  isLike?: boolean;
+  recommend?: number;
+  popularPost?: boolean;
+}
