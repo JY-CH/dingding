@@ -1,4 +1,4 @@
-const API_URL = `${import.meta.env.VITE_BASE_URL}/api`;
+const API_URL = import.meta.env.VITE_BASE_URL;
 
 interface LoginRequest {
   loginId: string;
@@ -139,6 +139,7 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
     });
 
     const data = await response.json();
+    console.log(data);
 
     // 204 No Content
     if (response.status === 204) {
@@ -155,7 +156,7 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
       const errorData = data as ErrorResponse;
       throw new Error(errorData.message || '로그인에 실패했습니다');
     }
-
+    sessionStorage.setItem('accessToken', data.accessToken);
     return data as LoginResponse;
   } catch (error) {
     // 에러 발생 시 콘솔에 출력하고, 사용자에게 에러 메시지를 보여줍니다.
@@ -194,7 +195,6 @@ export const signup = async (userData: SignupRequest): Promise<SignupResponse> =
     const errorData = data as ErrorResponse;
     throw new Error(errorData.message || '회원가입에 실패했습니다');
   }
-
   return data as SignupResponse;
 };
 
