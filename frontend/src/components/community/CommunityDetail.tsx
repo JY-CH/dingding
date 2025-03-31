@@ -1,5 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 
+import { useQuery, useMutation } from '@tanstack/react-query';
+
+import { CommunityComment } from './CommunityComment';
 import { _axiosAuth } from '../../services/JYapi';
 
 interface CommunityDetailProps {
@@ -32,6 +35,7 @@ interface ArticleDetail {
 }
 export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, setSelectedPost }) => {
   console.log(articleId);
+  const [newComment, setNewComment] = useState('');
   const {
     data: articleDetail,
     isLoading,
@@ -44,6 +48,29 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
       return data; // API 응답에서 데이터 추출
     },
   });
+
+  const mutation = useMutation({
+    mutationFn: async (newComment: string) => {
+      const response = await _axiosAuth.post(`/article/${articleId}/comment`, {
+        content: newComment,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      // 댓글 작성 후 새로고침
+      // window.location.reload();
+    },
+  });
+
+  const handleCommentSubmit = () => {
+    if (newComment.trim() === '') {
+      alert('댓글을 입력하세요!');
+      return;
+    }
+
+    mutation.mutate(newComment); // 댓글 작성 요청
+    setNewComment(''); // 댓글 입력란 초기화
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -58,23 +85,41 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
   }
 
   return (
-    <div className="p-4 bg-zinc-900 text-white rounded-lg">
+    <div className=" bg-zinc-900 py-4 text-white rounded-lg">
       <button
         onClick={() => setSelectedPost(null)}
-        className="mb-4 bg-amber-500 hover:bg-amber-600 text-white py-2 px-4 rounded-lg"
+        className="mb-4 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
       >
         Back
       </button>
 
-      <h1 className="text-2xl font-bold mb-2">{articleDetail.title}</h1>
-      <p className="text-sm text-gray-400 mb-4">
-        작성자: {articleDetail.userId} | 작성일:{' '}
-        {new Date(articleDetail.createdAt).toLocaleString()}
-      </p>
-      <p className="mb-4">{articleDetail.content}</p>
+      <div className="flex flex-col  ">
+        <h1 className="text-2xl font-[1000] mb-2">{articleDetail.title}</h1>
+        <div className="text-sm text-gray-400 flex flex-row gap-3">
+          <div>작성일: {new Date(articleDetail.createdAt).toLocaleString()}</div>
+          <div>작성자: {articleDetail.userId}</div>
+        </div>
+      </div>
+      <p className="mb-4 mt-[100px]">{articleDetail.content}</p>
 
       <div className="mt-6">
         <h2 className="text-xl font-semibold mb-2">댓글</h2>
+        <div className="mb-4">
+          <textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="댓글을 입력하세요..."
+            className="w-full p-2 bg-zinc-800 text-white rounded-lg resize-none"
+            rows={3}
+          />
+          <button
+            onClick={handleCommentSubmit}
+            className="mt-2 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
+            // disabled={mutation.isLoading}
+          >
+            {mutation?.isLoading ? '작성 중...' : '댓글 작성'}
+          </button>
+        </div>
         {articleDetail.comments.length > 0 ? (
           articleDetail.comments.map((comment) => (
             <div key={comment.commentId} className="mb-4 p-4 bg-zinc-800 rounded-lg">
@@ -86,14 +131,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
               {/* 대댓글 렌더링 */}
               {comment.comments.length > 0 && (
                 <div className="mt-4 pl-4 border-l border-gray-600">
-                  {comment.comments.map((reply) => (
-                    <div key={reply.commentId} className="mb-2">
-                      <p className="text-sm text-gray-400">
-                        {reply.username} | {new Date(reply.createdAt).toLocaleString()}
-                      </p>
-                      <p>{reply.content}</p>
-                    </div>
-                  ))}
+                  <CommunityComment comments={comment.comments} />
                 </div>
               )}
             </div>

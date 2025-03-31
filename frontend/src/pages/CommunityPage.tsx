@@ -39,7 +39,7 @@ export const CommunityPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white p-8">
+    <div className="min-h-screen bg-gradient-to-b bg-zinc-900 text-white p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="flex justify-between items-center mb-4">
           <div className="flex flex-col">
@@ -71,7 +71,7 @@ export const CommunityPage: React.FC = () => {
                       <div
                         key={post.articleId}
                         onClick={() => setSelectedPost(post.articleId)}
-                        className="p-4 rounded-xl cursor-pointer transition-all duration-300 
+                        className=" rounded-xl cursor-pointer transition-all duration-300 
                                  bg-zinc-900 hover:scale-[1.02] 
                                  transform ease-in-out"
                       >

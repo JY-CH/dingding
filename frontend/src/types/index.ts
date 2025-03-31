@@ -75,13 +75,13 @@ export interface NestedComment {
 
 export interface Comment {
   commentId: number;
-  id: number;
+  userId: number;
   username: string;
   content: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updateAt: string;
   isDeleted: boolean;
-  comments?: NestedComment[];
+  comments: Comment[]; // 대댓글
 }
 
 export interface CommunityListProps {
