@@ -1,7 +1,10 @@
 import { useState } from 'react';
 
 import { Dialog } from '@headlessui/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { X, Camera } from 'lucide-react';
+
+import apiClient from '../../services/dashboardapi';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -18,13 +21,69 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   email,
   profileImageUrl: initialProfileImage,
 }) => {
+  const queryClient = useQueryClient();
   const [name, setName] = useState(initialName);
   const [profileImage, setProfileImage] = useState(initialProfileImage);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelectedFile(file);
       setProfileImage(URL.createObjectURL(file));
+    }
+  };
+
+  // 회원 정보 수정 API 호출 (multipart/form-data 형식)
+  const handleProfileUpdate = async () => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('username', name);
+      if (selectedFile) {
+        formData.append('profileImg', selectedFile);
+      }
+      await apiClient.put('/auth/profile', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          // Authorization 헤더 추가: 예) 'Authorization': `Bearer ${access_token}`,
+        },
+      });
+      alert('회원 정보가 수정되었습니다.');
+
+      // 프로필 데이터 갱신: React Query 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardData'] });
+      onClose();
+    } catch (error) {
+      alert('회원 정보 수정에 실패했습니다.');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 회원 탈퇴 API 호출 (생략된 부분은 동일)
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('정말로 탈퇴하시겠습니까?')) return;
+    setLoading(true);
+    try {
+      await apiClient.delete('/auth/delete', {
+        headers: {
+          // Authorization 헤더 추가 가능
+        },
+      });
+      alert('회원 탈퇴가 완료되었습니다.');
+      localStorage.removeItem('auth-storage');
+      sessionStorage.removeItem('accessToken');
+      onClose();
+      window.location.href = '/';
+    } catch (error) {
+      alert('회원 탈퇴에 실패했습니다.');
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,18 +94,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
     >
       <Dialog.Panel className="bg-zinc-800 rounded-2xl shadow-lg w-full max-w-md p-6 relative">
-        {/* 닫기 버튼 */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
         >
           <X size={20} />
         </button>
-
-        {/* 타이틀 */}
         <Dialog.Title className="text-xl font-bold text-white mb-6">내 정보 수정</Dialog.Title>
-
-        {/* 프로필 이미지 */}
         <div className="flex flex-col items-center mb-6">
           <div className="relative w-24 h-24">
             <img
@@ -60,8 +114,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
             </label>
           </div>
         </div>
-
-        {/* 입력 필드 */}
         <div className="space-y-6">
           <div>
             <label className="text-gray-400 text-sm font-bold">이메일 주소</label>
@@ -91,26 +143,18 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
             />
           </div>
         </div>
-
-        {/* 버튼 영역 */}
         <div className="mt-8 flex flex-col gap-4">
-          {/* 수정하기 버튼 - 상단 */}
           <button
             className="w-full py-3 bg-amber-500 text-white rounded-md font-bold shadow-lg hover:bg-amber-600 transition-colors"
-            onClick={() => {
-              // 수정하기 처리 로직
-            }}
+            onClick={handleProfileUpdate}
+            disabled={loading}
           >
             수정하기
           </button>
-
-          {/* 탈퇴하기 버튼 - 하단 */}
           <button
             className="w-full py-3 bg-red-500 text-white rounded-md font-bold hover:bg-red-600 transition-colors"
-            onClick={() => {
-              // 탈퇴하기 처리 로직
-              onClose();
-            }}
+            onClick={handleDeleteAccount}
+            disabled={loading}
           >
             탈퇴하기
           </button>
