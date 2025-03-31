@@ -8,7 +8,7 @@ interface CommunityCreateProps {
   posts: Post[] | undefined;
 }
 
-export const CommunityCreate: React.FC<CommunityCreateProps> = ({ posts }) => {
+export const CommunityCreate: React.FC<CommunityCreateProps> = () => {
   const navigate = useNavigate();
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState('');

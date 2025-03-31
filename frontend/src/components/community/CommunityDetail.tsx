@@ -19,6 +19,8 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
     <div>
       <div>
         <button onClick={() => setSelectedPost(null)}>asd</button>
+
+        {articleDetail}
       </div>
     </div>
   );
