@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { CommunityComment } from './CommunityComment';
 import { _axiosAuth } from '../../services/JYapi';
@@ -9,8 +9,9 @@ interface CommunityDetailProps {
   articleId: number;
   setSelectedPost: (value: number | null) => void; // 상태 변경 함수 타입 정의
 }
+
 interface Comment {
-  commentId: number;
+  commentId: number; // 댓글 ID
   userId: number;
   username: string;
   content: string;
@@ -33,9 +34,11 @@ interface ArticleDetail {
   isLike: boolean;
   comments: Comment[];
 }
+
 export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, setSelectedPost }) => {
-  console.log(articleId);
   const [newComment, setNewComment] = useState('');
+  const queryClient = useQueryClient(); // 쿼리 클라이언트 인스턴스 생성
+
   const {
     data: articleDetail,
     isLoading,
@@ -44,7 +47,6 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
     queryKey: ['article', articleId],
     queryFn: async () => {
       const { data } = await _axiosAuth.get(`/article/${articleId}`);
-      console.log(data);
       return data; // API 응답에서 데이터 추출
     },
   });
@@ -57,8 +59,8 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
       return response.data;
     },
     onSuccess: () => {
-      // 댓글 작성 후 새로고침
-      // window.location.reload();
+      queryClient.invalidateQueries(['article', articleId]); // 댓글 작성 후 해당 게시물의 댓글 목록을 새로고침
+      setNewComment(''); // 입력 필드 초기화
     },
   });
 
@@ -85,7 +87,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
   }
 
   return (
-    <div className=" bg-zinc-900 py-4 text-white rounded-lg">
+    <div className="bg-zinc-900 py-4 text-white rounded-lg">
       <button
         onClick={() => setSelectedPost(null)}
         className="mb-4 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
@@ -93,7 +95,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
         Back
       </button>
 
-      <div className="flex flex-col  ">
+      <div className="flex flex-col">
         <h1 className="text-2xl font-[1000] mb-2">{articleDetail.title}</h1>
         <div className="text-sm text-gray-400 flex flex-row gap-3">
           <div>작성일: {new Date(articleDetail.createdAt).toLocaleString()}</div>
@@ -115,9 +117,9 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
           <button
             onClick={handleCommentSubmit}
             className="mt-2 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
-            // disabled={mutation.isLoading}
+            disabled={mutation.isLoading}
           >
-            {mutation?.isLoading ? '작성 중...' : '댓글 작성'}
+            {mutation.isLoading ? '작성 중...' : '댓글 작성'}
           </button>
         </div>
         {articleDetail.comments.length > 0 ? (
@@ -129,11 +131,13 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
               <p>{comment.content}</p>
 
               {/* 대댓글 렌더링 */}
-              {comment.comments.length > 0 && (
-                <div className="mt-4 pl-4 border-l border-gray-600">
-                  <CommunityComment comments={comment.comments} />
-                </div>
-              )}
+              <div className="mt-4 pl-4 border-l border-gray-600">
+                <CommunityComment
+                  comments={comment.comments}
+                  parentId={comment.commentId}
+                  articleId={articleId}
+                />
+              </div>
             </div>
           ))
         ) : (
