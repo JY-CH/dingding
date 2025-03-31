@@ -12,5 +12,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class CheckLikeArticleResponseDto {
+	private int userId;
 	private boolean success;
 }

@@ -18,6 +18,7 @@ public class ArticleLikeFacadeServiceImpl implements ArticleLikeFacadeService {
 	@Override
 	public CheckLikeArticleResponseDto checkLikeArticle(int userId, int articleId) {
 		CheckLikeArticleResponseDto checkLikeArticleResponseDto = CheckLikeArticleResponseDto.builder()
+			.userId(userId)
 			.success(articleLikeService.checkLikeArticle(userId, articleId))
 			.build();
 

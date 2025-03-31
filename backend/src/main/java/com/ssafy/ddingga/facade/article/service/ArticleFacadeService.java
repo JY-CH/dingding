@@ -10,7 +10,7 @@ import com.ssafy.ddingga.facade.article.dto.response.ArticleSearchResponseDto;
 
 public interface ArticleFacadeService {
 
-	List<ArticleGetAllResponseDto> allGetArticleList();
+	List<ArticleGetAllResponseDto> allGetArticleList(int userId);
 
 	ArticleDetailResponseDto getArticle(int userId, int articleId);
 

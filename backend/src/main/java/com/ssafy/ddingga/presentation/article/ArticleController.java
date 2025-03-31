@@ -49,9 +49,9 @@ public class ArticleController {
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 게시판입니다.")})
 	@GetMapping(value = "")
-	public ResponseEntity<List<ArticleGetAllResponseDto>> articleGetALL() {
+	public ResponseEntity<List<ArticleGetAllResponseDto>> articleGetALL(@AuthenticationPrincipal User user) {
 		// 게시판 전체 조회 로직 호출
-		List<ArticleGetAllResponseDto> response = articleFacadeService.allGetArticleList();
+		List<ArticleGetAllResponseDto> response = articleFacadeService.allGetArticleList(user.getUserId());
 		return ResponseEntity.ok().body(response);
 	}
 
@@ -65,7 +65,8 @@ public class ArticleController {
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 게시판입니다.")})
 	@GetMapping(value = "/{articleId}")
-	public ResponseEntity<ArticleDetailResponseDto> articleDetail(@AuthenticationPrincipal User user, @PathVariable int articleId) {
+	public ResponseEntity<ArticleDetailResponseDto> articleDetail(@AuthenticationPrincipal User user,
+		@PathVariable int articleId) {
 		// 게시판 전체 조회 로직 호출
 		ArticleDetailResponseDto response = articleFacadeService.getArticle(user.getUserId(), articleId);
 		return ResponseEntity.ok().body(response);
