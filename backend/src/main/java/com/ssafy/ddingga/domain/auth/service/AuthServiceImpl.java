@@ -2,7 +2,6 @@ package com.ssafy.ddingga.domain.auth.service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -48,6 +47,9 @@ public class AuthServiceImpl implements AuthService {
 	@Value("${spring.cloud.aws.s3.bucket}")
 	private String bucket;
 
+	// 기본 프로필 이미지 URL 상수
+	private static final String DEFAULT_PROFILE_IMAGE_URL = "https://ddingga.s3.ap-northeast-2.amazonaws.com/basic_profile.png";
+
 	@Override
 	@Transactional
 	public User registerUser(String loginId, String password, String username) {
@@ -64,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
 			.loginId(loginId)                        // 사용자 ID
 			.password(passwordEncoder.encode(password))    // 비밀번호 암호화
 			.username(username)                    // 사용자 이름
-			.profileImage("https://ddingga.s3.ap-northeast-2.amazonaws.com/basic_profile.png")  // 기본 프로필 이미지
+			.profileImage(DEFAULT_PROFILE_IMAGE_URL)  // 기본 프로필 이미지
 			.createAt(LocalDateTime.now())                      // 생성 시간
 			.isDeleted(false)                                   // 삭제 여부
 			.build();
@@ -121,27 +123,25 @@ public class AuthServiceImpl implements AuthService {
 		if (profileImage != null && !profileImage.isEmpty()) {
 			log.info("프로필 이미지 수정 시작 - userId: {}", userId);
 			try {
-				// 파일 이름 생성
-				String originalFilename = profileImage.getOriginalFilename();
-				String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-				String fileName = UUID.randomUUID().toString() + fileExtension;
-				String fileKey = "profile/" + fileName;
-
-				// S3에 파일 업로드
-				String uploadedFileKey = s3Service.uploadFile(profileImage, "profile");
-
 				// 이전 프로필 이미지 삭제 (S3에서)
 				String previousImagePath = user.getProfileImage();
-				if (previousImagePath != null && !previousImagePath.equals(
-					"https://ddingga.s3.ap-northeast-2.amazonaws.com/basic_profile.png")) {
+				// 기본 프로필 이미지가 아닌 경우에만 삭제
+				if (previousImagePath != null && !previousImagePath.equals(DEFAULT_PROFILE_IMAGE_URL)) {
 					try {
-						String previousFileKey = previousImagePath.substring(previousImagePath.lastIndexOf("/") + 1);
-						s3Service.deleteFile("profile/" + previousFileKey);
+						// 이전 이미지의 파일 키 추출 (S3 URL에서 파일 키만 추출)
+						String previousFileKey = previousImagePath.replace(
+							"https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/", "");
+						log.info("이전 이미지 삭제 시도 - fileKey: {}", previousFileKey);
+						s3Service.deleteFile(previousFileKey);
 					} catch (Exception e) {
 						log.error("이전 프로필 이미지 삭제 실패: {}", e.getMessage());
 					}
 				}
 
+				// S3에 새 파일 업로드
+				String uploadedFileKey = s3Service.uploadFile(profileImage, "profile");
+				log.info("새 이미지 업로드 완료 - fileKey: {}", uploadedFileKey);
+				
 				// 새 이미지 경로 저장 (S3 URL)
 				String newImagePath = "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + uploadedFileKey;
 				log.info("프로필 이미지 수정 완료 - userId: {}, newImagePath: {}", userId, newImagePath);
