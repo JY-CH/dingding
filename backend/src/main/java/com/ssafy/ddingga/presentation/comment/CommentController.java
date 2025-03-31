@@ -52,6 +52,10 @@ public class CommentController {
 		return ResponseEntity.ok().body(response);
 	}
 
+	@Operation(summary = "게시글 댓글 생성", description = "해당 게시글의 댓글을 생성합니다.")
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "해당 게시글의 댓글 조회 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
+		@ApiResponse(responseCode = "404", description = "존재하지 않는 게시글입니다.")})
 	@PostMapping(value = "/article/{articleId}/comment")
 	public ResponseEntity<CreateCommentResponseDto> createComment(@AuthenticationPrincipal User user,
 		@PathVariable int articleId, @RequestBody CreateCommentRequestDto requestDto) {
@@ -63,6 +67,10 @@ public class CommentController {
 		return ResponseEntity.ok().body(responseDto);
 	}
 
+	@Operation(summary = "게시글 대댓글 생성", description = "해당 게시글의 대댓글을 생성합니다.")
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "해당 게시글의 댓글 생성 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
+		@ApiResponse(responseCode = "404", description = "존재하지 않는 댓글입니다.")})
 	@PostMapping(value = "/article/{articleId}/comment/{commentId}")
 	public ResponseEntity<CreateReplyResponseDto> createReply(@AuthenticationPrincipal User user,
 		@PathVariable int articleId, @PathVariable int commentId, @RequestBody CreateReplyRequestDto requestDto) {
@@ -74,6 +82,10 @@ public class CommentController {
 		return ResponseEntity.ok().body(responseDto);
 	}
 
+	@Operation(summary = "게시글 댓글 수정", description = "해당 게시글의 댓글을 수정합니다.")
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "해당 게시글의 댓글 수정 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
+		@ApiResponse(responseCode = "404", description = "존재하지 않는 댓글입니다.")})
 	@PutMapping(value = "/comment/{commentId}")
 	public ResponseEntity<UpdateCommentResponseDto> updateComment(@AuthenticationPrincipal User user,
 		@PathVariable int commentId, @RequestBody UpdateCommentRequestDto requestDto) {
@@ -85,6 +97,10 @@ public class CommentController {
 		return ResponseEntity.ok().body(responseDto);
 	}
 
+	@Operation(summary = "게시글 댓글 삭제", description = "해당 게시글의 댓글을 삭제합니다.")
+	@ApiResponses({@ApiResponse(responseCode = "200", description = "해당 게시글의 댓글 삭제 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
+		@ApiResponse(responseCode = "404", description = "존재하지 않는 댓글입니다.")})
 	@DeleteMapping(value = "/comment/{commentId}")
 	public ResponseEntity<DeleteCommentResponseDto> deleteComment(@AuthenticationPrincipal User user,
 		@PathVariable int commentId) {

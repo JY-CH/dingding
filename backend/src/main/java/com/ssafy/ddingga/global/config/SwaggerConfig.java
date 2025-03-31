@@ -36,7 +36,7 @@ public class SwaggerConfig {
 			.info(info)
 			// 서버 정보 추가
 			.servers(List.of(
-				new Server().url("https://j12d105.p.ssafy.io/api/").description("EC2 Server"),
+				new Server().url("https://j12d105.p.ssafy.io/").description("EC2 Server"),
 				new Server().url("http://localhost:8090").description("Local Server")
 					.description("Production server (HTTPS)")))
 			.addSecurityItem(securityRequirement)

@@ -23,4 +23,5 @@ public class ArticleGetAllResponseDto {
 	private String category;    // 카테고리
 	private Boolean popularPost;  // 인기글
 	private Integer recommend;  // 추천수
+	private Boolean isLike; // 해당 유저가 게시판에대한 좋아요 상태
 }

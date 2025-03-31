@@ -24,5 +24,5 @@ public class GetCommentsResponseDto {
 	LocalDateTime createdAt;
 	LocalDateTime updateAt;
 	Boolean isDeleted;
-	List<Comment> comments;
+	List<GetCommentsResponseDto> comments;
 }
