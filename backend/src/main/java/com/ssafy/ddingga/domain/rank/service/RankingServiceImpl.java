@@ -1,5 +1,7 @@
 package com.ssafy.ddingga.domain.rank.service;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.ddingga.domain.auth.repository.AuthRepository;
@@ -39,19 +41,20 @@ public class RankingServiceImpl implements RankingService {
 
 	@Override
 	public TopRankingResponse getTop5Rankings() {
-		log.info("랭킹 - 상위 5명 랭킹 정보 조회 요청");
+		log.info("랭킹 - 상위 10명 랭킹 정보 조회 요청");
 		try {
+			Pageable pageable = PageRequest.of(0, 10);
 			TopRankingResponse response = TopRankingResponse.builder()
-				.playTimeTop5(rankingRepository.findTop5ByPlayTime())
-				.totalTryTop5(rankingRepository.findTop5ByTotalTry())
-				.scoreTop5(rankingRepository.findTop5ByScore())
+				.playTimeTop5(rankingRepository.findTop10ByPlayTime(pageable))
+				.totalTryTop5(rankingRepository.findTop10ByTotalTry(pageable))
+				.scoreTop5(rankingRepository.findTop10ByScore(pageable))
 				.build();
 
-			log.info("랭킹 - 상위 5명 랭킹 정보 조회 완료");
+			log.info("랭킹 - 상위 10명 랭킹 정보 조회 완료");
 			return response;
 		} catch (Exception e) {
-			log.error("랭킹 - 상위 5명 랭킹 정보 조회 실패: error={}", e.getMessage());
-			throw new DatabaseException("상위 5명 랭킹 정보 조회 중 오류가 발생했습니다.", e);
+			log.error("랭킹 - 상위 10명 랭킹 정보 조회 실패: error={}", e.getMessage());
+			throw new DatabaseException("상위 10명 랭킹 정보 조회 중 오류가 발생했습니다.", e);
 		}
 	}
 }

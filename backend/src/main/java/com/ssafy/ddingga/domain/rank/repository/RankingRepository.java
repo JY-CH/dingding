@@ -2,6 +2,7 @@ package com.ssafy.ddingga.domain.rank.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,7 +32,7 @@ public interface RankingRepository extends JpaRepository<Ranking, User> {
 		+ "r.score) "
 		+ "FROM Ranking r "
 		+ "ORDER BY r.playTime DESC")
-	List<TopRankingInfo> findTop5ByPlayTime();
+	List<TopRankingInfo> findTop10ByPlayTime(Pageable pageable);
 
 	@Query(value = "SELECT new com.ssafy.ddingga.facade.rank.dto.response.TopRankingInfo("
 		+ "CAST((SELECT COUNT(r2) + 1 FROM Ranking r2 WHERE r2.totalTry > r.totalTry) AS Integer), "
@@ -41,7 +42,7 @@ public interface RankingRepository extends JpaRepository<Ranking, User> {
 		+ "r.score) "
 		+ "FROM Ranking r "
 		+ "ORDER BY r.totalTry DESC")
-	List<TopRankingInfo> findTop5ByTotalTry();
+	List<TopRankingInfo> findTop10ByTotalTry(Pageable pageable);
 
 	@Query(value = "SELECT new com.ssafy.ddingga.facade.rank.dto.response.TopRankingInfo("
 		+ "CAST((SELECT COUNT(r2) + 1 FROM Ranking r2 WHERE r2.score > r.score) AS Integer), "
@@ -51,5 +52,5 @@ public interface RankingRepository extends JpaRepository<Ranking, User> {
 		+ "r.score) "
 		+ "FROM Ranking r "
 		+ "ORDER BY r.score DESC")
-	List<TopRankingInfo> findTop5ByScore();
+	List<TopRankingInfo> findTop10ByScore(Pageable pageable);
 }
