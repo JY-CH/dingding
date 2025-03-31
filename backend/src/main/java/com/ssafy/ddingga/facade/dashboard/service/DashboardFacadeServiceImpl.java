@@ -68,6 +68,7 @@ public class DashboardFacadeServiceImpl implements DashboardFacadeService {
 			.scoreRank(rankingInfo.getScoreRank())
 			.totalTry(rankingInfo.getTotalTry())
 			.totalTryRank(rankingInfo.getTotalTryRank())
+			.profileImage(user.getProfileImage())
 			.chordScoreDtos(chordScoreDtos)
 			.replays(replayDtos)
 			.build();
