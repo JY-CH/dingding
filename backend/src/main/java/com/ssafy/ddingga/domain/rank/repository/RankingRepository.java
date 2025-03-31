@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.ssafy.ddingga.domain.auth.entity.User;
 import com.ssafy.ddingga.domain.rank.entity.Ranking;
 import com.ssafy.ddingga.facade.rank.dto.response.RankingInfo;
-import com.ssafy.ddingga.facade.rank.dto.response.TopRankingResponse;
+import com.ssafy.ddingga.facade.rank.dto.response.TopRankingInfo;
 
 @Repository
 public interface RankingRepository extends JpaRepository<Ranking, User> {
@@ -23,36 +23,33 @@ public interface RankingRepository extends JpaRepository<Ranking, User> {
 		+ "WHERE r.user.userId = :userId")
 	RankingInfo findRankingByUserId(@Param("userId") Integer userId);
 
-	@Query(value = "SELECT new com.ssafy.ddingga.facade.rank.dto.response.TopRankingResponse("
+	@Query(value = "SELECT new com.ssafy.ddingga.facade.rank.dto.response.TopRankingInfo("
 		+ "CAST((SELECT COUNT(r2) + 1 FROM Ranking r2 WHERE r2.playTime > r.playTime) AS Integer), "
 		+ "r.user.username, "
 		+ "r.playTime, "
 		+ "r.totalTry, "
 		+ "r.score) "
 		+ "FROM Ranking r "
-		+ "ORDER BY r.playTime DESC "
-		+ "LIMIT 5")
-	List<TopRankingResponse> findTop5ByPlayTime();
+		+ "ORDER BY r.playTime DESC")
+	List<TopRankingInfo> findTop5ByPlayTime();
 
-	@Query(value = "SELECT new com.ssafy.ddingga.facade.rank.dto.response.TopRankingResponse("
+	@Query(value = "SELECT new com.ssafy.ddingga.facade.rank.dto.response.TopRankingInfo("
 		+ "CAST((SELECT COUNT(r2) + 1 FROM Ranking r2 WHERE r2.totalTry > r.totalTry) AS Integer), "
 		+ "r.user.username, "
 		+ "r.playTime, "
 		+ "r.totalTry, "
 		+ "r.score) "
 		+ "FROM Ranking r "
-		+ "ORDER BY r.totalTry DESC "
-		+ "LIMIT 5")
-	List<TopRankingResponse> findTop5ByTotalTry();
+		+ "ORDER BY r.totalTry DESC")
+	List<TopRankingInfo> findTop5ByTotalTry();
 
-	@Query(value = "SELECT new com.ssafy.ddingga.facade.rank.dto.response.TopRankingResponse("
+	@Query(value = "SELECT new com.ssafy.ddingga.facade.rank.dto.response.TopRankingInfo("
 		+ "CAST((SELECT COUNT(r2) + 1 FROM Ranking r2 WHERE r2.score > r.score) AS Integer), "
 		+ "r.user.username, "
 		+ "r.playTime, "
 		+ "r.totalTry, "
 		+ "r.score) "
 		+ "FROM Ranking r "
-		+ "ORDER BY r.score DESC "
-		+ "LIMIT 5")
-	List<TopRankingResponse> findTop5ByScore();
+		+ "ORDER BY r.score DESC")
+	List<TopRankingInfo> findTop5ByScore();
 }
