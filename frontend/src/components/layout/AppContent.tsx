@@ -26,16 +26,11 @@ interface AppContentProps {
 const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
   const location = useLocation();
   const isPlayPage = location.pathname === '/play';
-  const isSearchPage = location.pathname === '/search';
-  const isDashboardPage = location.pathname === '/dashboard';
-  const isCommunityPage = location.pathname === '/community';
-  const isMainPage = location.pathname === '/';
-
-  // 패딩이 필요없는 페이지들
-  const noPaddingPages =
-    isPlayPage || isSearchPage || isDashboardPage || isCommunityPage || isMainPage;
-
+  const isLoginPage = location.pathname === '/login';
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  // 뮤직 플레이어를 표시할지 여부를 결정
+  const shouldShowMusicPlayer = !isPlayPage && !isLoginPage && isAuthenticated;
 
   return (
     <main
@@ -46,9 +41,7 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
       `}
     >
       <div className="flex-1 relative">
-        <div
-          className={`absolute inset-0 overflow-y-auto custom-scrollbar ${!noPaddingPages ? 'mb-20' : ''}`}
-        >
+        <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
           <Routes>
             <Route path="/" element={<MainPage />} />
             <Route path="/home" element={<HomePage />} />
@@ -79,7 +72,7 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
         </div>
       </div>
 
-      {!isPlayPage && (
+      {shouldShowMusicPlayer && (
         <div
           className="fixed bottom-0 left-0 right-0 bg-transparent"
           style={{ marginLeft: isExpanded ? '16rem' : '5rem' }}
