@@ -23,7 +23,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 		// 웹소켓 핸들러와 URL 경로를 매핑
 		registry.addHandler(myWebSocketHandler, "/ws")
-			.addInterceptors(new HttpSessionHandshakeInterceptor()) // 핸드셰이크 인터셉터 (선택 사항)
-			.setAllowedOrigins("*"); // CORS 설정 (필요시)
+			.addInterceptors(new HttpSessionHandshakeInterceptor()); // 핸드셰이크 인터셉터 (선택 사항)
 	}
 }

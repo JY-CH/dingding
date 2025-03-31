@@ -25,8 +25,10 @@ public class SecurityConfig {
 		http
 			.cors(cors -> cors.configure(http))
 			.csrf(csrf -> csrf.disable())
+
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers(
+					HttpMethod.OPTIONS,
 					"/v3/api-docs/**",
 					"/swagger-ui/**",
 					"/swagger-ui.html",
@@ -41,8 +43,6 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/api/article", "/api/article/**").permitAll()  // GET 요청만 허용
 				.anyRequest().authenticated()
 			);
-		http
-			.csrf((auth) -> auth.disable());
 		http
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 		http

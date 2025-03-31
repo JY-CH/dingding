@@ -1,6 +1,6 @@
 package com.ssafy.ddingga.facade.rank.dto.response;
 
-import java.time.LocalTime;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TopRankingResponse {
-	private Integer rank;
-	private String username;
-	private LocalTime playTime;
-	private Integer totalTry;
-	private Float score;
+	private List<TopRankingInfo> playTimeTop5;    // 플레이 시간 상위 5명
+	private List<TopRankingInfo> totalTryTop5;    // 총 시도 횟수 상위 5명
+	private List<TopRankingInfo> scoreTop5;       // 점수 상위 5명
 }
