@@ -1,5 +1,4 @@
-// src/services/api.ts
-const API_URL = 'https://j12d105.p.ssafy.io/api';
+const API_URL = import.meta.env.VITE_BASE_URL;
 
 interface LoginRequest {
   loginId: string;
@@ -129,34 +128,45 @@ export const fetchStats = async () => {
 };
 
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(credentials),
-  });
+  try {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+      credentials: 'include', // 쿠키를 포함하도록 설정
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  // 204 No Content
-  if (response.status === 204) {
-    throw new Error('회원 정보가 없습니다.');
+    // 204 No Content
+    if (response.status === 204) {
+      throw new Error('회원 정보가 없습니다.');
+    }
+
+    // 400 Bad Request
+    if (response.status === 400) {
+      throw new Error('필수 정보가 누락되었습니다.');
+    }
+
+    // 성공이 아닌 경우
+    if (!response.ok) {
+      const errorData = data as ErrorResponse;
+      throw new Error(errorData.message || '로그인에 실패했습니다');
+    }
+
+    return data as LoginResponse;
+  } catch (error) {
+    // 에러 발생 시 콘솔에 출력하고, 사용자에게 에러 메시지를 보여줍니다.
+    console.error('로그인 오류:', error);
+    if (error instanceof Error) {
+      throw new Error(error.message || '로그인 처리 중 오류가 발생했습니다.');
+    }
+    throw new Error('알 수 없는 오류가 발생했습니다.');
   }
-
-  // 400 Bad Request
-  if (response.status === 400) {
-    throw new Error('필수 정보가 누락되었습니다.');
-  }
-
-  // 성공이 아닌 경우
-  if (!response.ok) {
-    const errorData = data as ErrorResponse;
-    throw new Error(errorData.message || '로그인에 실패했습니다');
-  }
-
-  return data as LoginResponse;
 };
+
 // 회원가입 로직
 export const signup = async (userData: SignupRequest): Promise<SignupResponse> => {
   const response = await fetch(`${API_URL}/auth/signup`, {

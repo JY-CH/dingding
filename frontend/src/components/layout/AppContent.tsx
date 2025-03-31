@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { Routes, Route } from 'react-router-dom';
 
+import { CommunityPage } from '@/pages/CommunityPage';
 import { useAuthStore } from '@/store/useAuthStore';
 
 import { mockSongs } from '../../data/mockData';
@@ -73,6 +74,7 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
             />
 
             <Route path="*" element={<NotFoundPage />} />
+            <Route path="/community" element={<CommunityPage />} />
           </Routes>
         </div>
       </div>
