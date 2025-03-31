@@ -16,7 +16,10 @@ interface DashboardData {
   username: string;
   playtime: string;
   playtimeRank: number;
-  avgScoreRank: number;
+  scoreRank: number;
+  profileImage: string;
+  createAt: string;
+  loginId: string;
   totalTry: number;
   totalTryRank: number;
   chordScoreDtos: ChordScoreDtos[];
@@ -150,12 +153,13 @@ const DashboardPage: React.FC = () => {
 
   const profileData = {
     name: data?.username || '로그인이 필요합니다',
-    email: 'guest@example.com', // Not in API, keeping original
+    email: data?.loginId || '로그인이 필요합니다',
     playtimerank: `${data?.playtimeRank} 등`,
-    avgscorerank: `${data?.avgScoreRank} 등`, // Not explicitly in API, keeping original
+    avgscorerank: `${data?.scoreRank} 등`, // Not explicitly in API, keeping original
     totaltryrank: `${data?.totalTryRank} 등`,
-    profileImageUrl: 'profile-placeholder.png',
+    profileImageUrl: data?.profileImage || 'ding.svg',
     backgroundImageUrl: 'ding.svg',
+    createAt: data?.createAt || '?',
   };
 
   function formatDate(dateString: string): string {
@@ -201,6 +205,7 @@ const DashboardPage: React.FC = () => {
               totaltryrank={profileData.totaltryrank}
               profileImageUrl={profileData.profileImageUrl}
               backgroundImageUrl={profileData.backgroundImageUrl}
+              createAt={profileData.createAt}
             />
           </motion.div>
 

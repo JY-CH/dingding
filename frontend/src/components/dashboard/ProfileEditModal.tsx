@@ -12,6 +12,7 @@ interface ProfileModalProps {
   name: string;
   email: string;
   profileImageUrl: string;
+  createAt: string;
 }
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
@@ -20,6 +21,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   name: initialName,
   email,
   profileImageUrl: initialProfileImage,
+  createAt: createAt,
 }) => {
   const queryClient = useQueryClient();
   const [name, setName] = useState(initialName);
@@ -87,6 +89,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     }
   };
 
+  const formattedDate = new Date(createAt).toLocaleDateString('ko-KR', {
+    timeZone: 'Asia/Seoul',
+  });
+
   return (
     <Dialog
       open={isOpen}
@@ -116,7 +122,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         </div>
         <div className="space-y-6">
           <div>
-            <label className="text-gray-400 text-sm font-bold">이메일 주소</label>
+            <label className="text-gray-400 text-sm font-bold">아이디</label>
             <input
               type="text"
               value={email}
@@ -135,9 +141,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           </div>
           <div>
             <label className="text-gray-400 text-sm font-bold">가입일</label>
+
             <input
               type="text"
-              value="2025.03.14"
+              value={formattedDate}
               disabled
               className="text-gray-400 font-bold w-full px-3 py-2 bg-transparent focus:outline-none border-b border-zinc-600"
             />
