@@ -23,7 +23,7 @@ public class SecurityConfig {
 		Exception {
 
 		http
-			.cors(cors -> cors.configure(http))
+			.cors(cors -> cors.disable())
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers(
@@ -41,8 +41,6 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/api/article", "/api/article/**").permitAll()  // GET 요청만 허용
 				.anyRequest().authenticated()
 			);
-		http
-			.csrf((auth) -> auth.disable());
 		http
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 		http
