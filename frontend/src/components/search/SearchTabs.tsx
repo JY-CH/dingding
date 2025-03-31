@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 interface SearchTabsProps {
   activeTab: string;
@@ -14,19 +15,30 @@ const tabs = [
 
 const SearchTabs: React.FC<SearchTabsProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="px-6 py-3 border-b border-zinc-800 sticky top-0 bg-zinc-900 z-10">
-      <div className="flex space-x-6 overflow-x-auto no-scrollbar">
+    <div className="px-6 py-3">
+      <div className="flex space-x-6 overflow-x-auto custom-scrollbar">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`text-sm whitespace-nowrap pb-2 transition-colors ${
-              activeTab === tab.key
-                ? 'text-amber-500 border-b-2 border-amber-500 font-medium'
-                : 'text-gray-400'
-            }`}
+            className="relative text-sm whitespace-nowrap px-3 py-2 rounded-lg transition-all"
           >
-            {tab.label}
+            {activeTab === tab.key && (
+              <motion.div
+                layoutId="activeTab"
+                className="absolute inset-0 bg-gradient-to-r from-amber-500/80 to-amber-600/80 rounded-lg"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              />
+            )}
+            <span
+              className={`relative z-10 font-medium ${
+                activeTab === tab.key ? 'text-zinc-900' : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </span>
           </button>
         ))}
       </div>
