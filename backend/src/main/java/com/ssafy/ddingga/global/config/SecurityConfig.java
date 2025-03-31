@@ -23,7 +23,7 @@ public class SecurityConfig {
 		Exception {
 
 		http
-			.cors(cors -> cors.disable())
+			.cors(cors -> cors.configure(http))
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers(
