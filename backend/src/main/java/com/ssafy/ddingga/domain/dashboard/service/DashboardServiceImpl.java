@@ -10,7 +10,7 @@ import com.ssafy.ddingga.domain.rank.repository.RankingRepository;
 import com.ssafy.ddingga.domain.replay.service.ReplayService;
 import com.ssafy.ddingga.domain.song.entity.ChordScore;
 import com.ssafy.ddingga.domain.song.repository.ChordScoreRepository;
-import com.ssafy.ddingga.facade.rank.dto.RankingInfo;
+import com.ssafy.ddingga.facade.rank.dto.response.RankingInfo;
 import com.ssafy.ddingga.facade.replay.dto.response.ReplayDto;
 import com.ssafy.ddingga.global.error.exception.DatabaseException;
 import com.ssafy.ddingga.global.error.exception.ServiceException;
