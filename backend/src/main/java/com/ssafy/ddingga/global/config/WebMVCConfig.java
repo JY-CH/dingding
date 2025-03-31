@@ -14,7 +14,8 @@ public class WebMVCConfig implements WebMvcConfigurer {
 				"https://j12d105.p.ssafy.io",
 				"http://j12d105.p.ssafy.io",
 				"http://localhost:8080",
-				"http://localhost:8090"
+				"http://localhost:8090",
+				"http://localhost:5173"
 			)
 			.allowedHeaders("*")
 			.allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS") // 허용할 HTTP 메서드
