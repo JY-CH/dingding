@@ -12,6 +12,7 @@ interface ProfileTileProps {
   totaltryrank: string;
   profileImageUrl: string;
   backgroundImageUrl: string;
+  createAt: string;
 }
 
 const ProfileTile: React.FC<ProfileTileProps> = ({
@@ -22,6 +23,7 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
   totaltryrank,
   profileImageUrl,
   backgroundImageUrl,
+  createAt
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -34,7 +36,7 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
           <img
             src={backgroundImageUrl}
             alt="배경"
-            className="h-full w-full object-cover opacity-20"
+            className="h-full w-full object-cover opacity-20 pr-10"
           />
         </div>
 
@@ -115,6 +117,7 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
         name={name}
         email={email}
         profileImageUrl={profileImageUrl}
+        createAt={createAt}
       />
     </div>
   );
