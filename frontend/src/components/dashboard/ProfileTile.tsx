@@ -34,7 +34,7 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
           <img
             src={backgroundImageUrl}
             alt="배경"
-            className="h-full w-full object-cover opacity-20"
+            className="h-full w-full object-cover opacity-20 pr-10"
           />
         </div>
 
