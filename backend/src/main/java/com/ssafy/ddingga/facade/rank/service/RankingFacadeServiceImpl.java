@@ -17,10 +17,10 @@ public class RankingFacadeServiceImpl implements RankingFacadeService {
 	private final RankingService rankingService;
 
 	@Override
-	public TopRankingResponse getTop5Rankings() {
-		log.info("랭킹 Facade - 상위 5명 랭킹 정보 조회 요청");
-		TopRankingResponse result = rankingService.getTop5Rankings();
-		log.info("랭킹 Facade - 상위 5명 랭킹 정보 조회 완료");
+	public TopRankingResponse getTop10Rankings() {
+		log.info("랭킹 Facade - 상위 10명 랭킹 정보 조회 요청");
+		TopRankingResponse result = rankingService.getTop10Rankings();
+		log.info("랭킹 Facade - 상위 10명 랭킹 정보 조회 완료");
 		return result;
 	}
 }

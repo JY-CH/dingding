@@ -6,12 +6,15 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ssafy.ddingga.domain.auth.entity.User;
+import com.ssafy.ddingga.domain.auth.repository.AuthRepository;
 import com.ssafy.ddingga.domain.dashboard.service.DashboardService;
 import com.ssafy.ddingga.domain.song.entity.ChordScore;
 import com.ssafy.ddingga.facade.dashboard.dto.response.ChordScoreDto;
 import com.ssafy.ddingga.facade.dashboard.dto.response.DashboardResponse;
 import com.ssafy.ddingga.facade.rank.dto.response.RankingInfo;
 import com.ssafy.ddingga.facade.replay.dto.response.ReplayDto;
+import com.ssafy.ddingga.global.error.exception.UserNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,9 +23,14 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class DashboardFacadeServiceImpl implements DashboardFacadeService {
 	private final DashboardService dashboardService;
+	private final AuthRepository authRepository;
 
 	@Override
 	public DashboardResponse getDashboard(Integer userId, String username) {
+		// 사용자 정보 조회
+		User user = authRepository.findByUserId(userId)
+			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+
 		// 순위정보 조회
 		RankingInfo rankingInfo = dashboardService.getRankingInfo(userId);
 
@@ -31,8 +39,10 @@ public class DashboardFacadeServiceImpl implements DashboardFacadeService {
 			rankingInfo = new RankingInfo(
 				LocalTime.of(0, 0, 0),  // 기본 플레이타임
 				0,                      // 기본 시도 횟수
+				0.0f,                   // 기본 평균 점수
 				0,                      // 기본 플레이타임 랭크
-				0                       // 기본 시도 횟수 랭크
+				0,                       // 기본 시도 횟수 랭크
+				0                        // 기본 점수 랭크
 			);
 		}
 		// 코드 점수 조회
@@ -50,8 +60,12 @@ public class DashboardFacadeServiceImpl implements DashboardFacadeService {
 		return DashboardResponse.builder()
 			.userId(userId)
 			.username(username)
+			.loginId(user.getLoginId())
+			.createAt(user.getCreateAt().toString())
 			.playtime(rankingInfo.getPlayTime())
 			.playtimeRank(rankingInfo.getPlayTimeRank())
+			.score(rankingInfo.getScore())
+			.scoreRank(rankingInfo.getScoreRank())
 			.totalTry(rankingInfo.getTotalTry())
 			.totalTryRank(rankingInfo.getTotalTryRank())
 			.chordScoreDtos(chordScoreDtos)

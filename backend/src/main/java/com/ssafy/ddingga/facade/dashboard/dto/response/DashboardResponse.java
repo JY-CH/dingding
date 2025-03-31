@@ -18,7 +18,11 @@ public class DashboardResponse {
 
 	private Integer userId;
 	private String username;
+	private String loginId;
+	private String createAt;
 	private LocalTime playtime;
+	private Float score;
+	private Integer scoreRank;
 	private Integer playtimeRank;
 	private Integer totalTry;
 	private Integer totalTryRank;
