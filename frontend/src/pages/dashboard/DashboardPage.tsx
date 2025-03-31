@@ -11,7 +11,6 @@ import StatsTile from '@/components/dashboard/StatsTile';
 
 import apiClient from '../../services/dashboardapi';
 
-// Define types based on the provided JSON structure
 interface DashboardData {
   userId: number;
   username: string;
@@ -50,15 +49,55 @@ const DashboardPage: React.FC = () => {
     queryFn: fetchDashboardData, // queryFn을 명시적으로 전달
   });
 
-  const lineChartData = [
-    { day: '월', current: 20, average: 50 },
-    { day: '화', current: 30, average: 40 },
-    { day: '수', current: 50, average: 70 },
-    { day: '목', current: 70, average: 30 },
-    { day: '금', current: 60, average: 50 },
-    { day: '토', current: 80, average: 60 },
-    { day: '일', current: 0, average: 0 },
-  ];
+  // 일주일간의 라인차트 데이터를 생성하는 함수
+  const getLineChartData = (): { day: string; current: number; average: number }[] => {
+    // 최근 7일간 날짜 배열 생성 (오늘 포함)
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i)); // 과거 6일 ~ 오늘
+      return {
+        // 'ko-KR'의 short weekday는 '월', '화' 등으로 나옴
+        day: date.toLocaleDateString('ko-KR', { weekday: 'short' }),
+        // 날짜 비교를 위한 기준 문자열 (시간정보 없이)
+        dateStr: date.toDateString(),
+        practiceScores: [] as number[],
+        performanceScores: [] as number[],
+      };
+    });
+
+    // replays 배열에서 각 날짜별 모드 점수 할당
+    data?.replays.forEach((replay) => {
+      const replayDate = new Date(replay.practiceDate);
+      const replayDateStr = replayDate.toDateString();
+      const dayEntry = days.find((d) => d.dateStr === replayDateStr);
+      if (dayEntry) {
+        // 모드명이 "연습 모드" 또는 "연주 모드"라고 가정
+        if (replay.mode === '연습 모드') {
+          dayEntry.practiceScores.push(replay.score);
+        } else if (replay.mode === '연주 모드') {
+          dayEntry.performanceScores.push(replay.score);
+        }
+      }
+    });
+
+    // 각 날짜별 평균 계산
+    return days.map((d) => ({
+      day: d.day,
+      current:
+        d.practiceScores.length > 0
+          ? Math.round(d.practiceScores.reduce((sum, s) => sum + s, 0) / d.practiceScores.length)
+          : 0,
+      average:
+        d.performanceScores.length > 0
+          ? Math.round(
+              d.performanceScores.reduce((sum, s) => sum + s, 0) / d.performanceScores.length,
+            )
+          : 0,
+    }));
+  };
+
+  // 기존의 정적 라인차트 데이터 대신 최근 일주일 데이터를 사용
+  const lineChartData = data ? getLineChartData() : [];
 
   const transformedBarChartData = data?.chordScoreDtos.map((chord) => ({
     name: chord.chordType,
@@ -110,13 +149,13 @@ const DashboardPage: React.FC = () => {
   ];
 
   const profileData = {
-    name: data?.username,
+    name: data?.username || '로그인이 필요합니다',
     email: 'guest@example.com', // Not in API, keeping original
     playtimerank: `${data?.playtimeRank} 등`,
     avgscorerank: `${data?.avgScoreRank} 등`, // Not explicitly in API, keeping original
     totaltryrank: `${data?.totalTryRank} 등`,
     profileImageUrl: 'profile-placeholder.png',
-    backgroundImageUrl: 'public/ding.svg',
+    backgroundImageUrl: 'ding.svg',
   };
 
   function formatDate(dateString: string): string {
@@ -124,6 +163,7 @@ const DashboardPage: React.FC = () => {
       const date = new Date(dateString);
       return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
     } catch (e) {
+      console.error('Date parsing error:', e);
       return dateString;
     }
   }
@@ -183,7 +223,7 @@ const DashboardPage: React.FC = () => {
             ))}
           </div>
 
-          {/* 라인 차트 - 원래 데이터 유지 (API에서 제공하지 않음) */}
+          {/* 라인 차트 - 최근 일주일간 리플레이 데이터를 이용 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -201,7 +241,7 @@ const DashboardPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <BarChartTile title="코드 별 정확도" data={transformedBarChartData} />
+            <BarChartTile title="코드 별 정확도" data={transformedBarChartData || []} />
           </motion.div>
 
           {/* 노래 목록 - API 데이터 사용 */}
@@ -210,7 +250,7 @@ const DashboardPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
           >
-            <SongListTile title="최근 연주한 노래" songs={transformedSongList} />
+            <SongListTile title="최근 연주한 노래" songs={transformedSongList || []} />
           </motion.div>
         </div>
       </div>
