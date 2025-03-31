@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: prod
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://j12d105.p.ssafy.io:3306/ddingga?createDatabaseIfNotExist=true&useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
