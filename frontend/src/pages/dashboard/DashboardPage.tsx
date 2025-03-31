@@ -15,7 +15,7 @@ import apiClient from '../../services/dashboardapi';
 interface DashboardData {
   userId: number;
   username: string;
-  playtime: number;
+  playtime: string;
   playtimeRank: number;
   totalTry: number;
   totalTryRank: number;
@@ -65,96 +65,59 @@ const DashboardPage: React.FC = () => {
     { day: '일', current: 0, average: 0 },
   ];
 
-  const songList = [
-    {
-      title: 'Basics of Mobile UX',
-      artist: 'Bruno Scott',
-      duration: '03:13',
-      score: 75,
-      thumbnail: 'src/assets/노래.jpg',
-    },
-    {
-      title: 'Basics of Mobile UX',
-      artist: 'Bruno Scott',
-      duration: '03:13',
-      score: 75,
-      thumbnail: 'src/assets/노래.jpg',
-    },
-    {
-      title: 'Basics of Mobile UX',
-      artist: 'Bruno Scott',
-      duration: '03:13',
-      score: 75,
-      thumbnail: 'src/assets/노래.jpg',
-    },
-    {
-      title: 'Basics of Mobile UX',
-      artist: 'Bruno Scott',
-      duration: '03:13',
-      score: 75,
-      thumbnail: 'src/assets/노래.jpg',
-    },
-    {
-      title: 'Basics of Mobile UX',
-      artist: 'Bruno Scott',
-      duration: '03:13',
-      score: 75,
-      thumbnail: 'src/assets/노래.jpg',
-    },
-  ];
-
   const transformedBarChartData = data?.chordScoreDtos.map((chord) => ({
     name: chord.chordType,
     value: parseInt(chord.score, 10),
   }));
 
-  const transformedSongList = data?.replay
-    ? data.replay.map((replay) => ({
-        title: replay.SongTitle,
-        artist: replay.mode, // Using mode as artist since actual artist isn't in the data
-        duration: formatDate(replay.practiceDate), // Using practice date instead of duration
-        score: replay.score,
-        thumbnail: 'src/assets/노래.jpg', // Use default thumbnail
-        videoPath: replay.videoPath,
-        replayId: replay.replayId,
-      }))
-    : songList;
+  const transformedSongList = data?.replays.map((replay) => ({
+    title: replay.SongTitle,
+    artist: replay.mode, // Using mode as artist since actual artist isn't in the data
+    duration: formatDate(replay.practiceDate), // Using practice date instead of duration
+    score: replay.score,
+    thumbnail: 'src/assets/노래.jpg', // Use default thumbnail
+    videoPath: replay.videoPath,
+    replayId: replay.replayId,
+  }));
 
-  // Calculate average score if data is available
   const calculateAverageScore = (): string => {
-    if (!data?.chordScore || data.chordScore.length === 0) return '0%';
+    if (!data?.chordScoreDtos || data.chordScoreDtos.length === 0) return '0%';
 
-    const sum = data.chordScore.reduce((acc, chord) => acc + parseInt(chord.score, 10), 0);
-    return `${Math.round(sum / data.chordScore.length)}%`;
+    const sum = data.chordScoreDtos.reduce((acc, chord) => acc + parseInt(chord.score, 10), 0);
+    return `${Math.round(sum / data.chordScoreDtos.length)}%`;
   };
 
-  // Update stats data with actual values if available
-  const updatedStatsData = data
-    ? [
+  const updatedStatsData =
+     [
         {
           label: '평균 정확도',
           value: calculateAverageScore(),
           change: '+10.01%', // Keeping original change since it's not in the API
-          positive: true,
+          positive: false,
         },
         {
           label: '누적시간',
-          value: `${data.playtime}시간`,
+          value:
+            data?.playtime
+              .split(':')
+              .slice(0, 2)
+              .map((v, i) => (v !== '00' ? `${+v}${i ? '분' : '시간'}` : ''))
+              .filter(Boolean)
+              .join(' ') || '0분',
           change: '',
           positive: null,
         },
         {
           label: '누적 연습량',
-          value: `${data.totalTry}회`,
+          value: `${data?.totalTry}회`,
           change: '-0.03%', // Keeping original change
-          positive: false,
+          positive: true,
         },
-      ]
-    : statsData;
+      ];
 
   // Profile data with actual values if available
   const profileData = {
-    name: data?.username || '게스트',
+    name: data?.username,
     email: 'guest@example.com', // Not in API, keeping original
     playtimerank: data ? `${data.playtimeRank} 등` : '9999 등',
     avgscorerank: '123 등', // Not explicitly in API, keeping original
