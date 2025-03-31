@@ -17,6 +17,7 @@ interface DashboardData {
   username: string;
   playtime: string;
   playtimeRank: number;
+  avgScoreRank: number;
   totalTry: number;
   totalTryRank: number;
   chordScoreDtos: ChordScoreDtos[];
@@ -48,12 +49,6 @@ const DashboardPage: React.FC = () => {
     queryKey: ['dashboardData'], // queryKey를 명시적으로 객체로 전달
     queryFn: fetchDashboardData, // queryFn을 명시적으로 전달
   });
-
-  const statsData = [
-    { label: '평균 정확도', value: '075%', change: '+10.01%', positive: true },
-    { label: '누적시간', value: '2,318시간', change: '', positive: null },
-    { label: '누적 연습량', value: '671회', change: '-0.03%', positive: false },
-  ];
 
   const lineChartData = [
     { day: '월', current: 20, average: 50 },
@@ -87,46 +82,43 @@ const DashboardPage: React.FC = () => {
     return `${Math.round(sum / data.chordScoreDtos.length)}%`;
   };
 
-  const updatedStatsData =
-     [
-        {
-          label: '평균 정확도',
-          value: calculateAverageScore(),
-          change: '+10.01%', // Keeping original change since it's not in the API
-          positive: false,
-        },
-        {
-          label: '누적시간',
-          value:
-            data?.playtime
-              .split(':')
-              .slice(0, 2)
-              .map((v, i) => (v !== '00' ? `${+v}${i ? '분' : '시간'}` : ''))
-              .filter(Boolean)
-              .join(' ') || '0분',
-          change: '',
-          positive: null,
-        },
-        {
-          label: '누적 연습량',
-          value: `${data?.totalTry}회`,
-          change: '-0.03%', // Keeping original change
-          positive: true,
-        },
-      ];
+  const updatedStatsData = [
+    {
+      label: '평균 정확도',
+      value: calculateAverageScore(),
+      change: '+10.01%',
+      positive: false,
+    },
+    {
+      label: '누적시간',
+      value:
+        data?.playtime
+          .split(':')
+          .slice(0, 2)
+          .map((v, i) => (v !== '00' ? `${+v}${i ? '분' : '시간'}` : ''))
+          .filter(Boolean)
+          .join(' ') || '0분',
+      change: '',
+      positive: null,
+    },
+    {
+      label: '누적 연습량',
+      value: `${data?.totalTry}회`,
+      change: '-0.03%',
+      positive: true,
+    },
+  ];
 
-  // Profile data with actual values if available
   const profileData = {
     name: data?.username,
     email: 'guest@example.com', // Not in API, keeping original
-    playtimerank: data ? `${data.playtimeRank} 등` : '9999 등',
-    avgscorerank: '123 등', // Not explicitly in API, keeping original
-    totaltryrank: data ? `${data.totalTryRank} 등` : '999 등',
+    playtimerank: `${data?.playtimeRank} 등`,
+    avgscorerank: `${data?.avgScoreRank} 등`, // Not explicitly in API, keeping original
+    totaltryrank: `${data?.totalTryRank} 등`,
     profileImageUrl: 'profile-placeholder.png',
-    backgroundImageUrl: '/dashboard-bg.png',
+    backgroundImageUrl: 'public/ding.svg',
   };
 
-  // Helper function to format date
   function formatDate(dateString: string): string {
     try {
       const date = new Date(dateString);
