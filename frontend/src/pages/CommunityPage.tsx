@@ -20,14 +20,22 @@ export const CommunityPage: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<number | null>(null);
 
   // `useQuery`의 반환 타입을 명확히 `Post[]`로 지정합니다.
-  const { data: posts = [] } = useQuery<Post[], Error>({
+  const { data: posts = [], error } = useQuery<Post[], Error>({
     queryKey: ['articles'],
     queryFn: async () => {
-      const { data } = await _axiosAuth.get<CommunityResponse>(`/article`);
-      console.log(data);
-      return data?.body?.data ?? []; // CommunityResponse에서 데이터 추출
+      try {
+        const { data } = await _axiosAuth.get<CommunityResponse>('/article');
+        return data?.body?.data ?? [];
+      } catch (err) {
+        console.error('Error fetching posts:', err);
+        throw err;
+      }
     },
   });
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
 
   // 선택된 포스트가 있으면 CommunityDetail 컴포넌트를 렌더링합니다.
   if (

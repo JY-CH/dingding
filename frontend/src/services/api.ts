@@ -64,7 +64,7 @@ export const setupTokenRefresh = () => {
           const { accessToken } = response;
 
           // 새 액세스 토큰 저장
-          localStorage.setItem('accessToken', accessToken);
+          sessionStorage.setItem('accessToken', accessToken);
 
           isRefreshing = false;
           processQueue(null, accessToken);
@@ -96,7 +96,7 @@ export const setupTokenRefresh = () => {
 
 // 토큰 만료 체크 함수 (JWT 디코딩 필요)
 const needsTokenRefresh = (): boolean => {
-  const token = localStorage.getItem('accessToken');
+  const token = sessionStorage.getItem('accessToken');
   if (!token) return true;
 
   // JWT 디코딩하여 만료 시간 확인
@@ -158,7 +158,7 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
     }
     sessionStorage.setItem('accessToken', data.accessToken);
     return data as LoginResponse;
-  } catch (error) {
+  } catch (error: Error | unknown) {
     // 에러 발생 시 콘솔에 출력하고, 사용자에게 에러 메시지를 보여줍니다.
     console.error('로그인 오류:', error);
     if (error instanceof Error) {
@@ -237,7 +237,7 @@ export const refreshAccessToken = async (): Promise<RefreshTokenResponse> => {
 export const fetchProtectedData = async () => {
   const response = await apiClient(`${API_URL}/protected-route`, {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+      Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
     },
   });
 
@@ -245,3 +245,33 @@ export const fetchProtectedData = async () => {
 };
 
 // 나머지 API 호출 함수들...
+// 로그아웃 함수 추가
+export const logout = async () => {
+  try {
+    const accessToken = sessionStorage.getItem('accessToken');
+    
+    const response = await fetch(`${API_URL}/auth/logout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json', // Content-Type을 JSON으로 설정
+        'Authorization': `Bearer ${accessToken}`, // Authorization 헤더에 토큰 추가
+      },
+      credentials: 'include', // 쿠키를 서버로 보내기 위해 설정
+    });
+
+    console.log(response);
+
+    if (!response.ok) {
+      throw new Error('로그아웃에 실패했습니다.');
+    }
+
+    // 세션에서 토큰 제거
+    sessionStorage.removeItem('accessToken');
+
+    // 로그인 페이지로 리다이렉트
+    window.location.href = '/login';
+  } catch (error) {
+    console.error('로그아웃 오류:', error);
+    throw new Error('로그아웃 처리 중 오류가 발생했습니다.');
+  }
+};
