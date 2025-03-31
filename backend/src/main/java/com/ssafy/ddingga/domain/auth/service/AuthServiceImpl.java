@@ -48,21 +48,6 @@ public class AuthServiceImpl implements AuthService {
 	@Value("${spring.cloud.aws.s3.bucket}")
 	private String bucket;
 
-	// // 프로필 이미지 URL 배열
-	// private static final String[] PROFILE_IMAGES = {
-	//     "https://example.com/profile1.jpg",
-	//     "https://example.com/profile2.jpg",
-	//     "https://example.com/profile3.jpg",
-	//     "https://example.com/profile4.jpg",
-	//     "https://example.com/profile5.jpg"
-	// };
-
-	// // 무작위 프로필 이미지 선택 메서드
-	// private String getRandomProfileImage() {
-	//     Random random = new Random();
-	//     return PROFILE_IMAGES[random.nextInt(PROFILE_IMAGES.length)];
-	// }
-
 	@Override
 	@Transactional
 	public User registerUser(String loginId, String password, String username) {
@@ -79,8 +64,7 @@ public class AuthServiceImpl implements AuthService {
 			.loginId(loginId)                        // 사용자 ID
 			.password(passwordEncoder.encode(password))    // 비밀번호 암호화
 			.username(username)                    // 사용자 이름
-			.profileImage("profileImg")                        // 임시 프로필 이미지
-			// .profileImage(getRandomProfileImage())  // 무작위 프로필 이미지 설정
+			.profileImage("https://ddingga.s3.ap-northeast-2.amazonaws.com/basic_profile.png")  // 기본 프로필 이미지
 			.createAt(LocalDateTime.now())                      // 생성 시간
 			.isDeleted(false)                                   // 삭제 여부
 			.build();
@@ -145,10 +129,11 @@ public class AuthServiceImpl implements AuthService {
 
 				// S3에 파일 업로드
 				String uploadedFileKey = s3Service.uploadFile(profileImage, "profile");
-				
+
 				// 이전 프로필 이미지 삭제 (S3에서)
 				String previousImagePath = user.getProfileImage();
-				if (previousImagePath != null && !previousImagePath.equals("profileImg")) {
+				if (previousImagePath != null && !previousImagePath.equals(
+					"https://ddingga.s3.ap-northeast-2.amazonaws.com/basic_profile.png")) {
 					try {
 						String previousFileKey = previousImagePath.substring(previousImagePath.lastIndexOf("/") + 1);
 						s3Service.deleteFile("profile/" + previousFileKey);
