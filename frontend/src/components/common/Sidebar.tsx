@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, Dispatch, SetStateAction } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -13,13 +13,15 @@ import { useAuthStore } from '@/store/useAuthStore';
 interface SidebarProps {
   isExpanded: boolean;
   onToggle: () => void;
+  setIsExpanded: Dispatch<SetStateAction<boolean>>;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }) => {
   const [activeItem, setActiveItem] = useState<number | null>(null);
   const { isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
-
+  const [trueUser, setTrueUser] = useState<string | null>(sessionStorage.getItem('accessToken'));
+  console.log(trueUser);
   const menuItems = [
     {
       icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
@@ -47,7 +49,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
       path: '/dashboard',
     },
   ];
-
+  useEffect(() => {
+    setTrueUser(sessionStorage.getItem('accessToken'));
+  }, [sessionStorage.getItem('accessToken')]);
   const handleItemClick = (index: number, path: string) => {
     setActiveItem(index);
     navigate(path);
@@ -57,7 +61,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
     try {
       await logout(); // 로그아웃 요청이 완료될 때까지 대기
       useAuthStore.getState().clearAuth(); // 상태 초기화
-      navigate('/');
+      setIsExpanded(false); // 사이드바 축소
+      setTimeout(() => {
+        navigate('/'); // 로그아웃 후 홈으로 이동
+      }, 300); // 사이드바 애니메이션이 끝날 때까지 대기
     } catch (error) {
       console.error('로그아웃 실패:', error);
     }
@@ -158,7 +165,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
 
         {/* 하단 버튼 영역 */}
         <div className="p-4 space-y-2">
-          {isAuthenticated && (
+          {trueUser && (
             <button
               onClick={handleLogout}
               className="w-full h-10 flex items-center justify-center rounded
@@ -180,12 +187,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
                   />
                 </svg>
               </div>
-              <div
-                className={`
-                overflow-hidden transition-all duration-300
-                ${isExpanded ? 'w-40 ml-2 opacity-100' : 'w-0 opacity-0'}
-              `}
-              >
+
+              <div className="overflow-hidden transition-all duration-300 w-40 ml-2 opacity-100">
                 <span className="text-sm font-medium whitespace-nowrap">로그아웃</span>
               </div>
             </button>
