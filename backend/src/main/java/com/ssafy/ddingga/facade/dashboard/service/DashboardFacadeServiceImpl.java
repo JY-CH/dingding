@@ -10,7 +10,7 @@ import com.ssafy.ddingga.domain.dashboard.service.DashboardService;
 import com.ssafy.ddingga.domain.song.entity.ChordScore;
 import com.ssafy.ddingga.facade.dashboard.dto.response.ChordScoreDto;
 import com.ssafy.ddingga.facade.dashboard.dto.response.DashboardResponse;
-import com.ssafy.ddingga.facade.rank.dto.RankingInfo;
+import com.ssafy.ddingga.facade.rank.dto.response.RankingInfo;
 import com.ssafy.ddingga.facade.replay.dto.response.ReplayDto;
 
 import lombok.RequiredArgsConstructor;
