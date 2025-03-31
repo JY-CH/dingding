@@ -4,16 +4,19 @@ FROM node:20-alpine AS build
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and install dependencies
-# Copy project files
+# 환경 변수 추가
+ARG VITE_BASE_URL
+ENV VITE_BASE_URL=${VITE_BASE_URL}
 
+# Copy package.json and install dependencies
 COPY frontend/tsconfig.json ./tsconfig.json
 COPY frontend/ .  
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 
 RUN npm install -g pnpm && pnpm install
 
-
+# 환경 변수 확인 (디버깅용)
+RUN echo "VITE_BASE_URL is set to: $VITE_BASE_URL"
 
 # Build the project
 RUN pnpm run build
