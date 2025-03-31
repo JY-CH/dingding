@@ -31,7 +31,7 @@ const _axiosAuth: AxiosInstance = axios.create({
 
 // 요청 인터셉터 설정
 _axiosAuth.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = localStorage.getItem('accessToken'); // 토큰 가져오기
+  const token = sessionStorage.getItem('accessToken'); // 토큰 가져오기
   if (token && config.headers) {
     config.headers['X-Access-Token'] = `Bearer ${token}`; // 토큰 헤더 설정
   }

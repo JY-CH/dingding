@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { logout } from '@/services/api';
 import { useAuthStore } from '@/store/useAuthStore';
 
 // interface User {
@@ -16,7 +17,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
   const [activeItem, setActiveItem] = useState<number | null>(null);
-  const { isAuthenticated, user, clearAuth } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
 
   const menuItems = [
@@ -52,9 +53,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
     navigate(path);
   };
 
-  const handleLogout = () => {
-    clearAuth();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout(); // 로그아웃 요청이 완료될 때까지 대기
+      useAuthStore.getState().clearAuth(); // 상태 초기화
+      navigate('/');
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
   };
 
   return (

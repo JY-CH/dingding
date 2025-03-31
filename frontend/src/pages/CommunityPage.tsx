@@ -23,7 +23,7 @@ export const CommunityPage: React.FC = () => {
   const { data: posts = [] } = useQuery<Post[], Error>({
     queryKey: ['articles'],
     queryFn: async () => {
-      const { data } = await _axiosAuth.get<CommunityResponse>(`/article`);
+      const { data } = await _axiosAuth.get<CommunityResponse>(`/article/`);
       console.log(data);
       return data?.body?.data ?? []; // CommunityResponse에서 데이터 추출
     },
