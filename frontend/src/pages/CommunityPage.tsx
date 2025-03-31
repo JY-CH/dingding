@@ -25,6 +25,7 @@ export const CommunityPage: React.FC = () => {
     queryFn: async () => {
       try {
         const { data } = await _axiosAuth.get<CommunityResponse>('/article');
+        console.log(data);
         return data?.body?.data ?? [];
       } catch (err) {
         console.error('Error fetching posts:', err);

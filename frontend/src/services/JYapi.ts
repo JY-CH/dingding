@@ -32,8 +32,7 @@ const _axiosAuth: AxiosInstance = axios.create({
 // 요청 인터셉터 설정
 _axiosAuth.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = sessionStorage.getItem('accessToken'); // 토큰 가져오기
-  console.log('Request Config:', config); // 요청 설정 확인
-  console.log('Access Token:', token); // 토큰 확인
+
   if (token && config.headers) {
     config.headers['Authorization'] = `Bearer ${token}`; // 토큰 헤더 설정
   }
@@ -42,7 +41,7 @@ _axiosAuth.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 _axiosAuth.interceptors.response.use(
   async (response: AxiosResponse) => {
-    console.log('Response Data:', response.data); // 응답 데이터 확인
+
     const customCode = response.data?.body?.code;
 
     // Access Token 만료
