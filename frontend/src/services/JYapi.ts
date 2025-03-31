@@ -32,14 +32,17 @@ const _axiosAuth: AxiosInstance = axios.create({
 // 요청 인터셉터 설정
 _axiosAuth.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = sessionStorage.getItem('accessToken'); // 토큰 가져오기
+  console.log('Request Config:', config); // 요청 설정 확인
+  console.log('Access Token:', token); // 토큰 확인
   if (token && config.headers) {
-    config.headers['X-Access-Token'] = `Bearer ${token}`; // 토큰 헤더 설정
+    config.headers['Authorization'] = `Bearer ${token}`; // 토큰 헤더 설정
   }
   return config; // 설정된 헤더를 반환
 });
 
 _axiosAuth.interceptors.response.use(
   async (response: AxiosResponse) => {
+    console.log('Response Data:', response.data); // 응답 데이터 확인
     const customCode = response.data?.body?.code;
 
     // Access Token 만료
@@ -54,8 +57,8 @@ _axiosAuth.interceptors.response.use(
 
           const BEARER_PREFIX = 'Bearer ';
           const newAccessToken =
-            tokenResponse.headers['X-Access-Token']?.substring(BEARER_PREFIX.length) ||
-            tokenResponse.headers['X-Access-Token']?.substring(BEARER_PREFIX.length);
+            tokenResponse.headers['Authorization']?.substring(BEARER_PREFIX.length) ||
+            tokenResponse.headers['Authorization']?.substring(BEARER_PREFIX.length);
 
           if (newAccessToken) {
             useAuthStore.getState().loginAuth(newAccessToken);
@@ -63,7 +66,7 @@ _axiosAuth.interceptors.response.use(
 
           // 새로운 토큰으로 헤더 업데이트
           if (originalRequest.headers) {
-            originalRequest.headers['X-Access-Token'] = `Bearer ${newAccessToken}`;
+            originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
           }
 
           // 원래 요청 재시도
@@ -89,7 +92,7 @@ _axiosAuth.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    console.error('Axios error:', error);
+    console.error('Axios Error Response:', error); // 에러 응답 확인
     return Promise.reject(error);
   },
 );
