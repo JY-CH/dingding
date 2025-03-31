@@ -24,15 +24,16 @@ public class WebMVCConfig implements WebMvcConfigurer {
 
 	private String[] getAllowedOrigins() {
 		if ("dev".equals(activeProfile)) {
-			return new String[]{
+			return new String[] {
 				"http://localhost:5173",
 				"http://localhost:8080",
 				"http://localhost:8090"
 			};
 		} else {
-			return new String[]{
+			return new String[] {
 				"https://j12d105.p.ssafy.io",
-				"http://j12d105.p.ssafy.io"
+				"http://j12d105.p.ssafy.io",
+				"http://localhost:5173",
 			};
 		}
 	}
