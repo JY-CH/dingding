@@ -40,14 +40,14 @@ public class RankingServiceImpl implements RankingService {
 	}
 
 	@Override
-	public TopRankingResponse getTop5Rankings() {
+	public TopRankingResponse getTop10Rankings() {
 		log.info("랭킹 - 상위 10명 랭킹 정보 조회 요청");
 		try {
 			Pageable pageable = PageRequest.of(0, 10);
 			TopRankingResponse response = TopRankingResponse.builder()
-				.playTimeTop5(rankingRepository.findTop10ByPlayTime(pageable))
-				.totalTryTop5(rankingRepository.findTop10ByTotalTry(pageable))
-				.scoreTop5(rankingRepository.findTop10ByScore(pageable))
+				.playTimeTop10(rankingRepository.findTop10ByPlayTime(pageable))
+				.totalTryTop10(rankingRepository.findTop10ByTotalTry(pageable))
+				.scoreTop10(rankingRepository.findTop10ByScore(pageable))
 				.build();
 
 			log.info("랭킹 - 상위 10명 랭킹 정보 조회 완료");

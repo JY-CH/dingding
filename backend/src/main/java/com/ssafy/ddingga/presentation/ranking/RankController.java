@@ -21,14 +21,14 @@ import lombok.RequiredArgsConstructor;
 public class RankController {
 	private final RankingFacadeService rankingFacadeService;
 
-	@Operation(summary = "전체 랭킹 TOP 5 조회", description = "플레이타임, 시도횟수, 점수 각각의 상위 5명을 조회합니다.")
+	@Operation(summary = "전체 랭킹 TOP 10 조회", description = "플레이타임, 시도횟수, 점수 각각의 상위 10명을 조회합니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "랭킹 조회 성공"),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류")
 	})
 	@GetMapping("/top")
 	public ResponseEntity<TopRankingResponse> getTop5Rankings() {
-		TopRankingResponse response = rankingFacadeService.getTop5Rankings();
+		TopRankingResponse response = rankingFacadeService.getTop10Rankings();
 		return ResponseEntity.ok(response);
 	}
 }
