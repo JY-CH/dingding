@@ -3,16 +3,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GiGuitar } from 'react-icons/gi';
 import { HiOutlineVideoCamera, HiOutlineVideoCameraSlash } from 'react-icons/hi2';
-import { IoStatsChartOutline, IoArrowBack } from 'react-icons/io5';
-import { RiMusicLine, RiSettings4Line } from 'react-icons/ri';
+import { RiMusicLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
+import GameModeNavbar from '../components/common/GameModeNavbar';
 import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
 import FretboardVisualizer from '../components/guitar/FretboardVisualizer';
 import PracticeSession from '../components/guitar/PracticeSession';
 import { GuitarString, Visualization, Exercise } from '../types/guitar';
-import GameModeNavbar from '../components/common/GameModeNavbar';
 
 const PlayPage: React.FC = () => {
   const navigate = useNavigate();
@@ -141,7 +140,9 @@ const PlayPage: React.FC = () => {
         currentMode="practice"
       />
 
-      <div className="p-8 h-[calc(100vh-4rem)]"> {/* 4rem은 네비게이션 바의 높이(h-16) */}
+      <div className="p-8 h-[calc(100vh-4rem)]">
+        {' '}
+        {/* 4rem은 네비게이션 바의 높이(h-16) */}
         {/* 메인 콘텐츠 그리드 */}
         <div className="max-w-7xl mx-auto h-full grid grid-cols-12 gap-6">
           {/* 왼쪽 사이드바 */}

@@ -1,21 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { IoArrowBack } from 'react-icons/io5';
-import { GiGuitar } from 'react-icons/gi';
-import { IoStatsChartOutline } from 'react-icons/io5';
-import { RiMusicLine, RiSettings4Line } from 'react-icons/ri';
 
+import GameModeNavbar from '../components/common/GameModeNavbar';
 import ChordTimeline from '../components/performance/ChordTimeline';
-import PerformanceHeader from '../components/performance/PerformanceHeader';
 import WebcamView from '../components/performance/WebcamView';
 import { ChordNote } from '../types/performance';
-import GameModeNavbar from '../components/common/GameModeNavbar';
 
 const PerformancePage: React.FC = () => {
-  const navigate = useNavigate();
   const [isWebcamOn, setIsWebcamOn] = useState(false);
   const [, setCurrentTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying] = useState(false);
   const [chordNotes, setChordNotes] = useState<ChordNote[]>([]);
   const [showStats, setShowStats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -51,13 +44,13 @@ const PerformancePage: React.FC = () => {
     }
   };
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-    if (!isPlaying) {
-      startTimeRef.current = null;
-      animationRef.current = requestAnimationFrame(animate);
-    }
-  };
+  // const togglePlay = () => {
+  //   setIsPlaying(!isPlaying);
+  //   if (!isPlaying) {
+  //     startTimeRef.current = null;
+  //     animationRef.current = requestAnimationFrame(animate);
+  //   }
+  // };
 
   useEffect(() => {
     return () => {
@@ -76,7 +69,7 @@ const PerformancePage: React.FC = () => {
         setShowSettings={setShowSettings}
         currentMode="performance"
       />
-      
+
       {/* 기존 콘텐츠 */}
       <div className="p-8 h-[calc(100vh-4rem)]">
         <div className="grid grid-cols-12 gap-6">

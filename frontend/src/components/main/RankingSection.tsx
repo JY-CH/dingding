@@ -2,9 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { Song } from '../../types';
-import { RankUser } from '@/types/rank';
 import { fetchRankings } from '@/services/api';
+
+import { Song } from '../../types';
+
+interface RankUser {
+  username: string;
+  playTime: number;
+  totalTry: number;
+  avgScore?: number;
+}
 
 interface RankingSectionProps {
   dailyTracks: Song[];
@@ -53,12 +60,12 @@ const RankingSection: React.FC<RankingSectionProps> = ({
   useEffect(() => {
     const loadRankings = async () => {
       if (rankingType !== 'user') return;
-      
+
       try {
         setIsLoading(true);
         setError(null);
         const data = await fetchRankings();
-        
+
         // 선택된 탭에 따라 데이터 설정
         switch (userTab) {
           case 'playtime':
@@ -98,10 +105,10 @@ const RankingSection: React.FC<RankingSectionProps> = ({
             key={`${user.username}-${index}`}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ 
+            transition={{
               duration: 0.4,
               delay: 0.1 + index * 0.1,
-              ease: "easeOut"
+              ease: 'easeOut',
             }}
             className="relative group"
             onMouseEnter={() => setHoveredUser(index)}
@@ -142,11 +149,12 @@ const RankingSection: React.FC<RankingSectionProps> = ({
               <div className="flex-1 min-w-0">
                 <h4 className="font-medium text-white text-sm truncate">{user.username}</h4>
                 <p className="text-xs text-amber-400/80 truncate">
-                  {userTab === 'playtime' && `${Math.floor(user.playTime / 60)}시간 ${user.playTime % 60}분`}
+                  {userTab === 'playtime' &&
+                    `${Math.floor(user.playTime / 60)}시간 ${user.playTime % 60}분`}
                   {userTab === 'totaltry' && `${user.totalTry}회 도전`}
-                  {userTab === 'avgscore' && typeof user.avgScore === 'number' && 
-                    `평균 ${user.avgScore.toFixed(1)}점`
-                  }
+                  {userTab === 'avgscore' &&
+                    typeof user.avgScore === 'number' &&
+                    `평균 ${user.avgScore.toFixed(1)}점`}
                 </p>
               </div>
 
@@ -162,10 +170,10 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                     ${hoveredUser === index ? 'bg-amber-500' : 'bg-white/5'}
                   `}
                 >
-                  <svg 
-                    className={`w-4 h-4 ${hoveredUser === index ? 'text-white' : 'text-zinc-400'}`} 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
+                  <svg
+                    className={`w-4 h-4 ${hoveredUser === index ? 'text-white' : 'text-zinc-400'}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
                     <path
@@ -212,9 +220,10 @@ const RankingSection: React.FC<RankingSectionProps> = ({
             onClick={() => setRankingType('music')}
             className={`
               px-4 py-1.5 rounded-full text-sm font-medium transition-all
-              ${rankingType === 'music' 
-                ? 'bg-amber-500 text-white shadow-lg' 
-                : 'text-zinc-400 hover:text-white'
+              ${
+                rankingType === 'music'
+                  ? 'bg-amber-500 text-white shadow-lg'
+                  : 'text-zinc-400 hover:text-white'
               }
             `}
           >
@@ -224,9 +233,10 @@ const RankingSection: React.FC<RankingSectionProps> = ({
             onClick={() => setRankingType('user')}
             className={`
               px-4 py-1.5 rounded-full text-sm font-medium transition-all
-              ${rankingType === 'user' 
-                ? 'bg-amber-500 text-white shadow-lg' 
-                : 'text-zinc-400 hover:text-white'
+              ${
+                rankingType === 'user'
+                  ? 'bg-amber-500 text-white shadow-lg'
+                  : 'text-zinc-400 hover:text-white'
               }
             `}
           >
@@ -239,54 +249,61 @@ const RankingSection: React.FC<RankingSectionProps> = ({
         <div
           className="absolute bottom-0 h-0.5 bg-gradient-to-r from-amber-400 to-amber-600 transition-all duration-300 ease-out rounded-full"
           style={{
-            left: rankingType === 'music' 
-              ? (activeTab === 'daily' ? '0%' : activeTab === 'weekly' ? '33.33%' : '66.66%')
-              : (userTab === 'playtime' ? '0%' : userTab === 'avgscore' ? '33.33%' : '66.66%'),
+            left:
+              rankingType === 'music'
+                ? activeTab === 'daily'
+                  ? '0%'
+                  : activeTab === 'weekly'
+                    ? '33.33%'
+                    : '66.66%'
+                : userTab === 'playtime'
+                  ? '0%'
+                  : userTab === 'avgscore'
+                    ? '33.33%'
+                    : '66.66%',
             width: '33.33%',
           }}
         />
 
-        {rankingType === 'music' ? (
-          [
-            { id: 'daily', label: 'Today' },
-            { id: 'weekly', label: 'This Week' },
-            { id: 'monthly', label: 'This Month' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as TabType)}
-              className={`
+        {rankingType === 'music'
+          ? [
+              { id: 'daily', label: 'Today' },
+              { id: 'weekly', label: 'This Week' },
+              { id: 'monthly', label: 'This Month' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`
                 pb-3 px-4 text-sm font-medium transition-all duration-300 flex-1
                 ${activeTab === tab.id ? 'text-amber-500' : 'text-zinc-400 hover:text-white'}
               `}
-            >
-              {tab.label}
-            </button>
-          ))
-        ) : (
-          [
-            { id: 'playtime', label: '플레이타임', icon: '⏱️' },
-            { id: 'avgscore', label: '평균 점수', icon: '📊' },
-            { id: 'totaltry', label: '도전 횟수', icon: '🎯' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setUserTab(tab.id as UserTabType)}
-              className={`
+              >
+                {tab.label}
+              </button>
+            ))
+          : [
+              { id: 'playtime', label: '플레이타임', icon: '⏱️' },
+              { id: 'avgscore', label: '평균 점수', icon: '📊' },
+              { id: 'totaltry', label: '도전 횟수', icon: '🎯' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setUserTab(tab.id as UserTabType)}
+                className={`
                 pb-3 px-2 text-sm font-medium transition-all duration-300 flex-1
                 ${userTab === tab.id ? 'text-amber-500' : 'text-zinc-400 hover:text-white'}
               `}
-            >
-              <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <span className="text-xs">{tab.icon}</span>
-                <span className="text-xs">{tab.label}</span>
-              </div>
-            </button>
-          ))
-        )}
+              >
+                <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
+                  <span className="text-xs">{tab.icon}</span>
+                  <span className="text-xs">{tab.label}</span>
+                </div>
+              </button>
+            ))}
       </div>
 
-      <div 
+      <div
         ref={scrollContainerRef}
         className="space-y-2 max-h-[320px] overflow-y-auto overflow-x-hidden pr-2 custom-scrollbar relative"
       >
@@ -305,10 +322,10 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                     key={`${activeTab}-${track.id}-${index}`}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ 
+                    transition={{
                       duration: 0.4,
                       delay: 0.1 + index * 0.1,
-                      ease: "easeOut"
+                      ease: 'easeOut',
                     }}
                     className="relative group"
                     onMouseEnter={() => setHoveredTrack(track.id)}
@@ -355,7 +372,9 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className="text-xs text-zinc-400">{Math.floor(track.plays / 1000)}k</span>
+                        <span className="text-xs text-zinc-400">
+                          {Math.floor(track.plays / 1000)}k
+                        </span>
                         <button
                           onClick={() => onPlayTrack(track)}
                           className={`
@@ -367,7 +386,12 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                             }
                           `}
                         >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -389,7 +413,9 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                   </motion.div>
                 ))}
               </div>
-            ) : renderUserRankings()}
+            ) : (
+              renderUserRankings()
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
