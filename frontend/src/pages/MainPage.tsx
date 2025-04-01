@@ -13,6 +13,7 @@ import ShortsSection from '../components/main/ShortsSection';
 import TopArtistSection from '../components/main/TopArtistSection';
 import TopSongSection from '../components/main/TopSongSection';
 import { mockDailyTracks, mockWeeklyTracks, mockMonthlyTracks } from '../data/mockData';
+import { logout } from '../services/api';
 import { Song } from '../types';
 
 const MainPage = () => {
@@ -43,6 +44,16 @@ const MainPage = () => {
 
   const handlePlaySong = (song: Song) => {
     setCurrentSong(song);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      clearAuth();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return (
@@ -304,6 +315,7 @@ const MainPage = () => {
                     <div className="p-1 border-t border-white/10">
                       <button
                         onClick={() => {
+                          handleLogout();
                           clearAuth();
                           setIsProfileOpen(false);
                           navigate('/');
