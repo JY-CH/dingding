@@ -3,7 +3,7 @@ FROM python:3.9.13
 
 # ✅ 작업 디렉토리 설정
 WORKDIR /app
-
+RUN python --version
 # ✅ 필수 라이브러리 설치
 COPY requirements.txt .  
 RUN pip install --no-cache-dir -r requirements.txt
