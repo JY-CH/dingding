@@ -2,13 +2,9 @@ import { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { Post } from '@/types/index';
+// import { Post } from '@/types/index';
 
-interface CommunityCreateProps {
-  posts: Post[] | undefined;
-}
-
-export const CommunityCreate: React.FC<CommunityCreateProps> = () => {
+export const CommunityCreate = () => {
   const navigate = useNavigate();
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState('');

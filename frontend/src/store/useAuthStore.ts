@@ -12,10 +12,12 @@ interface AuthState {
   isAuthenticated: boolean;
   setAuth: (user: User, token: string) => void;
   clearAuth: () => void;
+  getUser: () => User | null; // 현재 로그인된 사용자 정보를 반환
 }
+
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       accessToken: null,
       isAuthenticated: false,
@@ -27,31 +29,23 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
         }),
 
-      clearAuth: async () => {
-        try {
-          // 🚀 로그아웃 API 요청
-          const response = await fetch(`${import.meta.env.VITE_BASE_URL}/auth/logout`, {
-            method: 'POST',
-            credentials: 'include', // 쿠키 포함하여 서버 요청
-          });
+      clearAuth: () => {
+        // 상태 초기화
+        set({
+          user: null,
+          accessToken: null,
+          isAuthenticated: false,
+        });
+        console.log('로그아웃 후 상태:', useAuthStore.getState());
 
-          if (!response.ok) {
-            throw new Error('로그아웃에 실패했습니다.');
-          }
+        // 로그인 페이지로 리다이렉트
+        window.location.href = '/login';
+      },
 
-          // ✅ 상태 초기화
-          set({
-            user: null,
-            accessToken: null,
-            isAuthenticated: false,
-          });
-          console.log('로그아웃 후 상태:', useAuthStore.getState());
-
-          // 로그인 페이지로 리다이렉트
-          window.location.href = '/login';
-        } catch (error) {
-          console.error('로그아웃 실패:', error);
-        }
+      // 현재 로그인된 사용자 정보를 반환하는 메서드
+      getUser: () => {
+        const { user } = get();
+        return user;
       },
     }),
     { name: 'auth-storage' },
