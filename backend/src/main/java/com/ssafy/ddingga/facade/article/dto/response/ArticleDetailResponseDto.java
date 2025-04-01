@@ -19,6 +19,7 @@ import lombok.Setter;
 public class ArticleDetailResponseDto {
 	private Integer articleId; // userPk
 	private int userId;
+	private String username;
 	private String title; // 게시판 제목
 	private String content;    // 게시판 내용
 	private LocalDateTime createdAt; // 생성일자

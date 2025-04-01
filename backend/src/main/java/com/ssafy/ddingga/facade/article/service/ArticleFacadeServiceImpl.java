@@ -53,6 +53,7 @@ public class ArticleFacadeServiceImpl implements ArticleFacadeService {
 		ArticleDetailResponseDto responseDto = ArticleDetailResponseDto.builder()
 			.articleId(article.getArticleId())
 			.userId(article.getUser().getUserId())
+			.username(article.getUser().getUsername())
 			.title(article.getTitle())
 			.content(article.getContent())
 			.createdAt(article.getCreatedAt())
