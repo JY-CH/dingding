@@ -19,9 +19,9 @@ const TopSongSection: React.FC<TopSongSectionProps> = ({ onPlaySong }) => {
     >
       <div className="mb-6">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
-          추천 영상
+          최신 발매
         </h2>
-        <p className="text-zinc-400 text-sm mt-2">ThingThing이 엄선한 추천 영상을 만나보세요</p>
+        <p className="text-zinc-400 text-sm mt-2">Dingding이 추천하는 새로운 앨범을 만나보세요</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 h-[570px]">

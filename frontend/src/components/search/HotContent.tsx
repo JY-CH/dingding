@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { motion } from 'framer-motion';
-import { BookHeadphones } from 'lucide-react';
+import { BookHeadphones, Disc, TrendingUp } from 'lucide-react';
 
 import GenreCards from './GenreCards';
 import HotSongs from './HotSongs';
@@ -30,6 +30,22 @@ interface Post {
 interface HotContentsProps {
   activeTab: string;
 }
+
+// 애니메이션 설정
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+  },
+};
 
 const HotContent: React.FC<HotContentsProps> = ({ activeTab }) => {
   const trendingSongs: Song[] = [
@@ -174,13 +190,14 @@ const HotContent: React.FC<HotContentsProps> = ({ activeTab }) => {
   ];
 
   return (
-    <div className="bg-zinc-900 min-h-screen pb-20">
+    <motion.div
+      className="bg-zinc-900 min-h-screen pb-12"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {activeTab === 'all' && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
+        <motion.div variants={itemVariants}>
           <GenreCards genres={genreCards} />
         </motion.div>
       )}
@@ -189,35 +206,38 @@ const HotContent: React.FC<HotContentsProps> = ({ activeTab }) => {
         <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 트렌딩 노래 */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            variants={itemVariants}
+            className="bg-zinc-800/30 backdrop-blur-sm rounded-xl border border-white/5 p-5 hover:shadow-lg hover:shadow-amber-500/5 transition-all"
           >
+            <div className="flex items-center gap-2 mb-5">
+              <TrendingUp className="w-5 h-5 text-amber-500" />
+              <h3 className="text-xl font-bold text-white">인기 노래</h3>
+            </div>
             <HotSongs songs={trendingSongs} />
           </motion.div>
 
           {/* 최신 발매 */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            variants={itemVariants}
+            className="bg-zinc-800/30 backdrop-blur-sm rounded-xl border border-white/5 p-5 hover:shadow-lg hover:shadow-amber-500/5 transition-all"
           >
+            <div className="flex items-center gap-2 mb-5">
+              <Disc className="w-5 h-5 text-amber-500" />
+              <h3 className="text-xl font-bold text-white">최신 발매</h3>
+            </div>
             <RecentReleases releases={recentReleases} />
           </motion.div>
         </div>
       )}
 
       {(activeTab === 'all' || activeTab === 'community') && (
-        <motion.div
-          className="px-6 py-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <PopularPosts posts={popularPosts} />
+        <motion.div variants={itemVariants} className="px-6 py-6">
+          <div className="bg-zinc-800/30 backdrop-blur-sm rounded-xl border border-white/5 p-5 hover:shadow-lg hover:shadow-amber-500/5 transition-all">
+            <PopularPosts posts={popularPosts} />
+          </div>
         </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

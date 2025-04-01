@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Dispatch, SetStateAction } from 'react';
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { logout } from '@/services/api';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -20,7 +20,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
   const [activeItem, setActiveItem] = useState<number | null>(null);
   const { isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const [trueUser, setTrueUser] = useState<string | null>(sessionStorage.getItem('accessToken'));
+
+  console.log(trueUser);
+  const isPlayPage = location.pathname === '/play';
   const menuItems = [
     {
       icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
@@ -66,6 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
       useAuthStore.getState().clearAuth(); // 상태 초기화
       setIsExpanded(false); // 사이드바 축소
       setTimeout(() => {
+        localStorage.removeItem('auth-storage'); // 토큰 삭제
         navigate('/'); // 로그아웃 후 홈으로 이동
       }, 300); // 사이드바 애니메이션이 끝날 때까지 대기
     } catch (error) {
@@ -76,11 +81,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
   return (
     <aside
       className={`
-      fixed top-0 left-0 h-screen bg-[#1E1E1E]
-      transition-[width] duration-300 ease-in-out
-      ${isExpanded ? 'w-64' : 'w-20'}
-      z-50
-    `}
+        fixed top-0 left-0 h-screen bg-[#1E1E1E]
+        transition-all duration-500 ease-in-out
+        ${isPlayPage ? '-translate-x-full' : 'translate-x-0'}
+        ${isExpanded ? 'w-64' : 'w-20'}
+        z-50
+      `}
     >
       <div className="flex flex-col h-full">
         {/* 로그인/프로필 영역 */}
@@ -89,7 +95,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
             <div className="flex items-center h-10">
               <div className="w-10 h-10 flex-shrink-0">
                 <img
-                  src="/profile-placeholder.png"
+                  src={user?.userProfile}
                   alt={user?.username}
                   className="w-full h-full rounded-full object-cover bg-gradient-to-br from-amber-500/10 to-amber-600/10"
                 />

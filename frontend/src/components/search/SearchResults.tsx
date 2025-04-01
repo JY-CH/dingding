@@ -44,63 +44,79 @@ const relatedPosts: Post[] = [
   },
 ];
 
+// 애니메이션 설정
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: 'spring',
+      stiffness: 260,
+      damping: 20,
+    },
+  },
+};
+
 const SearchResults: React.FC<SearchResultsProps> = ({ activeTab }) => {
   // activeTab에 따라 표시할 콘텐츠를 전환합니다.
   if (activeTab === 'all') {
     return (
-      <div className="px-6 py-4 bg-zinc-900 min-h-screen space-y-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
+      <motion.div
+        className="p-6 space-y-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={itemVariants}>
           <RelatedSongs songs={relatedSongs} />
         </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
+        <motion.div variants={itemVariants}>
           <RelatedPosts posts={relatedPosts} />
         </motion.div>
-      </div>
+      </motion.div>
     );
   } else if (activeTab === 'albums') {
     return (
-      <div className="px-6 py-4 bg-zinc-900 min-h-screen">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
+      <motion.div className="p-6" variants={containerVariants} initial="hidden" animate="visible">
+        <motion.div variants={itemVariants}>
           <RelatedSongs songs={relatedSongs} />
         </motion.div>
-      </div>
+      </motion.div>
     );
   } else if (activeTab === 'community') {
     return (
-      <div className="px-6 py-4 bg-zinc-900 min-h-screen">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
+      <motion.div className="p-6" variants={containerVariants} initial="hidden" animate="visible">
+        <motion.div variants={itemVariants}>
           <RelatedPosts posts={relatedPosts} />
         </motion.div>
-      </div>
+      </motion.div>
     );
   } else if (activeTab === 'artists') {
     return (
-      <div className="px-6 py-4 bg-zinc-900 min-h-screen">
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-white text-center"
+      <motion.div
+        className="p-6 flex items-center justify-center h-64"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div
+          variants={itemVariants}
+          className="p-6 bg-zinc-800/50 rounded-xl backdrop-blur-sm border border-white/5"
         >
-          관련 데이터가 없습니다.
-        </motion.p>
-      </div>
+          <p className="text-zinc-300 text-center">관련 데이터가 없습니다.</p>
+        </motion.div>
+      </motion.div>
     );
   }
 

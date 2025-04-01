@@ -13,6 +13,7 @@ import ShortsSection from '../components/main/ShortsSection';
 import TopArtistSection from '../components/main/TopArtistSection';
 import TopSongSection from '../components/main/TopSongSection';
 import { mockDailyTracks, mockWeeklyTracks, mockMonthlyTracks } from '../data/mockData';
+import { logout } from '../services/api';
 import { Song } from '../types';
 
 const MainPage = () => {
@@ -43,6 +44,16 @@ const MainPage = () => {
 
   const handlePlaySong = (song: Song) => {
     setCurrentSong(song);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      clearAuth();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return (
@@ -225,7 +236,7 @@ const MainPage = () => {
                   >
                     <div className="w-full h-full bg-gradient-to-br from-amber-500/10 to-amber-600/10 flex items-center justify-center">
                       <img
-                        src="/profile-placeholder.png"
+                        src={user?.userProfile}
                         alt={user?.username}
                         className="w-full h-full object-cover"
                       />
@@ -244,7 +255,6 @@ const MainPage = () => {
                   <div className="absolute right-0 mt-2 w-48 rounded-xl bg-zinc-800/90 backdrop-blur-sm border border-white/10 shadow-xl z-50">
                     <div className="p-3 border-b border-white/10">
                       <p className="text-sm font-medium text-white">{user?.username}님</p>
-                      <p className="text-xs text-zinc-400">유저 아이디 추가 필요?</p>
                     </div>
 
                     <div className="p-1">
@@ -304,6 +314,7 @@ const MainPage = () => {
                     <div className="p-1 border-t border-white/10">
                       <button
                         onClick={() => {
+                          handleLogout();
                           clearAuth();
                           setIsProfileOpen(false);
                           navigate('/');

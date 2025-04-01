@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+import GameModeNavbar from '../components/common/GameModeNavbar';
 import ChordTimeline from '../components/performance/ChordTimeline';
-import PerformanceHeader from '../components/performance/PerformanceHeader';
 import WebcamView from '../components/performance/WebcamView';
 import { ChordNote } from '../types/performance';
 
 const PerformancePage: React.FC = () => {
   const [isWebcamOn, setIsWebcamOn] = useState(false);
   const [, setCurrentTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying] = useState(false);
   const [chordNotes, setChordNotes] = useState<ChordNote[]>([]);
+  const [showStats, setShowStats] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -42,13 +44,13 @@ const PerformancePage: React.FC = () => {
     }
   };
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-    if (!isPlaying) {
-      startTimeRef.current = null;
-      animationRef.current = requestAnimationFrame(animate);
-    }
-  };
+  // const togglePlay = () => {
+  //   setIsPlaying(!isPlaying);
+  //   if (!isPlaying) {
+  //     startTimeRef.current = null;
+  //     animationRef.current = requestAnimationFrame(animate);
+  //   }
+  // };
 
   useEffect(() => {
     return () => {
@@ -59,10 +61,17 @@ const PerformancePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white">
-      <PerformanceHeader isPlaying={isPlaying} onTogglePlay={togglePlay} />
+    <div className="flex-1 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 h-screen overflow-hidden">
+      <GameModeNavbar
+        showStats={showStats}
+        setShowStats={setShowStats}
+        showSettings={showSettings}
+        setShowSettings={setShowSettings}
+        currentMode="performance"
+      />
 
-      <div className="p-8">
+      {/* 기존 콘텐츠 */}
+      <div className="p-8 h-[calc(100vh-4rem)]">
         <div className="grid grid-cols-12 gap-6">
           {/* 왼쪽: 웹캠 */}
           <div className="col-span-4">
