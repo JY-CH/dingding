@@ -52,6 +52,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
     setTrueUser(sessionStorage.getItem('accessToken'));
   }, [sessionStorage.getItem('accessToken')]);
   const handleItemClick = (index: number, path: string) => {
+    if (path === '/community' && !isAuthenticated) {
+      navigate('/login'); // 로그인 페이지로 이동
+      return;
+    }
     setActiveItem(index);
     navigate(path);
   };

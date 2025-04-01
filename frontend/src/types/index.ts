@@ -48,18 +48,15 @@ export interface Category {
   count: number;
 }
 export interface Post {
-  articleId: number;
-  userId: number;
-  username: string;
-  title: string;
-  content?: string;
-  createdAt: Date;
-  category: string;
-  popularPost: boolean;
-  recommend: number;
-  boardCreatedMemberId?: string;
-  picked?: boolean;
-  comments?: Comment[];
+  articleId: number; // Int
+  userId: number; // Int
+  username: string; // String
+  title: string; // String
+  createdAt: string; // Date (ISO 형식 문자열)
+  category: string; // String
+  popularPost: boolean; // Boolean
+  recommend: number; // Int
+  isLike: boolean; // Boolean
 }
 
 export interface NestedComment {
