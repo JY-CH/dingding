@@ -37,7 +37,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       );
 
       onClose();
-      window.location.href = '/dashboard';
+      window.location.href = '/';
     } catch (error) {
       console.error('Login failed:', error);
       setError(error instanceof Error ? error.message : '로그인에 실패했습니다');
