@@ -11,11 +11,13 @@ interface CommunityCommentProps {
   comments: Comment[]; // 댓글 배열
   parentId: number; // 부모 댓글 ID (대댓글 작성 시 필요)
   articleId: number; // 게시물 ID
+  commentIsDeleted: boolean; // 댓글 삭제 여부
 }
 export const CommunityComment: React.FC<CommunityCommentProps> = ({
   comments,
   parentId,
   articleId,
+  commentIsDeleted,
 }) => {
   const [replyContent, setReplyContent] = useState(''); // 대댓글 입력 상태
   const queryClient = useQueryClient();
@@ -74,19 +76,21 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
         .map((comment) => (
           <div key={comment.commentId} className="p-4 bg-zinc-800 rounded-lg">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-sm text-gray-400">
-                {comment.username}
+              <p className="text-sm text-gray-400 mb-1 flex flex-col gap-1">
+                <span className="font-bold text-gray-1000 text-md">{comment.username}</span>
                 {comment.isDeleted && (
                   <span className="ml-2 text-gray-500 italic">(삭제된 댓글입니다)</span>
                 )}
-                {!comment.isDeleted && ` | ${new Date(comment.createdAt).toLocaleString()}`}
+                {!comment.isDeleted && (
+                  <span className="text-xs">{new Date(comment.createdAt).toLocaleString()}</span>
+                )}
               </p>
               {!comment.isDeleted && comment.username === currentUserId && (
                 <button
                   onClick={() => handleDeleteComment(comment.commentId)}
                   className="text-sm text-red-500 hover:underline"
                 >
-                  삭제
+                  x
                 </button>
               )}
             </div>
@@ -105,6 +109,7 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
                   comments={comment.comments}
                   parentId={comment.commentId}
                   articleId={articleId}
+                  commentIsDeleted={comment.isDeleted}
                 />
               </div>
             )}
@@ -112,48 +117,49 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
         ))}
 
       {/* 항상 최하단에 위치하는 대댓글 입력창 */}
-      {commentModal ? (
-        <div className="mt-4">
-          <div className="flex flex-row items-center justify-between gap-1 mt-2">
-            <textarea
-              value={replyContent}
-              onChange={(e) => setReplyContent(e.target.value)}
-              placeholder="댓글을 입력하세요..."
-              className="p-2 w-full bg-zinc-700 text-white rounded-lg resize-none"
-              rows={2}
-            />
-            <div className="flex ">
+      {!commentIsDeleted ? (
+        commentModal ? (
+          <div className="mt-4">
+            <div className="flex flex-row items-center justify-between gap-1 mt-2">
+              <textarea
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                placeholder="댓글을 입력하세요..."
+                className="p-2 w-full bg-zinc-700 text-white rounded-lg resize-none"
+                rows={2}
+              />
+              <div className="flex">
+                <button
+                  onClick={handleReplySubmit}
+                  className="bg-amber-500 w-[70px] hover:bg-amber-600 text-white rounded-lg px-2 py-1 min-h-[60px]"
+                  disabled={replyMutation.isLoading}
+                >
+                  <div className="text-[10px]">
+                    {replyMutation.isLoading ? '작성 중...' : '댓글 작성'}
+                  </div>
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-end items-center mt-2">
               <button
-                onClick={handleReplySubmit}
-                className="bg-amber-500 w-[70px] hover:bg-amber-600 text-white rounded-lg px-2 py-1 min-h-[60px]"
-                disabled={replyMutation.isLoading}
+                className="hover:bg-gray-700 rounded-lg text-gray-400 mt-1"
+                onClick={() => setCommentModal(false)}
               >
-                <div className="text-[10px]">
-                  {replyMutation.isLoading ? '작성 중...' : '댓글 작성'}
-                </div>
+                <span className="p-3">닫기</span>
               </button>
             </div>
           </div>
-          <div className="flex justify-end items-center mt-2">
-            {/* <div className="flex-1"></div> 빈 공간 확보 */}
+        ) : (
+          <div className="flex justify-end">
             <button
-              className=" hover:bg-gray-700 rounded-lg text-gray-400 mt-1"
-              onClick={() => setCommentModal(false)}
+              className="text-gray-400 hover:bg-gray-700 rounded-lg"
+              onClick={() => setCommentModal(true)}
             >
-              <span className="p-3">닫기</span>
+              <span className="p-3">답글</span>
             </button>
           </div>
-        </div>
-      ) : (
-        <div className="flex justify-end">
-          <button
-            className=" text-gray-400 hover:bg-gray-700 rounded-lg"
-            onClick={() => setCommentModal(true)}
-          >
-            <span className="p-3">답글</span>
-          </button>
-        </div>
-      )}
+        )
+      ) : null}
     </div>
   );
 };

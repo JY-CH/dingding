@@ -147,15 +147,16 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
             .map((comment) => (
               <div key={comment.commentId} className="mb-4 p-4 bg-zinc-800 rounded-lg">
                 <div className="flex justify-between items-center">
-                  <p className="text-sm text-gray-400 mb-1">
-                    {comment.username} | {new Date(comment.createdAt).toLocaleString()}
+                  <p className="text-sm text-gray-400 mb-1 flex flex-col gap-1">
+                    <span className="font-bold text-gray-1000 text-lg">{comment.username}</span>
+                    <span className="text-xs">{new Date(comment.createdAt).toLocaleString()}</span>
                   </p>
                   {!comment.isDeleted && comment.username === currentUserId && (
                     <button
                       onClick={() => handleDeleteComment(comment.commentId)}
-                      className="text-sm text-red-500 hover:underline"
+                      className="text-sm text-red-500 hover:underline mr-4"
                     >
-                      삭제
+                      x
                     </button>
                   )}
                 </div>
@@ -173,6 +174,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
                     comments={comment.comments}
                     parentId={comment.commentId}
                     articleId={articleId}
+                    commentIsDeleted={comment.isDeleted}
                   />
                 </div>
               </div>
