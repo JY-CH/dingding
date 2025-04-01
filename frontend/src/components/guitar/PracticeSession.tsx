@@ -57,12 +57,12 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
     connect(exercise.id);
   };
 
-  const handleStop = () => {
-    setIsReady(false);
-    // URL에서 roomId 제거
-    window.history.pushState({}, '', '/practice');
-    disconnect();
-  };
+  // const handleStop = () => {
+  //   setIsReady(false);
+  //   // URL에서 roomId 제거
+  //   window.history.pushState({}, '', '/practice');
+  //   disconnect();
+  // };
 
   // 웹소켓 연결 해제
   useEffect(() => {

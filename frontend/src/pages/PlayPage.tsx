@@ -1,23 +1,23 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useWebSocketStore } from '../store/useWebSocketStore';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { GiGuitar } from 'react-icons/gi';
 import { HiOutlineVideoCamera, HiOutlineVideoCameraSlash } from 'react-icons/hi2';
 import { IoStatsChartOutline } from 'react-icons/io5';
 import { RiMusicLine, RiSettings4Line } from 'react-icons/ri';
+import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
 import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
 import FretboardVisualizer from '../components/guitar/FretboardVisualizer';
 import PracticeSession from '../components/guitar/PracticeSession';
+import { useWebSocketStore } from '../store/useWebSocketStore';
 import { GuitarString, Visualization } from '../types/guitar';
 
 const PlayPage: React.FC = () => {
   const navigate = useNavigate();
-  const { roomId } = useParams<{ roomId: string }>();
-  const { sendMessage, score, messages, isConnected, connect, disconnect } = useWebSocketStore();
+  // const { roomId } = useParams<{ roomId: string }>();
+  const { sendMessage, messages, isConnected, disconnect } = useWebSocketStore();
   const [selectedMode, setSelectedMode] = useState<'practice' | 'performance'>('practice');
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
