@@ -112,6 +112,6 @@ pipeline {
                     channel: "${env.MATTERMOST_CHANNEL}"
                 )
             }
-
+        }
     }
 }
