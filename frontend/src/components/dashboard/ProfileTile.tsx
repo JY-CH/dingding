@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 
 import { Clock, Star, Repeat, Edit } from 'lucide-react';
 
@@ -46,6 +46,7 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
             src={backgroundImageUrl}
             alt="배경"
             className="h-full w-full object-cover opacity-20 pr-10"
+            loading="lazy"
           />
         </div>
 
@@ -67,6 +68,7 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
                   src={profileImageUrl}
                   alt="프로필"
                   className="w-full h-full rounded-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <div
@@ -134,17 +136,19 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
         </div>
       </div>
 
-      {/* 모달 추가 */}
-      <ProfileEditModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        name={name}
-        email={email}
-        profileImageUrl={profileImageUrl}
-        createAt={createAt}
-      />
+      {/* 필요할 때만 모달 렌더링 */}
+      {isModalOpen && (
+        <ProfileEditModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          name={name}
+          email={email}
+          profileImageUrl={profileImageUrl}
+          createAt={createAt}
+        />
+      )}
     </div>
   );
 };
 
-export default ProfileTile;
+export default memo(ProfileTile);

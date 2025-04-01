@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 
 import {
   ResponsiveContainer,
@@ -27,17 +27,17 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
     '연주 모드': true,
   });
 
-  const handleLegendClick = (lineName: string) => {
+  const handleLegendClick = useCallback((lineName: string) => {
     if (lineName in visibleLines) {
       setVisibleLines((prev) => ({
         ...prev,
         [lineName]: !prev[lineName],
       }));
     }
-  };
+  }, [visibleLines]);
 
-  // 커스텀 툴팁 컴포넌트
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  // 커스텀 툴팁 컴포넌트 - memo로 감싸기
+  const CustomTooltip = memo(({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-zinc-800/90 p-4 border border-white/10 rounded-lg shadow-lg backdrop-blur-sm">
@@ -56,10 +56,10 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
       );
     }
     return null;
-  };
+  });
 
-  // 커스텀 범례 컴포넌트
-  const renderLegend = ({ payload }: { payload: { value: string; color: string }[] }) => (
+  // 커스텀 범례 컴포넌트 - 콜백 메모이제이션
+  const renderLegend = useCallback(({ payload }: { payload: { value: string; color: string }[] }) => (
     <div className="flex items-center gap-4 text-sm">
       {payload.map((entry, index) => (
         <div
@@ -85,7 +85,7 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
         </div>
       ))}
     </div>
-  );
+  ), [visibleLines, handleLegendClick]);
 
   // 데이터가 없는 경우 표시할 내용
   if (!data || data.length === 0) {
@@ -133,7 +133,7 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
         })}
       </div>
 
-      {/* 반응형 라인 차트 */}
+      {/* 반응형 라인 차트 - 애니메이션 단축 */}
       <ResponsiveContainer width="100%" height={250}>
         <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
@@ -160,7 +160,7 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
           />
           <Tooltip content={<CustomTooltip />} />
 
-          {/* 연습 모드 라인 */}
+          {/* 연습 모드 라인 - 애니메이션 단축 */}
           {visibleLines['연습 모드'] && (
             <>
               <Line
@@ -172,13 +172,13 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
                 dot={{ r: 4, fill: '#F59E0B', strokeWidth: 2, stroke: '#FEF3C7' }}
                 activeDot={{ r: 6, fill: '#F59E0B', stroke: '#FEF3C7', strokeWidth: 2 }}
                 name="연습 모드"
-                animationDuration={1500}
+                animationDuration={800}
                 connectNulls
               />
             </>
           )}
 
-          {/* 연주 모드 라인 */}
+          {/* 연주 모드 라인 - 애니메이션 단축 */}
           {visibleLines['연주 모드'] && (
             <>
               <Line
@@ -191,7 +191,7 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
                 dot={{ r: 4, fill: '#9CA3AF', strokeWidth: 2, stroke: '#F3F4F6' }}
                 activeDot={{ r: 6, fill: '#9CA3AF', stroke: '#F3F4F6', strokeWidth: 2 }}
                 name="연주 모드"
-                animationDuration={1500}
+                animationDuration={800}
                 connectNulls
               />
             </>
@@ -202,4 +202,4 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
   );
 };
 
-export default LineChartTile;
+export default memo(LineChartTile);

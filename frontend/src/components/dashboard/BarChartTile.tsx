@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
@@ -14,8 +14,8 @@ interface BarChartTileProps {
 }
 
 const BarChartTile: React.FC<BarChartTileProps> = ({ title, data }) => {
-  // 커스텀 툴팁 컴포넌트
-  const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+  // 커스텀 툴팁 메모이제이션
+  const CustomTooltip = memo(({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-zinc-800/90 p-4 border border-white/10 rounded-lg shadow-lg text-xs backdrop-blur-sm">
@@ -29,7 +29,7 @@ const BarChartTile: React.FC<BarChartTileProps> = ({ title, data }) => {
       );
     }
     return null;
-  };
+  });
 
   // 데이터가 없는 경우 표시할 내용
   if (!data || data.length === 0) {
@@ -69,7 +69,7 @@ const BarChartTile: React.FC<BarChartTileProps> = ({ title, data }) => {
         {title}
       </h3>
 
-      {/* 반응형 바 차트 */}
+      {/* 반응형 바 차트 - 애니메이션 시간 단축 */}
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0}}>
@@ -91,15 +91,16 @@ const BarChartTile: React.FC<BarChartTileProps> = ({ title, data }) => {
             {/* 툴팁 */}
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ fill: 'rgba(251, 191, 36, 0.1)' }} // Amber-500 투명도
+              cursor={{ fill: 'rgba(251, 191, 36, 0.1)' }}
               wrapperStyle={{ outline: 'none' }}
             />
             {/* 바 */}
             <defs>
               <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#F59E0B" /> {/* Amber-500 */}
-                <stop offset="100%" stopColor="#D97706" /> {/* Amber-600 */}
+                <stop offset="0%" stopColor="#F59E0B" />
+                <stop offset="100%" stopColor="#D97706" />
               </linearGradient>
+              {/* 간소화된 필터 */}
               <filter id="glow">
                 <feGaussianBlur stdDeviation="3.5" result="blur" />
                 <feComposite in="SourceGraphic" in2="blur" operator="over" />
@@ -121,4 +122,4 @@ const BarChartTile: React.FC<BarChartTileProps> = ({ title, data }) => {
   );
 };
 
-export default BarChartTile;
+export default memo(BarChartTile);
