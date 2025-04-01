@@ -54,6 +54,7 @@ public class ArticleFacadeServiceImpl implements ArticleFacadeService {
 			.articleId(article.getArticleId())
 			.userId(article.getUser().getUserId())
 			.username(article.getUser().getUsername())
+			.userProfile(article.getUser().getProfileImage())
 			.title(article.getTitle())
 			.content(article.getContent())
 			.createdAt(article.getCreatedAt())
