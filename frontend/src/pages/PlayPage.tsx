@@ -1,26 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useWebSocketStore } from '../store/useWebSocketStore';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { GiGuitar } from 'react-icons/gi';
 import { HiOutlineVideoCamera, HiOutlineVideoCameraSlash } from 'react-icons/hi2';
-import { RiMusicLine } from 'react-icons/ri';
-import { useNavigate } from 'react-router-dom';
+import { IoStatsChartOutline } from 'react-icons/io5';
+import { RiMusicLine, RiSettings4Line } from 'react-icons/ri';
 import Webcam from 'react-webcam';
 
-import GameModeNavbar from '../components/common/GameModeNavbar';
 import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
 import FretboardVisualizer from '../components/guitar/FretboardVisualizer';
 import PracticeSession from '../components/guitar/PracticeSession';
-import { GuitarString, Visualization, Exercise } from '../types/guitar';
+import { GuitarString, Visualization } from '../types/guitar';
 
 const PlayPage: React.FC = () => {
   const navigate = useNavigate();
+  const { roomId } = useParams<{ roomId: string }>();
+  const { sendMessage, score, messages, isConnected, connect, disconnect } = useWebSocketStore();
   const [selectedMode, setSelectedMode] = useState<'practice' | 'performance'>('practice');
-  const [isWebcamOn, setIsWebcamOn] = useState(false);
-  const [showStats, setShowStats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   const [currentChord] = useState<string | null>(null);
   const [, setPracticeStreak] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
   // 기타 줄 상태
   const [strings] = useState<GuitarString[]>([
@@ -45,22 +49,27 @@ const PlayPage: React.FC = () => {
   });
 
   // 예시 연습 세션
-  const sampleExercise: Exercise = {
-    id: '1',
-    title: '기본 코드 연습',
-    difficulty: 'beginner',
-    type: 'chord',
-    bpm: 60,
-    duration: 300,
-    description: '기본적인 오픈 코드를 연습합니다',
-    requirements: [
-      '기타 튜닝이 되어있어야 합니다',
-      '웹캠이 필요합니다',
-      '조용한 환경이 필요합니다',
-    ],
-    chords: ['Em', 'C', 'G', 'D'],
-    thumbnail: '/guitar-practice.jpg',
-  };
+  const sampleExercise = useMemo(
+    () => ({
+      id: '1',
+      title: '기본 코드 연습',
+      difficulty: 'beginner' as const,
+      type: 'chord' as const,
+      bpm: 60,
+      duration: 300,
+      description: '기본적인 오픈 코드를 연습합니다',
+      requirements: [
+        '기타 튜닝이 되어있어야 합니다',
+        '웹캠이 필요합니다',
+        '조용한 환경이 필요합니다',
+      ],
+      chords: ['Em', 'C', 'G', 'D'],
+      thumbnail: '/guitar-practice.jpg',
+    }),
+    [],
+  );
+
+  const webcamRef = useRef<Webcam>(null);
 
   useEffect(() => {
     let isActive = true; // cleanup을 위한 flag
@@ -123,28 +132,110 @@ const PlayPage: React.FC = () => {
     webcamMirrored: true,
   });
 
-  // const stats = useState({
-  //   totalPracticeTime: 0,
-  //   accuracyTrend: [65, 70, 75, 72, 78, 80, 85],
-  //   completedExercises: 42,
-  //   currentStreak: 7,
-  // });
+  // 웹소켓 연결 상태 변경 시 로깅
+  useEffect(() => {
+    console.log('웹소켓 연결 상태:', isConnected);
+  }, [isConnected]);
+
+  // 웹캠 캡처 및 이미지 전송
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    const captureAndSendImage = async () => {
+      try {
+        const webcam = webcamRef.current;
+        if (!webcam || !isConnected || !sampleExercise) {
+          return;
+        }
+
+        const imageData = webcam.getScreenshot();
+        if (!imageData) {
+          return;
+        }
+
+        sendMessage({
+          type: 'image',
+          data: imageData,
+          chord: sampleExercise.chords[currentStep],
+          room_id: sampleExercise.id,
+        });
+      } catch (error) {
+        console.error('이미지 처리 중 오류:', error);
+      }
+    };
+
+    if (isReady) {
+      // 더 빠른 간격으로 이미지 캡처 및 전송
+      intervalId = setInterval(captureAndSendImage, 200);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isReady, isConnected, currentStep, sendMessage, sampleExercise]);
+
+  // 컴포넌트 언마운트 시 웹소켓 연결 해제
+  useEffect(() => {
+    return () => {
+      if (isConnected) {
+        disconnect();
+      }
+    };
+  }, [isConnected, disconnect]);
 
   return (
-    <div className="flex-1 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 h-screen overflow-hidden">
-      <GameModeNavbar
-        showStats={showStats}
-        setShowStats={setShowStats}
-        showSettings={showSettings}
-        setShowSettings={setShowSettings}
-        currentMode="practice"
-      />
+    <div className="flex-1 overflow-auto bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 h-full">
+      {/* 상단 네비게이션 바 */}
+      <nav className="bg-black/30 backdrop-blur-sm border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <GiGuitar className="w-6 h-6 text-amber-500" />
+            <h1 className="text-xl font-bold text-white">ThingThing Guitar</h1>
+          </div>
 
-      <div className="p-8 h-[calc(100vh-4rem)]">
-        {' '}
-        {/* 4rem은 네비게이션 바의 높이(h-16) */}
+          <div className="flex items-center gap-4">
+            <button className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-700 hover:text-white transition-colors">
+              <GiGuitar className="w-5 h-5" />
+              연습 모드
+            </button>
+            <button
+              onClick={() => navigate('/performance')}
+              className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+            >
+              <RiMusicLine className="w-5 h-5" />
+              연주 모드
+            </button>
+            <button
+              onClick={() => setShowStats(!showStats)}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
+            >
+              <IoStatsChartOutline className="w-5 h-5 text-zinc-400 group-hover:text-amber-500" />
+            </button>
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 ㅋㅌtransition-colors group"
+            >
+              <RiSettings4Line className="w-5 h-5 text-zinc-400 group-hover:text-amber-500" />
+            </button>
+            <div className="h-8 w-px bg-white/10" />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <span className="text-amber-500 font-medium">7</span>
+              </div>
+              <div className="text-sm">
+                <div className="text-zinc-400">연습 스트릭</div>
+                <div className="text-white font-medium">7일 연속</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="p-8">
         {/* 메인 콘텐츠 그리드 */}
-        <div className="max-w-7xl mx-auto h-full grid grid-cols-12 gap-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6">
           {/* 왼쪽 사이드바 */}
           <div className="col-span-3 space-y-6">
             {/* 모드 선택 카드 */}
@@ -216,12 +307,14 @@ const PlayPage: React.FC = () => {
               className="bg-white/5 rounded-xl overflow-hidden"
             >
               <div className="relative aspect-video">
-                {isWebcamOn ? (
+                {settings.webcamMirrored ? (
                   <>
                     <Webcam
+                      ref={webcamRef}
                       audio={false}
                       className="rounded-lg w-full"
                       mirrored={settings.webcamMirrored}
+                      screenshotFormat="image/jpeg"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     <div className="absolute bottom-4 right-4 flex items-center gap-2">
@@ -234,7 +327,7 @@ const PlayPage: React.FC = () => {
                         미러링 {settings.webcamMirrored ? 'ON' : 'OFF'}
                       </button>
                       <button
-                        onClick={() => setIsWebcamOn(false)}
+                        onClick={() => setSettings((s) => ({ ...s, webcamMirrored: false }))}
                         className="p-2 bg-red-500/80 hover:bg-red-500 text-white rounded-lg backdrop-blur-sm transition-colors"
                       >
                         <HiOutlineVideoCameraSlash className="w-5 h-5" />
@@ -245,7 +338,7 @@ const PlayPage: React.FC = () => {
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50">
                     <HiOutlineVideoCamera className="w-12 h-12 text-zinc-400 mb-4" />
                     <button
-                      onClick={() => setIsWebcamOn(true)}
+                      onClick={() => setSettings((s) => ({ ...s, webcamMirrored: true }))}
                       className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
                     >
                       웹캠 켜기
@@ -268,6 +361,11 @@ const PlayPage: React.FC = () => {
                   console.log('Practice completed:', performance);
                   setPracticeStreak((prev) => prev + 1);
                 }}
+                isReady={isReady}
+                setIsReady={setIsReady}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+                messages={messages}
               />
             </motion.div>
           </div>
