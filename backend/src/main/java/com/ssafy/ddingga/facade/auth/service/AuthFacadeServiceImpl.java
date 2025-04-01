@@ -51,6 +51,7 @@ public class AuthFacadeServiceImpl implements AuthFacadeService {
 
 		return LoginResponseDto.builder()
 			.username(user.getUsername())
+			.userProfile(user.getProfileImage())
 			.accessToken(tokens.getAccessToken())
 			.refreshToken(tokens.getRefreshToken())
 			.build();
