@@ -1,5 +1,5 @@
 # ✅ Python 3.11 기반의 가벼운 공식 이미지 사용
-FROM python:3.11-slim
+FROM python:3.11.9
 
 # ✅ 작업 디렉토리 설정
 WORKDIR /app
