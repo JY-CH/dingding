@@ -4,7 +4,6 @@ from websocket import WebSocketManager, WebSocketHandler
 import jwt
 from jwt.exceptions import InvalidTokenError
 import os
-from dotenv import load_dotenv
 import torch
 import base64
 from PIL import Image
@@ -13,9 +12,6 @@ import json
 import time
 from ai_handler import AIHandler
 import logging
-
-# .env 파일 로드
-load_dotenv()
 
 app = FastAPI()
 
