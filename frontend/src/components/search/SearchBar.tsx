@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { Search, X, Clock, Disc, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
   query: string;
@@ -149,7 +150,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }
 
       {/* 드롭다운 메뉴 수정 */}
       {isFocused && (suggestions.length > 0 || recentSearches.length > 0) && (
-        <div className="absolute z-20 left-0 right-0 mt-2 bg-zinc-800/90 backdrop-blur-md rounded-xl shadow-xl border border-white/10 overflow-hidden">
+        <div className="absolute z-30 left-0 right-0 mt-2 bg-zinc-800/90 backdrop-blur-md rounded-xl shadow-xl border border-white/10 overflow-hidden">
           {/* 연관 검색어 */}
           {suggestions.length > 0 && (
             <div className="py-3">

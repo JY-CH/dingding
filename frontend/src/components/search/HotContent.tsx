@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { motion } from 'framer-motion';
-import { BookHeadphones, Music, User, Clock, Disc, TrendingUp } from 'lucide-react';
+import { BookHeadphones, Disc, TrendingUp } from 'lucide-react';
 
 import GenreCards from './GenreCards';
 import HotSongs from './HotSongs';
@@ -36,9 +36,6 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
   },
 };
 
@@ -47,11 +44,6 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 260,
-      damping: 20,
-    },
   },
 };
 

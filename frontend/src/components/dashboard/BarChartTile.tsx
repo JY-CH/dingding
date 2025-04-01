@@ -72,7 +72,7 @@ const BarChartTile: React.FC<BarChartTileProps> = ({ title, data }) => {
       {/* 반응형 바 차트 */}
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 10 }}>
+          <BarChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0}}>
             {/* X축 */}
             <XAxis
               dataKey="name"

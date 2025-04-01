@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { motion } from 'framer-motion';
 
 interface SearchTabsProps {
@@ -33,7 +34,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({ activeTab, setActiveTab }) => {
               />
             )}
             <span
-              className={`relative z-10 font-medium ${
+              className={`relative z-1 font-medium ${
                 activeTab === tab.key ? 'text-zinc-900' : 'text-zinc-400 hover:text-white'
               }`}
             >

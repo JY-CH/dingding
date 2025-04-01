@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import { motion } from 'framer-motion';
 import { ArrowLeft, Volume2, VolumeX, Music, Code, Download } from 'lucide-react';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface Song {
   title: string;
@@ -19,7 +19,6 @@ interface LocationState {
 const VideoStreamingPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const params = useParams();
   const state = location.state as LocationState;
   const videoRef = useRef<HTMLVideoElement>(null);
 

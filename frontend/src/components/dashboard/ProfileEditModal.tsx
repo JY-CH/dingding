@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import { Fragment } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { X, Camera, UserCircle, Calendar, Mail, LogOut } from 'lucide-react';
-import { Fragment } from 'react';
 
 import apiClient from '../../services/dashboardapi';
 

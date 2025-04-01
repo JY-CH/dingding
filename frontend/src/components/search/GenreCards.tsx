@@ -33,12 +33,12 @@ const GenreCards: React.FC<GenreCardsProps> = ({ genres }) => {
         <button className="text-sm text-amber-500 hover:underline">모두 보기</button>
       </motion.div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {genres.map((genre, index) => (
+        {genres.map((genre) => (
           <motion.div
             key={genre.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 + index * 0.1 }}
+            transition={{ delay: 0.2 }}
             className={`relative rounded-xl p-5 flex flex-col justify-between cursor-pointer transform transition hover:scale-105 shadow-lg bg-gradient-to-br ${genre.color}`}
           >
             {/* 아이콘 */}

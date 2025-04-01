@@ -8,7 +8,7 @@ import BarChartTile from '@/components/dashboard/BarChartTile';
 import LineChartTile from '@/components/dashboard/LineChartTile';
 import ProfileTile from '@/components/dashboard/ProfileTile';
 import SongListTile from '@/components/dashboard/SongListTile';
-import StatsTile from '@/components/dashboard/StatsTile';
+// import StatsTile from '@/components/dashboard/StatsTile';
 
 import apiClient from '../../services/dashboardapi';
 
@@ -159,7 +159,7 @@ const DashboardPage: React.FC = () => {
     name: data?.username || '로그인이 필요합니다',
     email: data?.loginId || '로그인이 필요합니다',
     playtimerank: `${data?.playtimeRank} 등`,
-    avgscorerank: `${data?.scoreRank} 등`, // Not explicitly in API, keeping original
+    avgscorerank: `${data?.scoreRank} 등`,
     totaltryrank: `${data?.totalTryRank} 등`,
     profileImageUrl: data?.profileImage || 'ding.svg',
     backgroundImageUrl: 'ding.svg',
@@ -181,9 +181,6 @@ const DashboardPage: React.FC = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
     },
   };
 
@@ -226,8 +223,8 @@ const DashboardPage: React.FC = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white overflow-y-auto custom-scrollbar pb-20">
-      <div className="max-w-7xl mx-auto px-8 py-10">
+    <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white overflow-y-auto custom-scrollbar pb-20 p-8">
+      <div className="max-w-7xl mx-auto ">
         <motion.div
           initial="hidden"
           animate="visible"
@@ -267,7 +264,6 @@ const DashboardPage: React.FC = () => {
               {updatedStatsData.map((stat, index) => (
                 <motion.div
                   key={index}
-                  whileHover={{ y: -5 }}
                   className="bg-zinc-800/70 backdrop-blur-sm rounded-xl border border-white/5 shadow-xl overflow-hidden hover:border-amber-500/30 transition-all duration-300"
                 >
                   <div className="p-5">

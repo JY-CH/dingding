@@ -26,6 +26,12 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
   createAt,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const formattedDate = new Date(createAt).toLocaleDateString('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
   return (
     <div className="backdrop-blur-lg group">
@@ -35,15 +41,22 @@ const ProfileTile: React.FC<ProfileTileProps> = ({
         <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-zinc-900/60 z-0"></div>
         <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-amber-600/10 blur-2xl"></div>
+        <div className="absolute top-0 right-0 h-full p-4">
+          <img
+            src={backgroundImageUrl}
+            alt="배경"
+            className="h-full w-full object-cover opacity-20 pr-10"
+          />
+        </div>
 
         {/* 내용 영역 */}
         <div className="relative z-10 p-6">
           {/* 내 프로필 타이틀 */}
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-white text-lg font-bold bg-zinc-800/40 px-4 py-2 rounded-full backdrop-blur-sm">
+            <h2 className="text-white text-lg font-bold bg-zinc-800/40 px-2 rounded-full backdrop-blur-sm">
               내 프로필
             </h2>
-            <span className="text-xs text-zinc-400">가입일: {createAt}</span>
+            <span className="text-xs text-zinc-400">가입일: {formattedDate}</span>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center">
