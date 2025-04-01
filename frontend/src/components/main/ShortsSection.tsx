@@ -19,7 +19,7 @@ const ShortsSection = () => {
           <h2 className="text-xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
             쇼츠
           </h2>
-          <p className="text-zinc-400 text-xs mt-1">기타리스트들의 짧은 연주 영상을 만나보세요</p>
+          <p className="text-zinc-400 text-xs mt-1">기타리스트들의 연주 영상을 만나보세요</p>
         </div>
         <div className="flex gap-2">
           <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors group">
