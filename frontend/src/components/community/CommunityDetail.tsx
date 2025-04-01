@@ -1,24 +1,25 @@
-import { useState } from 'react';
+import { use, useState } from 'react';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { CommunityComment } from './CommunityComment';
 import { _axiosAuth } from '../../services/JYapi';
+import { useAuthStore } from '../../store/useAuthStore';
 
 interface CommunityDetailProps {
   articleId: number;
-  setSelectedPost: (value: number | null) => void; // 상태 변경 함수 타입 정의
+  setSelectedPost: (value: number | null) => void;
 }
 
 interface Comment {
-  commentId: number; // 댓글 ID
+  commentId: number;
   userId: number;
   username: string;
   content: string;
   createdAt: string;
   updateAt: string;
   isDeleted: boolean;
-  comments: Comment[]; // 대댓글
+  comments: Comment[];
 }
 
 interface ArticleDetail {
@@ -37,7 +38,8 @@ interface ArticleDetail {
 
 export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, setSelectedPost }) => {
   const [newComment, setNewComment] = useState('');
-  const queryClient = useQueryClient(); // 쿼리 클라이언트 인스턴스 생성
+  const queryClient = useQueryClient();
+  const currentUserId = useAuthStore.getState().getUser()?.username || ''; // 현재 로그인한 사용자의 username (string 타입)
 
   const {
     data: articleDetail,
@@ -47,7 +49,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
     queryKey: ['article', articleId],
     queryFn: async () => {
       const { data } = await _axiosAuth.get(`/article/${articleId}`);
-      return data; // API 응답에서 데이터 추출
+      return data;
     },
   });
 
@@ -59,8 +61,17 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['article', articleId]); // 댓글 작성 후 해당 게시물의 댓글 목록을 새로고침
-      setNewComment(''); // 입력 필드 초기화
+      queryClient.invalidateQueries(['article', articleId]);
+      setNewComment('');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (commentId: number) => {
+      await _axiosAuth.delete(`/comment/${commentId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['article', articleId]);
     },
   });
 
@@ -70,8 +81,14 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
       return;
     }
 
-    mutation.mutate(newComment); // 댓글 작성 요청
-    setNewComment(''); // 댓글 입력란 초기화
+    mutation.mutate(newComment);
+    setNewComment('');
+  };
+
+  const handleDeleteComment = (commentId: number) => {
+    if (window.confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
+      deleteMutation.mutate(commentId);
+    }
   };
 
   if (isLoading) {
@@ -87,7 +104,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
   }
 
   return (
-    <div className="bg-zinc-900 py-4 text-white rounded-lg">
+    <div className="bg-zinc-900 py-4 text-white rounded-lg pb-[100px]">
       <button
         onClick={() => setSelectedPost(null)}
         className="mb-4 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
@@ -106,7 +123,8 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
 
       <div className="mt-6">
         <h2 className="text-xl font-semibold mb-2">댓글</h2>
-        <div className="mb-4">
+        <hr className="border-gray-700" />
+        <div className="mb-4 mt-2">
           <textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
@@ -123,23 +141,42 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ articleId, set
           </button>
         </div>
         {articleDetail.comments.length > 0 ? (
-          articleDetail.comments.map((comment) => (
-            <div key={comment.commentId} className="mb-4 p-4 bg-zinc-800 rounded-lg">
-              <p className="text-sm text-gray-400">
-                {comment.username} | {new Date(comment.createdAt).toLocaleString()}
-              </p>
-              <p>{comment.content}</p>
+          articleDetail.comments
+            .slice()
+            .reverse()
+            .map((comment) => (
+              <div key={comment.commentId} className="mb-4 p-4 bg-zinc-800 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-gray-400 mb-1">
+                    {comment.username} | {new Date(comment.createdAt).toLocaleString()}
+                  </p>
+                  {!comment.isDeleted && comment.username === currentUserId && (
+                    <button
+                      onClick={() => handleDeleteComment(comment.commentId)}
+                      className="text-sm text-red-500 hover:underline"
+                    >
+                      삭제
+                    </button>
+                  )}
+                </div>
+                <p className="mt-2">
+                  {comment.isDeleted ? (
+                    <span className="text-gray-500 italic">삭제된 댓글입니다</span>
+                  ) : (
+                    comment.content
+                  )}
+                </p>
 
-              {/* 대댓글 렌더링 */}
-              <div className="mt-4 pl-4 border-l border-gray-600">
-                <CommunityComment
-                  comments={comment.comments}
-                  parentId={comment.commentId}
-                  articleId={articleId}
-                />
+                {/* 대댓글 렌더링 */}
+                <div className="mt-4 pl-4 border-l border-gray-600">
+                  <CommunityComment
+                    comments={comment.comments}
+                    parentId={comment.commentId}
+                    articleId={articleId}
+                  />
+                </div>
               </div>
-            </div>
-          ))
+            ))
         ) : (
           <p>댓글이 없습니다.</p>
         )}

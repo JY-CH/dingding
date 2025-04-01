@@ -5,22 +5,25 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { _axiosAuth } from '@/services/JYapi';
 import { Comment } from '@/types/index'; // 필요한 경로로 조정하세요
 
+import { useAuthStore } from '../../store/useAuthStore';
+
 interface CommunityCommentProps {
   comments: Comment[]; // 댓글 배열
   parentId: number; // 부모 댓글 ID (대댓글 작성 시 필요)
   articleId: number; // 게시물 ID
 }
-
 export const CommunityComment: React.FC<CommunityCommentProps> = ({
   comments,
   parentId,
   articleId,
 }) => {
   const [replyContent, setReplyContent] = useState(''); // 대댓글 입력 상태
-  const [replyingTo, setReplyingTo] = useState<number | null>(null); // 현재 대댓글을 작성 중인 댓글 ID
   const queryClient = useQueryClient();
+  const currentUserId = useAuthStore.getState().getUser()?.username || ''; // 현재 로그인한 사용자의 username (string 타입)
+  const [commentModal, setCommentModal] = useState(false); // 댓글 모달 상태
+  console.log('현재 로그인된 사용자:', currentUserId);
 
-  const mutation = useMutation({
+  const replyMutation = useMutation({
     mutationFn: async (content: string) => {
       const response = await _axiosAuth.post(`/article/${articleId}/comment/${parentId}`, {
         content,
@@ -30,7 +33,22 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
     onSuccess: () => {
       queryClient.invalidateQueries(['article', articleId]); // 댓글 목록 새로고침
       setReplyContent(''); // 입력 필드 초기화
-      setReplyingTo(null); // 대댓글 작성 상태 초기화
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (commentId: number) => {
+      try {
+        console.log('삭제 요청 commentId:', commentId); // 요청 ID 확인
+        const response = await _axiosAuth.delete(`/comment/${commentId}`);
+        console.log('삭제 요청 응답:', response); // 응답 확인
+      } catch (error: any) {
+        console.error('삭제 요청 실패:', error.response?.data || error.message); // 서버 에러 메시지 확인
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['article', articleId]); // 댓글 목록 새로고침
     },
   });
 
@@ -39,46 +57,100 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
       alert('대댓글 내용을 입력해주세요.');
       return;
     }
-    mutation.mutate(replyContent);
+    replyMutation.mutate(replyContent);
+  };
+
+  const handleDeleteComment = (commentId: number) => {
+    if (window.confirm('정말로 이 대댓글을 삭제하시겠습니까?')) {
+      deleteMutation.mutate(commentId);
+    }
   };
 
   return (
     <div className="space-y-4">
-      {comments.map((comment) => (
-        <div key={comment.commentId} className="p-4 bg-zinc-800 rounded-lg">
-          <div className="flex justify-between items-center mb-2">
-            <p className="text-sm text-gray-400">
-              {comment.username} | {new Date(comment.createdAt).toLocaleString()}
+      {comments
+        .slice()
+        .reverse()
+        .map((comment) => (
+          <div key={comment.commentId} className="p-4 bg-zinc-800 rounded-lg">
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-sm text-gray-400">
+                {comment.username}
+                {comment.isDeleted && (
+                  <span className="ml-2 text-gray-500 italic">(삭제된 댓글입니다)</span>
+                )}
+                {!comment.isDeleted && ` | ${new Date(comment.createdAt).toLocaleString()}`}
+              </p>
+              {!comment.isDeleted && comment.username === currentUserId && (
+                <button
+                  onClick={() => handleDeleteComment(comment.commentId)}
+                  className="text-sm text-red-500 hover:underline"
+                >
+                  삭제
+                </button>
+              )}
+            </div>
+            <p className="mb-2">
+              {comment.isDeleted ? (
+                <span className="text-gray-500 italic">삭제된 댓글입니다.</span>
+              ) : (
+                comment.content
+              )}
             </p>
+
+            {/* 대댓글 렌더링 */}
+            {!comment.isDeleted && comment.comments.length > 0 && (
+              <div className="mt-4 pl-4 border-l border-gray-600">
+                <CommunityComment
+                  comments={comment.comments}
+                  parentId={comment.commentId}
+                  articleId={articleId}
+                />
+              </div>
+            )}
           </div>
-          <p className="mb-2">{comment.content}</p>
+        ))}
+
+      {/* 항상 최하단에 위치하는 대댓글 입력창 */}
+      {commentModal ? (
+        <div className="mt-4">
+          <div className="flex flex-row items-center justify-between gap-1 mt-2">
+            <textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="댓글을 입력하세요..."
+              className="p-2 w-full bg-zinc-700 text-white rounded-lg resize-none"
+              rows={2}
+            />
+            <div className="flex ">
+              <button
+                onClick={handleReplySubmit}
+                className="bg-amber-500 w-[70px] hover:bg-amber-600 text-white rounded-lg px-2 py-1 min-h-[60px]"
+                disabled={replyMutation.isLoading}
+              >
+                <div className="text-[10px]">
+                  {replyMutation.isLoading ? '작성 중...' : '댓글 작성'}
+                </div>
+              </button>
+            </div>
+          </div>
+          <div className="flex justify-end items-center mt-2">
+            {/* <div className="flex-1"></div> 빈 공간 확보 */}
+            <button
+              className=" hover:bg-gray-700 rounded-lg text-gray-400 mt-1"
+              onClick={() => setCommentModal(false)}
+            >
+              <span className="p-3">닫기</span>
+            </button>
+          </div>
         </div>
-      ))}
-
-      {/* 대댓글 작성 버튼 */}
-      <button
-        onClick={() => setReplyingTo(parentId)}
-        className="text-sm text-amber-500 hover:underline"
-      >
-        답글 작성
-      </button>
-
-      {/* 대댓글 작성 폼 */}
-      {replyingTo === parentId && (
-        <div className="mt-2">
-          <textarea
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            placeholder="대댓글을 입력하세요..."
-            className="w-full p-2 bg-zinc-700 text-white rounded-lg resize-none"
-            rows={2}
-          />
+      ) : (
+        <div className="flex justify-end">
           <button
-            onClick={handleReplySubmit}
-            className="mt-2 py-1 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
-            disabled={mutation.isLoading}
+            className=" text-gray-400 hover:bg-gray-700 rounded-lg"
+            onClick={() => setCommentModal(true)}
           >
-            {mutation.isLoading ? '작성 중...' : '대댓글 작성'}
+            <span className="p-3">답글</span>
           </button>
         </div>
       )}
