@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 interface User {
   username: string;
-  // 필요한 다른 사용자 정보들 추가
+  userProfile: string;
 }
 
 interface AuthState {

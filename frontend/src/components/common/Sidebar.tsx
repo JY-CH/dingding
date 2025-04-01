@@ -90,7 +90,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
             <div className="flex items-center h-10">
               <div className="w-10 h-10 flex-shrink-0">
                 <img
-                  src="/ding.png"
+                  src={user?.userProfile}
                   alt={user?.username}
                   className="w-full h-full rounded-full object-cover bg-gradient-to-br from-amber-500/10 to-amber-600/10"
                 />

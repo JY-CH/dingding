@@ -6,6 +6,7 @@ interface LoginRequest {
 }
 
 interface LoginResponse {
+  userProfile: string;
   username: string;
   accesToken: string;
 }
