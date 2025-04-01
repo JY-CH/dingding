@@ -1,5 +1,5 @@
 # ✅ Python 3.11 기반의 가벼운 공식 이미지 사용
-FROM python:3.9.13
+FROM python:3.8
 
 # ✅ 작업 디렉토리 설정
 WORKDIR /app
