@@ -1,4 +1,4 @@
-import { use, useState } from 'react';
+import { useState } from 'react';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -229,9 +229,8 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
             <button
               onClick={handleCommentSubmit}
               className="mt-2 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
-              disabled={mutation.isLoading}
             >
-              {mutation.isLoading ? '작성 중...' : '댓글 작성'}
+              '댓글 작성'
             </button>
           </div>
           {articleDetail.comments.length > 0 ? (

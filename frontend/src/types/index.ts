@@ -77,6 +77,7 @@ export interface Comment {
   content: string;
   createdAt: string;
   updateAt: string;
+  userProfile: string;
   isDeleted: boolean;
   comments: Comment[]; // 대댓글
 }

@@ -25,7 +25,7 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
   const [commentModal, setCommentModal] = useState(false); // 댓글 모달 상태
   console.log('현재 로그인된 사용자:', currentUserId);
 
-  const replyMutation = useMutation({
+  const replyMutation = useMutation<void, Error, string>({
     mutationFn: async (content: string) => {
       const response = await _axiosAuth.post(`/article/${articleId}/comment/${parentId}`, {
         content,
@@ -33,24 +33,23 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['article', articleId]); // 댓글 목록 새로고침
+      queryClient.invalidateQueries({
+        queryKey: ['article', articleId],
+      });
       setReplyContent(''); // 입력 필드 초기화
     },
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useMutation<void, Error, number>({
     mutationFn: async (commentId: number) => {
-      try {
-        console.log('삭제 요청 commentId:', commentId); // 요청 ID 확인
-        const response = await _axiosAuth.delete(`/comment/${commentId}`);
-        console.log('삭제 요청 응답:', response); // 응답 확인
-      } catch (error: any) {
-        console.error('삭제 요청 실패:', error.response?.data || error.message); // 서버 에러 메시지 확인
-        throw error;
-      }
+      console.log('삭제 요청 commentId:', commentId); // 요청 ID 확인
+      const response = await _axiosAuth.delete(`/comment/${commentId}`);
+      console.log('삭제 요청 응답:', response); // 응답 확인
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['article', articleId]); // 댓글 목록 새로고침
+      queryClient.invalidateQueries({
+        queryKey: ['article', articleId],
+      });
     },
   });
 
@@ -137,11 +136,8 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
                 <button
                   onClick={handleReplySubmit}
                   className="bg-amber-500 w-[70px]  hover:bg-amber-600 text-white rounded-lg px-2 py-1 min-h-[50px]"
-                  disabled={replyMutation.isLoading}
                 >
-                  <div className="text-[10px]">
-                    {replyMutation.isLoading ? '작성 중...' : '댓글 작성'}
-                  </div>
+                  <div className="text-[10px]">'댓글 작성'</div>
                 </button>
               </div>
             </div>

@@ -3,14 +3,14 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { _axiosAuth } from '@/services/JYapi';
-import { CommunityListProps } from '@/types/index'; // 필요한 경로로 조정하세요
+import { Post } from '@/types/index'; // 필요한 경로로 조정하세요
 
 import { CommunityCreate } from '../components/community/CommunityCreate';
 import { CommunityDetail } from '../components/community/CommunityDetail';
 import { CommunityList } from '../components/community/CommunityList';
 
 // API 응답이 배열 형태라면 이렇게 정의해야 합니다
-type CommunityResponse = CommunityListProps[];
+type CommunityResponse = Post[];
 
 export const CommunityPage: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
