@@ -5,6 +5,9 @@ pipeline {
         COMPOSE_FILE_PATH = "/home/ubuntu/j12d105/docker-compose.yml"
         IMAGE_NAME = "fastapi-server"
         DOCKER_HUB_ID = "jaeyeolyim"  // Docker Hub 아이디
+        MATTERMOST_WEBHOOK_URL = 'https://meeting.ssafy.com/hooks/9xbbpnkbqfyo3nzxjrkaib8xbc'  // Mattermost Incoming Webhook URL
+        MATTERMOST_CHANNEL = 'd105-jenkins-alarm'  // Mattermost 채널
+
     }
 
     stages {
@@ -42,17 +45,23 @@ pipeline {
             steps {
                 sshagent(['ubuntu-ssh-key']) {
                     script {
+                        withCredentials([string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')])
                         sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@j12d105.p.ssafy.io <<- EOF
                         cd /home/ubuntu/j12d105
 
                         echo "🛑 기존 FastAPI 컨테이너 중단 & 삭제"
                         docker-compose down
+                        echo "🚀 환경 변수 설정 후 컨테이너 실행"
+                        export JWT_SECRET="${JWT_SECRET}"
+
+                        echo "JWT_SECRET=${JWT_SECRET}" >> .env
 
                         echo "🚀 최신 FastAPI 이미지 가져오기"
                         docker pull ${DOCKER_HUB_ID}/${IMAGE_NAME}:latest
 
                         echo "🚀 FastAPI 컨테이너 실행"
+                        JWT_SECRET=${JWT_SECRET} \
                         docker-compose up -d
 
                         echo "✅ FastAPI 배포 완료! 현재 컨테이너 상태:"
@@ -69,10 +78,40 @@ pipeline {
 
     post {
         success {
-            echo "✅ FastAPI Deployment Successful!"
+            echo "✅ Deployment Successful!"
+            
+            // GitLab 커밋 기록에서 배포한 사람의 GitLab 아이디 추출
+            script {
+                def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+                def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+                def Name = Author_ID.substring(1)
+
+                // Mattermost 알림 전송 (빌드 성공 시)
+                mattermostSend(
+                    color: 'good',
+                    message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 성공했습니다! \n배포한 사람: ${Name} ㅋㅋ좀치노 \n브랜치: ${env.GIT_BRANCH} \n(<${env.BUILD_URL}|상세 보기>)",
+                    endpoint: "${env.MATTERMOST_WEBHOOK_URL}",
+                    channel: "${env.MATTERMOST_CHANNEL}"
+                )
+            }
         }
         failure {
-            echo "❌ FastAPI Deployment Failed."
+            echo "❌ Deployment Failed."
+            
+            script {
+                // GitLab 커밋 기록에서 배포한 사람의 GitLab 아이디 추출
+                def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+                def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+                def Name = Author_ID.substring(1)
+
+                // Mattermost 알림 전송 (빌드 실패 시)
+                mattermostSend(
+                    color: 'danger',
+                    message: "${env.JOB_NAME}의 Jenkins ${env.BUILD_NUMBER}번째 빌드가 실패했습니다. \n배포한 사람: ${Name} 뭐함? \n${env.GIT_BRANCH}에서 오류가 발생했습니다. \n(<${env.BUILD_URL}|상세 보기>)",
+                    endpoint: "${env.MATTERMOST_WEBHOOK_URL}",
+                    channel: "${env.MATTERMOST_CHANNEL}"
+                )
+            }
         }
     }
 }

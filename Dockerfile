@@ -1,9 +1,9 @@
 # ✅ Python 3.11 기반의 가벼운 공식 이미지 사용
-FROM python:3.11-slim
+FROM python:3.8
 
 # ✅ 작업 디렉토리 설정
 WORKDIR /app
-
+RUN python --version
 # ✅ 필수 라이브러리 설치
 COPY requirements.txt .  
 RUN pip install --no-cache-dir -r requirements.txt
