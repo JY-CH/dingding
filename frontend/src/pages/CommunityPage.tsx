@@ -15,6 +15,8 @@ type CommunityResponse = CommunityListProps[];
 export const CommunityPage: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [selectedPost, setSelectedPost] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태
+  const postsPerPage = 4; // 페이지당 표시할 게시물 수
 
   const { data: posts = [], error } = useQuery<CommunityResponse, Error>({
     queryKey: ['articles'],
@@ -38,8 +40,18 @@ export const CommunityPage: React.FC = () => {
     setShowCreate(!showCreate);
   };
 
+  // 페이지네이션 계산
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = posts.slice().reverse().slice(indexOfFirstPost, indexOfLastPost);
+  const totalPages = Math.ceil(posts.length / postsPerPage);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b bg-zinc-900 text-white p-8">
+    <div className="min-h-screen bg-gradient-to-b bg-zinc-900 text-white p-8 pb-[10%]">
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="flex justify-between items-center mb-4">
           <div className="flex flex-col">
@@ -49,7 +61,11 @@ export const CommunityPage: React.FC = () => {
         </header>
 
         {selectedPost !== null ? (
-          <CommunityDetail articleId={selectedPost} setSelectedPost={setSelectedPost} />
+          <CommunityDetail
+            articleId={selectedPost}
+            setSelectedPost={setSelectedPost}
+            posts={posts.slice().reverse()}
+          />
         ) : (
           <>
             <button
@@ -63,25 +79,41 @@ export const CommunityPage: React.FC = () => {
 
             {!showCreate && (
               <div className="space-y-10">
-                {posts.length > 0 ? (
-                  posts
-                    .slice()
-                    .reverse()
-                    .map((post) => (
-                      <div
-                        key={post.articleId}
-                        onClick={() => setSelectedPost(post.articleId)}
-                        className=" rounded-xl cursor-pointer transition-all duration-300 
+                {currentPosts.length > 0 ? (
+                  currentPosts.map((post) => (
+                    <div
+                      key={post.articleId}
+                      onClick={() => setSelectedPost(post.articleId)}
+                      className="rounded-xl cursor-pointer transition-all duration-300 
                                  bg-zinc-900 hover:scale-[1.02] 
                                  transform ease-in-out"
-                      >
-                        <CommunityList post={post} />
-                      </div>
-                    ))
+                    >
+                      <CommunityList post={post} />
+                    </div>
+                  ))
                 ) : (
                   <div>
                     <p>게시물이 없습니다</p>
                     <p>게시물 개수: {posts.length}</p>
+                  </div>
+                )}
+
+                {/* 페이지네이션 */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center mt-4">
+                    {Array.from({ length: totalPages }, (_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handlePageChange(index + 1)}
+                        className={`px-3 py-1 mx-1 rounded-lg ${
+                          currentPage === index + 1
+                            ? 'bg-amber-500 text-white'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
