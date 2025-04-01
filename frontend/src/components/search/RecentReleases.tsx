@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { motion } from 'framer-motion';
-import { Calendar } from 'lucide-react';
 
 interface Song {
   id: number;
@@ -17,22 +16,13 @@ interface RecentReleasesProps {
 const RecentReleases: React.FC<RecentReleasesProps> = ({ releases }) => {
   return (
     <div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="flex items-center gap-2 mb-4"
-      >
-        <Calendar className="w-5 h-5 text-amber-500" />
-        <h3 className="text-lg font-bold text-white">최신 발매</h3>
-      </motion.div>
       <div className="bg-zinc-800 rounded-xl overflow-hidden">
-        {releases.map((song, index) => (
+        {releases.map((song) => (
           <motion.div
             key={song.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 + index * 0.1 }}
+            transition={{ delay: 0.1 }}
             className="flex items-center p-4 hover:bg-zinc-700 transition-colors cursor-pointer border-b border-zinc-700 last:border-b-0"
           >
             <img

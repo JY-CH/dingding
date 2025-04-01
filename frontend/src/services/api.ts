@@ -267,6 +267,7 @@ export const logout = async () => {
 
     // 세션에서 토큰 제거
     sessionStorage.removeItem('accessToken');
+    localStorage.removeItem('auth-storage'); // 로컬 스토리지에서 토큰 제거
 
     // 로그인 페이지로 리다이렉트
     window.location.href = '/login';

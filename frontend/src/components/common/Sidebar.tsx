@@ -63,6 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
       useAuthStore.getState().clearAuth(); // 상태 초기화
       setIsExpanded(false); // 사이드바 축소
       setTimeout(() => {
+        localStorage.removeItem('auth-storage'); // 토큰 삭제
         navigate('/'); // 로그아웃 후 홈으로 이동
       }, 300); // 사이드바 애니메이션이 끝날 때까지 대기
     } catch (error) {
@@ -86,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
             <div className="flex items-center h-10">
               <div className="w-10 h-10 flex-shrink-0">
                 <img
-                  src="/profile-placeholder.png"
+                  src="/ding.png"
                   alt={user?.username}
                   className="w-full h-full rounded-full object-cover bg-gradient-to-br from-amber-500/10 to-amber-600/10"
                 />
