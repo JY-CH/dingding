@@ -17,7 +17,7 @@ const TopArtistSection = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
-            인기 아티스트
+            이주의 아티스트
           </h2>
           <p className="text-zinc-400 text-xs mt-1">이번 주 가장 인기있는 아티스트</p>
         </div>

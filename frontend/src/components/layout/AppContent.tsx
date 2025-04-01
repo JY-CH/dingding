@@ -25,19 +25,19 @@ interface AppContentProps {
 
 const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
   const location = useLocation();
-  const isPlayPage = location.pathname === '/play';
+  const isFullscreenPage = location.pathname === '/play' || location.pathname === '/performance';
   const isLoginPage = location.pathname === '/login';
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   // 뮤직 플레이어를 표시할지 여부를 결정
-  const shouldShowMusicPlayer = !isPlayPage && !isLoginPage && isAuthenticated;
+  const shouldShowMusicPlayer = !isLoginPage && isAuthenticated;
 
   return (
     <main
       className={`
         flex-1 flex flex-col 
-        transition-all duration-300 ease-in-out
-        ${isExpanded ? 'ml-64' : 'ml-20'}
+        transition-all duration-500 ease-in-out
+        ${!isFullscreenPage && (isExpanded ? 'ml-64' : 'ml-20')}
       `}
     >
       <div className="flex-1 relative">
@@ -72,14 +72,22 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
         </div>
       </div>
 
-      {shouldShowMusicPlayer && (
-        <div
-          className="fixed bottom-0 left-0 right-0 bg-transparent"
-          style={{ marginLeft: isExpanded ? '16rem' : '5rem' }}
-        >
+      <div
+        className={`
+          fixed bottom-0 left-0 right-0
+          transition-all duration-500 ease-in-out
+          transform
+          ${isFullscreenPage ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}
+          ${!shouldShowMusicPlayer && 'hidden'}
+        `}
+        style={{ 
+          marginLeft: isExpanded ? '16rem' : '5rem'
+        }}
+      >
+        <div className="min-w-[976px] w-full">
           <MusicPlayer songs={mockSongs} isExpanded={isExpanded} />
         </div>
-      )}
+      </div>
     </main>
   );
 };

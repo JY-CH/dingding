@@ -276,3 +276,51 @@ export const logout = async () => {
     throw new Error('로그아웃 처리 중 오류가 발생했습니다.');
   }
 };
+
+// 랭킹 관련 타입 추가
+interface RankUser {
+  rank: number;
+  username: string;
+  playTime: number;
+  totalTry: number;
+  avgScore: number;
+}
+
+interface RankResponse {
+  playTimeTop10: RankUser[];
+  totalTryTop10: RankUser[];
+  scoreTop10: RankUser[];
+}
+
+// 랭킹 조회 함수 추가
+export const fetchRankings = async (): Promise<RankResponse> => {
+  try {
+    const response = await fetch(`${API_URL}/rank/top`, {
+      headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    // 에러 응답 처리
+    if (!response.ok) {
+      switch (response.status) {
+        case 400:
+          throw new Error('필수 정보가 누락되었습니다.');
+        case 404:
+          throw new Error('존재하지 않는 유저입니다.');
+        case 500:
+          throw new Error('서버 내부 오류가 발생했습니다.');
+        default:
+          throw new Error('랭킹 정보를 불러오는데 실패했습니다.');
+      }
+    }
+
+    return data as RankResponse;
+  } catch (error) {
+    console.error('랭킹 조회 오류:', error);
+    throw error;
+  }
+};
