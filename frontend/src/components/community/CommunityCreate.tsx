@@ -1,13 +1,15 @@
 import { useState } from 'react';
 
+import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
-// import { Post } from '@/types/index';
+import { _axiosAuth } from '@/services/JYapi'; // 실제 API 요청을 위한 axios 인스턴스
 
 export const CommunityCreate = () => {
   const navigate = useNavigate();
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(''); // 선택된 카테고리 상태
   const mockCategories = [
     'Music',
     'Technology',
@@ -19,13 +21,31 @@ export const CommunityCreate = () => {
     'Society & Culture',
   ];
 
+  const createPostMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedCategory) {
+        throw new Error('Please select a category.');
+      }
+      const response = await _axiosAuth.post('/article', {
+        title: newPostTitle,
+        content: newPostContent,
+        category: selectedCategory,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      alert('Post created successfully!');
+      window.location.reload(); // 페이지 새로고침
+      // navigate('/community'); // 게시글 생성 후 커뮤니티 페이지로 이동
+    },
+  });
+
   const handleCreatePost = () => {
     if (newPostTitle.trim() === '' || newPostContent.trim() === '') {
       alert('Please fill in both title and content.');
       return;
     }
-    setNewPostTitle('');
-    setNewPostContent('');
+    createPostMutation.mutate(); // 게시글 생성 요청
   };
 
   const handleGoBack = () => {
@@ -50,6 +70,21 @@ export const CommunityCreate = () => {
           value={newPostContent}
           onChange={(e) => setNewPostContent(e.target.value)}
         />
+        <div className="flex flex-wrap gap-2 mb-4">
+          {mockCategories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                selectedCategory === category
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-white/5 border border-white/10 hover:bg-white/10'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
         <div className="flex gap-2">
           <button
             onClick={handleCreatePost}
@@ -63,21 +98,6 @@ export const CommunityCreate = () => {
           >
             Back
           </button>
-        </div>
-      </section>
-
-      {/* Categories Section */}
-      <section className="bg-zinc-800/90 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-        <h2 className="text-xl font-semibold mb-4">Categories</h2>
-        <div className="flex flex-wrap gap-2">
-          {mockCategories.map((category) => (
-            <button
-              key={category}
-              className="bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm hover:bg-white/10 transition-colors"
-            >
-              {category}
-            </button>
-          ))}
         </div>
       </section>
     </div>
