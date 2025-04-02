@@ -164,6 +164,26 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
     },
   });
 
+  // 댓글 수정
+
+  const [editMode, setEditMode] = useState<{ [key: number]: boolean }>({});
+  const [editContent, setEditContent] = useState('');
+
+  const handleEditClick = (commentId: number, content: string) => {
+    setEditMode((prev) => ({ ...prev, [commentId]: true }));
+    setEditContent(content);
+  };
+
+  const handleEditSave = async (commentId: number) => {
+    if (editContent.trim() === '') {
+      alert('수정할 내용을 입력하세요.');
+      return;
+    }
+    await _axiosAuth.put(`/comment/${commentId}`, { content: editContent });
+    setEditMode((prev) => ({ ...prev, [commentId]: false }));
+    queryClient.invalidateQueries({ queryKey: ['article', articleId] });
+  };
+
   const handleLikeClick = () => {
     likeMutation.mutate();
   };
@@ -213,7 +233,12 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
       <div className="bg-zinc-900 py-4 w-2/3 text-white rounded-lg pb-[100px] pr-[80px]">
         <div className="flex flex-row justify-between">
           <button
-            onClick={() => setSelectedPost(null)}
+            onClick={() => {
+              setSelectedPost(null);
+              // 강제로 쿼리 무효화 및 리페치
+              queryClient.invalidateQueries({ queryKey: ['articles'] });
+              queryClient.refetchQueries({ queryKey: ['articles'] });
+            }}
             className="mb-4 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
           >
             Back
@@ -281,7 +306,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
               onClick={handleCommentSubmit}
               className="mt-2 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
             >
-              '댓글 작성'
+              댓글 작성
             </button>
           </div>
           {articleDetail.comments.length > 0 ? (
@@ -311,21 +336,60 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
                       </div>
                     </div>
                     {!comment.isDeleted && comment.username === currentUserId && (
-                      <button
-                        onClick={() => handleDeleteComment(comment.commentId)}
-                        className="text-sm text-red-500 hover:underline mr-4"
-                      >
-                        x
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleDeleteComment(comment.commentId)}
+                          className="text-sm text-red-500 hover:underline"
+                        >
+                          삭제
+                        </button>
+                      </div>
                     )}
                   </div>
-                  <p className="mt-2">
+
+                  {/* 댓글 내용 부분 - 수정 기능 추가 */}
+                  <div className="mt-2">
                     {comment.isDeleted ? (
                       <span className="text-gray-500 italic">삭제된 댓글입니다</span>
+                    ) : editMode[comment.commentId] ? (
+                      <div className="flex flex-col gap-2">
+                        <textarea
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          className="w-full p-2 text-sm border border-gray-700 bg-zinc-800 text-white rounded-lg resize-none"
+                          rows={3}
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleEditSave(comment.commentId)}
+                            className="text-sm bg-green-500 hover:bg-green-600 text-white rounded-lg px-3 py-1"
+                          >
+                            저장
+                          </button>
+                          <button
+                            onClick={() =>
+                              setEditMode((prev) => ({ ...prev, [comment.commentId]: false }))
+                            }
+                            className="text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-lg px-3 py-1"
+                          >
+                            취소
+                          </button>
+                        </div>
+                      </div>
                     ) : (
-                      comment.content
+                      <div className="flex flex-row justify-between items-start">
+                        <p className="break-words">{comment.content}</p>
+                        {!comment.isDeleted && comment.username === currentUserId && (
+                          <button
+                            onClick={() => handleEditClick(comment.commentId, comment.content)}
+                            className="text-gray-400 hover:bg-gray-700 rounded-lg px-2 ml-2"
+                          >
+                            수정
+                          </button>
+                        )}
+                      </div>
                     )}
-                  </p>
+                  </div>
 
                   {/* 대댓글 렌더링 */}
                   <div className="mt-4 pl-4 border-l border-gray-600">

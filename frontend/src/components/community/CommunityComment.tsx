@@ -53,6 +53,23 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
     },
   });
 
+  const [editMode, setEditMode] = useState<{ [key: number]: boolean }>({});
+  const [editContent, setEditContent] = useState('');
+
+  const handleEditClick = (commentId: number, content: string) => {
+    setEditMode((prev) => ({ ...prev, [commentId]: true }));
+    setEditContent(content);
+  };
+
+  const handleEditSave = async (commentId: number) => {
+    if (editContent.trim() === '') {
+      alert('수정할 내용을 입력하세요.');
+      return;
+    }
+    await _axiosAuth.put(`/comment/${commentId}`, { content: editContent });
+    setEditMode((prev) => ({ ...prev, [commentId]: false }));
+    queryClient.invalidateQueries({ queryKey: ['article', articleId] });
+  };
   const handleReplySubmit = () => {
     if (replyContent.trim() === '') {
       alert('대댓글 내용을 입력해주세요.');
@@ -101,8 +118,39 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
           <p className="mb-2">
             {comment.isDeleted ? (
               <span className="text-gray-500 italic">삭제된 댓글입니다.</span>
+            ) : editMode[comment.commentId] ? (
+              <div className="flex flex-col gap-2">
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="w-full p-2 text-sm border border-gray-700 bg-zinc-800 text-white rounded-lg resize-none"
+                  rows={2}
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => handleEditSave(comment.commentId)}
+                    className="text-sm bg-green-500 hover:bg-green-600 text-white rounded-lg px-3 py-1"
+                  >
+                    저장
+                  </button>
+                  <button
+                    onClick={() => setEditMode((prev) => ({ ...prev, [comment.commentId]: false }))}
+                    className="text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-lg px-3 py-1"
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
             ) : (
-              comment.content
+              <div className="flex flex-row justify-between">
+                <span>{comment.content}</span>
+                <button
+                  onClick={() => handleEditClick(comment.commentId, comment.content)}
+                  className="text-gray-400 hover:bg-gray-700 rounded-lg px-2"
+                >
+                  수정
+                </button>
+              </div>
             )}
           </p>
 
@@ -137,7 +185,7 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
                   onClick={handleReplySubmit}
                   className="bg-amber-500 w-[70px]  hover:bg-amber-600 text-white rounded-lg px-2 py-1 min-h-[50px]"
                 >
-                  <div className="text-[10px]">'댓글 작성'</div>
+                  <div className="text-[10px]">댓글 작성</div>
                 </button>
               </div>
             </div>

@@ -30,6 +30,7 @@ export const CommunityPage: React.FC = () => {
         throw err;
       }
     },
+    staleTime: 0,
   });
 
   if (error) {
