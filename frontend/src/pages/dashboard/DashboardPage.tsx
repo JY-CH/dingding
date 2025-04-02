@@ -44,7 +44,6 @@ interface Replays {
 // API 요청 함수
 const fetchDashboardData = async (): Promise<DashboardData> => {
   const { data } = await apiClient.get('/mypage/dashboard');
-  console.log('Dashboard data:', data);
   return data;
 };
 
@@ -77,8 +76,6 @@ const DashboardPage: React.FC = () => {
       };
     });
 
-    console.log('생성된 days 배열:', days);
-
     // replays 배열에서 각 날짜별 모드 점수 할당
     data.replays.forEach((replay) => {
       const replayDate = new Date(replay.practiceDate);
@@ -90,12 +87,8 @@ const DashboardPage: React.FC = () => {
         } else {
           dayEntry.performanceScores.push(replay.score);
         }
-      } else {
-        console.log('매칭되는 날짜 없음:', replay);
       }
     });
-
-    console.log('replays 할당 후 days 배열:', days);
 
     // 각 날짜별 평균 계산
     const result = days.map((d) => ({
@@ -111,8 +104,6 @@ const DashboardPage: React.FC = () => {
             )
           : 0,
     }));
-
-    console.log('최종 라인차트 데이터:', result);
     return result;
   }, [data?.replays]);
 

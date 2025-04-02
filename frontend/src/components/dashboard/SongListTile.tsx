@@ -1,12 +1,11 @@
 import React from 'react';
-
 import { Play, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Song {
   title: string;
   artist: string;
-  duration: string;
+  duration: string; // formatted practiceDate
   score: number;
   thumbnail: string;
   videoPath?: string;
@@ -83,15 +82,14 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
                 </span>
               </div>
               <div className="text-right pr-2">
-                {song.videoPath ? (
-                  <a
-                    href={song.videoPath}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                {song.videoPath && song.replayId ? (
+                  <Link
+                    to={`/video-stream/${song.replayId}`}
+                    state={{ song, videoUrl: song.videoPath }}
                     className="inline-flex items-center justify-center bg-zinc-800 hover:bg-amber-500 p-2 rounded-full text-zinc-400 hover:text-white transition-all group-hover:shadow-lg group-hover:shadow-amber-500/20"
                   >
-                    <ExternalLink size={16} />
-                  </a>
+                    <Play size={16} />
+                  </Link>
                 ) : (
                   <button className="bg-zinc-800 hover:bg-amber-500 p-2 rounded-full text-zinc-400 hover:text-white transition-all group-hover:shadow-lg group-hover:shadow-amber-500/20">
                     <Play size={16} />
@@ -107,7 +105,7 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={1.5}
-                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
               />
             </svg>
             <p className="text-sm">최근 연주한 노래가 없습니다</p>

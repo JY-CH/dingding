@@ -22,9 +22,6 @@ interface LineChartTileProps {
 }
 
 const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
-  // 디버깅 로그: 부모 컴포넌트에서 전달받은 data 확인
-  console.log('LineChartTile prop data:', data);
-
   const [visibleLines, setVisibleLines] = useState<{ [key: string]: boolean }>({
     '연습 모드': true,
     '연주 모드': true,
