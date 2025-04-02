@@ -53,6 +53,7 @@ export interface Post {
   username: string; // String
   title: string; // String
   createdAt: string; // Date (ISO 형식 문자열)
+  updatedAt: string;
   category: string; // String
   popularPost: boolean; // Boolean
   recommend: number; // Int

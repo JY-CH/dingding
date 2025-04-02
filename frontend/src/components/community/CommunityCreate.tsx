@@ -38,10 +38,6 @@ export const CommunityCreate = () => {
       window.location.reload(); // 페이지 새로고침
       // navigate('/community'); // 게시글 생성 후 커뮤니티 페이지로 이동
     },
-    onError: (error: any) => {
-      console.error('Failed to create post:', error.response?.data || error.message);
-      alert('Failed to create post. Please try again.');
-    },
   });
 
   const handleCreatePost = () => {
@@ -93,9 +89,8 @@ export const CommunityCreate = () => {
           <button
             onClick={handleCreatePost}
             className="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-            disabled={createPostMutation.isLoading} // 로딩 중 버튼 비활성화
           >
-            {createPostMutation.isLoading ? 'Creating...' : 'Post'}
+            Post
           </button>
           <button
             onClick={handleGoBack}

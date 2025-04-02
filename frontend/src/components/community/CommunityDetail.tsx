@@ -6,6 +6,7 @@ import lickeIcon from '@/assets/like.svg'; // 필요한 경로로 조정하세�
 import unLikeIcon from '@/assets/unlike.svg'; // 필요한 경로로 조정하세요
 
 import { CommunityComment } from './CommunityComment';
+import { CommunityEdit } from './CommunityEdit';
 import { _axiosAuth } from '../../services/JYapi';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Post } from '../../types/index'; // 필요한 경로로 조정하세요
@@ -64,6 +65,31 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
       return data;
     },
   });
+
+  const deleteArticle = useMutation({
+    mutationFn: async () => {
+      const response = await _axiosAuth.delete(`/article/${articleId}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['article', articleId],
+      });
+      setSelectedPost(null); // 게시글 삭제 후 목록으로 돌아가기
+      window.location.reload(); // 페이지 새로고침
+    },
+    onError: (error) => {
+      console.error('게시글 삭제 실패:', error);
+      alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
+    },
+  });
+  const [isEditing, setIsEditing] = useState(false); // 수정 모드 상태 추가
+
+  const handleDeleteArticle = () => {
+    if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+      deleteArticle.mutate();
+    }
+  };
 
   // 게시글 목록 페이지 이동용
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태
@@ -172,16 +198,41 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
   if (!articleDetail) {
     return <div>No article found.</div>;
   }
+  if (isEditing) {
+    return (
+      <CommunityEdit
+        articleDetail={articleDetail}
+        onCancel={() => setIsEditing(false)} // 수정 취소 시 호출
+        onComplete={() => setIsEditing(false)} // 수정 완료 시 호출
+      />
+    );
+  }
 
   return (
     <div className="flex">
       <div className="bg-zinc-900 py-4 w-2/3 text-white rounded-lg pb-[100px] pr-[80px]">
-        <button
-          onClick={() => setSelectedPost(null)}
-          className="mb-4 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
-        >
-          Back
-        </button>
+        <div className="flex flex-row justify-between">
+          <button
+            onClick={() => setSelectedPost(null)}
+            className="mb-4 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
+          >
+            Back
+          </button>
+          <div className="flex flex-row gap-4">
+            <button
+              className="mb-4 py-2 px-4 bg-amber-800 hover:bg-amber-600 text-white rounded-lg"
+              onClick={() => setIsEditing(true)} // 수정 모드로 전환
+            >
+              Edit
+            </button>
+            <button
+              className="mb-4 py-2 px-4 bg-amber-800 hover:bg-amber-600 text-white rounded-lg"
+              onClick={() => handleDeleteArticle()}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
 
         <div className="flex flex-col">
           <div className="flex flex-row justify-between items-center">
@@ -199,7 +250,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
             </button>
           </div>
           <div className="text-sm text-gray-400 items-center flex flex-row gap-3 justify-between">
-            <div>{new Date(articleDetail.createdAt).toLocaleString()}</div>
+            <div>{new Date(articleDetail.updatedAt).toLocaleString()}</div>
             <div className="flex items-center gap-2">
               <img
                 src={
@@ -254,7 +305,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
                             {comment.username}
                           </span>
                           <span className="text-xs">
-                            {new Date(comment.createdAt).toLocaleString()}
+                            {new Date(comment.updateAt).toLocaleString()}
                           </span>
                         </div>
                       </div>
@@ -307,7 +358,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
                   >
                     <div className="text-xl font-semibold mb-2">{post.title}</div>
                     <div className="flex flex-row items-center justify-between text-xs text-gray-400">
-                      <div>{formatDate(post.createdAt)}</div>
+                      <div>{formatDate(post.updatedAt)}</div>
                       <div className="flex items-center gap-1">
                         <img src={lickeIcon} alt="Like Icon" className="w-4 h-4" />
                         <span>{post.recommend}</span>
