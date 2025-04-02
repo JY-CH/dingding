@@ -34,7 +34,7 @@ interface ChordScoreDtos {
 
 interface Replays {
   replayId: number;
-  SongTitle: string;
+  songTitle: string;
   score: number;
   mode: string;
   videoPath: string;
@@ -117,11 +117,12 @@ const DashboardPage: React.FC = () => {
     );
   }, [data?.chordScoreDtos]);
 
+  console.log(data?.replays);
   // 노래 목록 데이터 메모이제이션
   const transformedSongList = useMemo(() => {
     return (
       data?.replays?.map((replay) => ({
-        title: replay.SongTitle,
+        title: replay.songTitle,
         artist: replay.mode,
         duration: formatDate(replay.practiceDate),
         score: replay.score,
