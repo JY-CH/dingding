@@ -44,7 +44,9 @@ export const CommunityEdit: React.FC<CommunityEditProps> = ({
         category: selectedCategory, // 선택된 카테고리 전송
       });
       alert('수정이 완료되었습니다.');
-      queryClient.invalidateQueries(['article', articleDetail.articleId]); // 데이터 새로고침
+      queryClient.invalidateQueries({
+        queryKey: ['article', articleDetail.articleId],
+      });
       onComplete(); // 수정 완료 후 호출
     } catch (error) {
       console.error('수정 실패:', error);
