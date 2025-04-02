@@ -10,7 +10,9 @@ import com.ssafy.ddingga.domain.comment.service.CommentService;
 import com.ssafy.ddingga.facade.comment.dto.response.GetCommentsResponseDto;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentFacadeServiceImpl implements CommentFacadeService {

@@ -7,8 +7,11 @@ import com.ssafy.ddingga.facade.replay.dto.request.ReplayCreateRequestDto;
 import com.ssafy.ddingga.facade.replay.dto.response.ReplayDto;
 
 public interface ReplayService {
-	// 이번주 리플레이 조회
+	// 특정 유저 이번주 리플레이 조회
 	List<ReplayDto> getLastWeekReplays(Integer userId);
+
+	// 이번주 리플레이 조회
+	List<Replay> getLastWeekReplays();
 
 	// 유저의 리플레이 전체 조회
 	List<ReplayDto> getAllReplays(Integer userId);

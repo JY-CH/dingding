@@ -1,7 +1,10 @@
 package com.ssafy.ddingga.domain.replay.service;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -58,7 +61,7 @@ public class ReplayServiceImpl implements ReplayService {
 			List<ReplayDto> result = replays.stream()
 				.map(replay -> ReplayDto.builder()
 					.replayId(replay.getReplayId())
-					.songTitle(replay.getSong().getSongTitle())
+					.song(replay.getSong())
 					.score(replay.getScore())
 					.mode(replay.getMode())
 					.videoPath(replay.getVideoPath())
@@ -119,6 +122,30 @@ public class ReplayServiceImpl implements ReplayService {
 	// }
 
 	@Override
+	public List<Replay> getLastWeekReplays() {
+		LocalDateTime now = LocalDateTime.now();
+
+		// 이번 주 월요일 00:00:00 시간 계산
+		// previousOrSame: 현재 날짜로부터 가장 가까운 월요일(당일 포함)을 찾음
+		LocalDateTime weekStart = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+			.withHour(0)
+			.withMinute(0)
+			.withSecond(0);
+		LocalDateTime weekEnd = weekStart.plusWeeks(1);
+		log.debug("리플레이 - 조회 기간 설정: start={}, end={}", weekStart, weekEnd);
+
+		try {
+			log.info("이번 주의 재생 기록을 조회합니다.");
+			List<Replay> replays = replayRepository.findThisWeekReplay(weekStart, weekEnd);
+			log.info("이번 주의 재생 기록 {}개 조회됨", replays.size());
+			return replays;
+		} catch (Exception e) {
+			log.error("이번 주의 재생 기록 조회 중 예외 발생: ", e);
+			return new ArrayList<>();
+		}
+	}
+
+	@Override
 	public List<ReplayDto> getAllReplays(Integer userId) {
 		if (!authRepository.existsById(userId)) {
 			log.error("리플레이 - 사용자를 찾을 수 없음: userId={}", userId);
@@ -132,7 +159,7 @@ public class ReplayServiceImpl implements ReplayService {
 			List<ReplayDto> result = replays.stream()
 				.map(replay -> ReplayDto.builder()
 					.replayId(replay.getReplayId())
-					.songTitle(replay.getSong().getSongTitle())
+					.song(replay.getSong())
 					.score(replay.getScore())
 					.mode(replay.getMode())
 					.videoPath(replay.getVideoPath())

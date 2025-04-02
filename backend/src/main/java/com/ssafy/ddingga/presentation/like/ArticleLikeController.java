@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Like", description = "게시판 좋아요 API")
 @RestController
-@RequestMapping("/api/{articleId}/like")
+@RequestMapping("/api/article/{articleId}/like")
 @RequiredArgsConstructor
 public class ArticleLikeController {
 

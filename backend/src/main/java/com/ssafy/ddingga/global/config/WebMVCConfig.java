@@ -27,7 +27,9 @@ public class WebMVCConfig implements WebMvcConfigurer {
 			return new String[] {
 				"http://localhost:5173",
 				"http://localhost:8080",
-				"http://localhost:8090"
+				"http://localhost:8090",
+				"https://j12d105.p.ssafy.io",
+				"http://j12d105.p.ssafy.io"
 			};
 		} else {
 			return new String[] {

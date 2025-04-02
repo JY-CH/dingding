@@ -20,5 +20,12 @@ public interface ReplayRepository extends JpaRepository<Replay, Integer> {
 		@Param("weekEnd") LocalDateTime weekEnd
 	);
 
+	// 최근 1주일간의 리플레이 조회
+	@Query("SELECT r FROM Replay r WHERE r.practiceDate >= :weekStart AND r.practiceDate <= :weekEnd ORDER BY r.practiceDate DESC")
+	List<Replay> findThisWeekReplay(
+		@Param("weekStart") LocalDateTime weekStart,
+		@Param("weekEnd") LocalDateTime weekEnd
+	);
+
 	List<Replay> findReplaysByUser_UserId(Integer userId);
 }

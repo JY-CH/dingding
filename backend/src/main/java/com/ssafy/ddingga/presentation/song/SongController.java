@@ -5,11 +5,10 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ssafy.ddingga.facade.song.dto.request.SearchSongRequestDto;
 import com.ssafy.ddingga.facade.song.dto.response.GetSongResponseDto;
 import com.ssafy.ddingga.facade.song.dto.response.SearchSongResponseDto;
 import com.ssafy.ddingga.facade.song.dto.response.SelectSongResponseDto;
@@ -54,9 +53,9 @@ public class SongController {
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 댓글입니다.")})
 	@GetMapping(value = "/search")
-	public ResponseEntity<List<SearchSongResponseDto>> searchSong(@RequestBody SearchSongRequestDto requestDto) {
+	public ResponseEntity<List<SearchSongResponseDto>> searchSong(@RequestParam String keyword) {
 
-		List<SearchSongResponseDto> responseDto = songFacadeService.searchSong(requestDto.getKeyword());
+		List<SearchSongResponseDto> responseDto = songFacadeService.searchSong(keyword);
 
 		return ResponseEntity.ok().body(responseDto);
 	}
