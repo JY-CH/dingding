@@ -22,21 +22,27 @@ interface LineChartTileProps {
 }
 
 const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
+  // 디버깅 로그: 부모 컴포넌트에서 전달받은 data 확인
+  console.log('LineChartTile prop data:', data);
+
   const [visibleLines, setVisibleLines] = useState<{ [key: string]: boolean }>({
     '연습 모드': true,
     '연주 모드': true,
   });
 
-  const handleLegendClick = useCallback((lineName: string) => {
-    if (lineName in visibleLines) {
-      setVisibleLines((prev) => ({
-        ...prev,
-        [lineName]: !prev[lineName],
-      }));
-    }
-  }, [visibleLines]);
+  const handleLegendClick = useCallback(
+    (lineName: string) => {
+      if (lineName in visibleLines) {
+        setVisibleLines((prev) => ({
+          ...prev,
+          [lineName]: !prev[lineName],
+        }));
+      }
+    },
+    [visibleLines],
+  );
 
-  // 커스텀 툴팁 컴포넌트 - memo로 감싸기
+  // 커스텀 툴팁 컴포넌트 - memo 처리
   const CustomTooltip = memo(({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -58,36 +64,39 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
     return null;
   });
 
-  // 커스텀 범례 컴포넌트 - 콜백 메모이제이션
-  const renderLegend = useCallback(({ payload }: { payload: { value: string; color: string }[] }) => (
-    <div className="flex items-center gap-4 text-sm">
-      {payload.map((entry, index) => (
-        <div
-          key={`item-${index}`}
-          className="flex items-center cursor-pointer"
-          onClick={() => handleLegendClick(entry.value)}
-        >
+  // 커스텀 범례 컴포넌트 - memo 처리
+  const renderLegend = useCallback(
+    ({ payload }: { payload: { value: string; color: string }[] }) => (
+      <div className="flex items-center gap-4 text-sm">
+        {payload.map((entry, index) => (
           <div
-            className={`w-3 h-3 mr-2 rounded-full transition-all duration-300 ${
-              visibleLines[entry.value] ? 'scale-100' : 'scale-75 opacity-40'
-            }`}
-            style={{
-              backgroundColor: entry.color,
-            }}
-          ></div>
-          <span
-            className={`${
-              visibleLines[entry.value] ? 'text-white' : 'text-gray-500'
-            } transition-colors`}
+            key={`item-${index}`}
+            className="flex items-center cursor-pointer"
+            onClick={() => handleLegendClick(entry.value)}
           >
-            {entry.value}
-          </span>
-        </div>
-      ))}
-    </div>
-  ), [visibleLines, handleLegendClick]);
+            <div
+              className={`w-3 h-3 mr-2 rounded-full transition-all duration-300 ${
+                visibleLines[entry.value] ? 'scale-100' : 'scale-75 opacity-40'
+              }`}
+              style={{
+                backgroundColor: entry.color,
+              }}
+            ></div>
+            <span
+              className={`${
+                visibleLines[entry.value] ? 'text-white' : 'text-gray-500'
+              } transition-colors`}
+            >
+              {entry.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    ),
+    [visibleLines, handleLegendClick],
+  );
 
-  // 데이터가 없는 경우 표시할 내용
+  // data가 없는 경우 처리
   if (!data || data.length === 0) {
     return (
       <div className="p-6 backdrop-blur-lg">
@@ -133,7 +142,7 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
         })}
       </div>
 
-      {/* 반응형 라인 차트 - 애니메이션 단축 */}
+      {/* 반응형 라인 차트 */}
       <ResponsiveContainer width="100%" height={250}>
         <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
@@ -153,48 +162,46 @@ const LineChartTile: React.FC<LineChartTileProps> = ({ title, data }) => {
             axisLine={{ stroke: '#374151' }}
             tickLine={false}
           />
+          {/* YAxis에 도메인 설정을 추가합니다 */}
           <YAxis
             tick={{ fontSize: 12, fill: '#9CA3AF' }}
             axisLine={{ stroke: '#374151' }}
             tickLine={false}
+            domain={[0, 100]}
           />
           <Tooltip content={<CustomTooltip />} />
 
-          {/* 연습 모드 라인 - 애니메이션 단축 */}
+          {/* 연습 모드 라인 */}
           {visibleLines['연습 모드'] && (
-            <>
-              <Line
-                type="monotone"
-                dataKey="current"
-                stroke="#F59E0B" // Amber-500
-                strokeWidth={3}
-                strokeLinecap="round"
-                dot={{ r: 4, fill: '#F59E0B', strokeWidth: 2, stroke: '#FEF3C7' }}
-                activeDot={{ r: 6, fill: '#F59E0B', stroke: '#FEF3C7', strokeWidth: 2 }}
-                name="연습 모드"
-                animationDuration={800}
-                connectNulls
-              />
-            </>
+            <Line
+              type="monotone"
+              dataKey="current"
+              stroke="#F59E0B"
+              strokeWidth={3}
+              strokeLinecap="round"
+              dot={{ r: 4, fill: '#F59E0B', strokeWidth: 2, stroke: '#FEF3C7' }}
+              activeDot={{ r: 6, fill: '#F59E0B', stroke: '#FEF3C7', strokeWidth: 2 }}
+              name="연습 모드"
+              animationDuration={800}
+              connectNulls
+            />
           )}
 
-          {/* 연주 모드 라인 - 애니메이션 단축 */}
+          {/* 연주 모드 라인 */}
           {visibleLines['연주 모드'] && (
-            <>
-              <Line
-                type="monotone"
-                dataKey="average"
-                stroke="#9CA3AF" // Gray-400
-                strokeWidth={3}
-                strokeDasharray="5 5"
-                strokeLinecap="round"
-                dot={{ r: 4, fill: '#9CA3AF', strokeWidth: 2, stroke: '#F3F4F6' }}
-                activeDot={{ r: 6, fill: '#9CA3AF', stroke: '#F3F4F6', strokeWidth: 2 }}
-                name="연주 모드"
-                animationDuration={800}
-                connectNulls
-              />
-            </>
+            <Line
+              type="monotone"
+              dataKey="average"
+              stroke="#9CA3AF"
+              strokeWidth={3}
+              strokeDasharray="5 5"
+              strokeLinecap="round"
+              dot={{ r: 4, fill: '#9CA3AF', strokeWidth: 2, stroke: '#F3F4F6' }}
+              activeDot={{ r: 6, fill: '#9CA3AF', stroke: '#F3F4F6', strokeWidth: 2 }}
+              name="연주 모드"
+              animationDuration={800}
+              connectNulls
+            />
           )}
         </LineChart>
       </ResponsiveContainer>

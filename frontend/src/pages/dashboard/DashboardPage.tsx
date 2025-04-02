@@ -44,7 +44,15 @@ interface Replays {
 // API 요청 함수
 const fetchDashboardData = async (): Promise<DashboardData> => {
   const { data } = await apiClient.get('/mypage/dashboard');
+  console.log('Dashboard data:', data);
   return data;
+};
+
+const formatDateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = ('0' + (date.getMonth() + 1)).slice(-2);
+  const day = ('0' + date.getDate()).slice(-2);
+  return `${year}-${month}-${day}`;
 };
 
 const DashboardPage: React.FC = () => {
@@ -63,28 +71,34 @@ const DashboardPage: React.FC = () => {
       date.setDate(date.getDate() - (6 - i)); // 과거 6일 ~ 오늘
       return {
         day: date.toLocaleDateString('ko-KR', { weekday: 'short' }),
-        dateStr: date.toDateString(),
+        dateKey: formatDateKey(date),
         practiceScores: [] as number[],
         performanceScores: [] as number[],
       };
     });
 
+    console.log('생성된 days 배열:', days);
+
     // replays 배열에서 각 날짜별 모드 점수 할당
     data.replays.forEach((replay) => {
       const replayDate = new Date(replay.practiceDate);
-      const replayDateStr = replayDate.toDateString();
-      const dayEntry = days.find((d) => d.dateStr === replayDateStr);
+      const replayKey = formatDateKey(replayDate);
+      const dayEntry = days.find((d) => d.dateKey === replayKey);
       if (dayEntry) {
-        if (replay.mode === '연습 모드') {
+        if (replay.mode === 'PRACTICE') {
           dayEntry.practiceScores.push(replay.score);
-        } else if (replay.mode === '연주 모드') {
+        } else {
           dayEntry.performanceScores.push(replay.score);
         }
+      } else {
+        console.log('매칭되는 날짜 없음:', replay);
       }
     });
 
+    console.log('replays 할당 후 days 배열:', days);
+
     // 각 날짜별 평균 계산
-    return days.map((d) => ({
+    const result = days.map((d) => ({
       day: d.day,
       current:
         d.practiceScores.length > 0
@@ -97,6 +111,9 @@ const DashboardPage: React.FC = () => {
             )
           : 0,
     }));
+
+    console.log('최종 라인차트 데이터:', result);
+    return result;
   }, [data?.replays]);
 
   // 바차트 데이터 메모이제이션

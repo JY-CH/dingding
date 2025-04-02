@@ -52,7 +52,7 @@ const AllSongsPage: React.FC = () => {
   } = useQuery<ApiResponse>({
     queryKey: ['replays'],
     queryFn: async () => {
-      const { data } = await apiClient.get('/mypage/replay');
+      const { data } = await apiClient.get('/replay');
       return data;
     },
     enabled: shouldFetchData, // preloadedSongs가 없을 때만 API 호출
@@ -61,11 +61,11 @@ const AllSongsPage: React.FC = () => {
   // API 데이터를 Song 형식으로 변환
   const transformApiData = (data: ApiResponse): Song[] => {
     return data.replaysList.map((replay) => ({
-      title: replay.songTitle,
+      title: replay.songTitle || '제목 없음',
       artist: replay.mode === 'PRACTICE' ? '연습 모드' : '연주 모드',
       duration: formatDate(replay.practiceDate),
       score: replay.score,
-      thumbnail: 'src/assets/노래.jpg', // 기본 이미지
+      thumbnail: 'src/assets/노래.jpg', // 기본값, 필요시 변경
       videoPath: replay.videoPath,
       replayId: replay.replayId,
     }));
@@ -91,12 +91,12 @@ const AllSongsPage: React.FC = () => {
 
   // 노래 필터링
   const filteredSongs = songs.filter((song) => {
-    const matchesSearch = song.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const title = song.title || '';
+    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesMode =
       selectedMode === 'all' ||
-      (selectedMode === 'practice' && song.artist === '연습 모드') ||
-      (selectedMode === 'performance' && song.artist === '연주 모드');
-
+      (selectedMode === 'practice' && song.artist === 'PRACTICE') ||
+      (selectedMode === 'performance' && song.artist !== 'PRACTICE');
     return matchesSearch && matchesMode;
   });
 
