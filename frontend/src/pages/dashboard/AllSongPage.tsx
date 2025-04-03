@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Search, Play, Music, Filter, ChevronDown } from 'lucide-react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import apiClient from '../../services/dashboardapi';
 
@@ -25,12 +25,23 @@ interface Song {
 }
 
 interface ApiResponse {
-  replays: Replays[];
+  replaysList: Replays[]; // 필드명이 replaysList로 변경됨
+}
+
+interface TransformedSong {
+  title: string;
+  mode: string;
+  artist: string;
+  duration: string;
+  date: string;
+  score: number;
+  thumbnail: string;
+  videoPath: string;
+  replayId: number;
 }
 
 const AllSongsPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   // 검색 및 필터링 상태
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,12 +49,7 @@ const AllSongsPage: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'score'>('date');
 
-  // URL을 통해 전달받은 songs 배열이 있으면 사용하고, 없으면 API로 가져온 데이터 사용
-  const preloadedSongs: Song[] = location.state?.songs || [];
-  const shouldFetchData = preloadedSongs.length === 0;
-
   function parseDuration(duration: string): string {
-    // Expecting format "hh:mm:ss"
     const parts = duration.split(':');
     if (parts.length !== 3) return duration;
     const hours = parseInt(parts[0], 10);
@@ -52,7 +58,6 @@ const AllSongsPage: React.FC = () => {
     let result = '';
     if (hours > 0) result += `${hours}시간 `;
     if (minutes > 0) result += `${minutes}분 `;
-    // Optionally show seconds only if hours is 0
     if (hours === 0 && seconds > 0) result += `${seconds}초`;
     return result.trim();
   }
@@ -70,26 +75,23 @@ const AllSongsPage: React.FC = () => {
     },
   });
 
-  // API 데이터를 Song 형식으로 변환
-  const transformApiData = (data: ApiResponse) => {
-    data?.replays?.map((replay) => ({
-      title: replay.song.songTitle,
-      mode: replay.mode,
-      artist: replay.song.songWriter,
-      duration: replay.song.songDuration,
-      date: formatDate(replay.practiceDate),
-      score: replay.score,
-      // thumbnail: 'src/assets/노래.jpg', // replay.song.songImage,
-      thumbnail: replay.song.songImage,
-      videoPath: replay.videoPath,
-      replayId: replay.replayId,
-    }));
+  // API 데이터를 TransformedSong 형식으로 변환
+  const transformApiData = (data: ApiResponse): TransformedSong[] => {
+    return (
+      data?.replaysList?.map((replay) => ({
+        title: replay.song.songTitle,
+        mode: replay.mode,
+        artist: replay.song.songWriter,
+        duration: replay.song.songDuration,
+        date: formatDate(replay.practiceDate),
+        score: replay.score,
+        thumbnail: replay.song.songImage,
+        videoPath: replay.videoPath,
+        replayId: replay.replayId,
+      })) || []
+    );
   };
 
-  // 사용할 노래 데이터 결정
-  const songs = shouldFetchData && apiData ? transformApiData(apiData) : preloadedSongs;
-
-  // 날짜 포맷팅 함수
   function formatDate(dateString: string): string {
     try {
       const date = new Date(dateString);
@@ -104,35 +106,30 @@ const AllSongsPage: React.FC = () => {
     }
   }
 
-  // 노래 필터링
+  const songs: TransformedSong[] = apiData ? transformApiData(apiData) : [];
+
   const filteredSongs = songs.filter((song) => {
-    const title = song.title || '';
-    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = song.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesMode =
       selectedMode === 'all' ||
       (selectedMode === 'practice' && song.mode === 'PRACTICE') ||
-      (selectedMode === 'performance' && song.artist !== 'PRACTICE');
+      (selectedMode === 'performance' && song.mode !== 'PRACTICE');
     return matchesSearch && matchesMode;
   });
 
-  // 정렬
   const sortedSongs = [...filteredSongs].sort((a, b) => {
     if (sortBy === 'score') {
       return b.score - a.score;
     } else {
-      // 날짜 기준 정렬 (최신순)
-      return new Date(b.duration).getTime() - new Date(a.duration).getTime();
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
     }
   });
 
-  // 애니메이션 변형 설정
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.05,
-      },
+      transition: { staggerChildren: 0.05 },
     },
   };
 
@@ -286,12 +283,10 @@ const AllSongsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 결과 표시 */}
         <p className="text-zinc-400 mb-6">
           총 <span className="text-amber-500 font-medium">{sortedSongs.length}</span>개의 연주 기록
         </p>
 
-        {/* 노래 카드 그리드 */}
         {sortedSongs.length > 0 ? (
           <motion.div
             variants={containerVariants}
@@ -314,7 +309,6 @@ const AllSongsPage: React.FC = () => {
                   }
                   className="cursor-pointer"
                 >
-                  {/* 앨범 커버 */}
                   <div className="relative w-full h-44 overflow-hidden">
                     <img
                       src={song.thumbnail}
@@ -343,8 +337,6 @@ const AllSongsPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-
-                  {/* 노래 정보 */}
                   <div className="p-4">
                     <h3 className="text-white font-bold text-lg group-hover:text-amber-500 transition-colors line-clamp-1">
                       {song.title}

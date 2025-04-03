@@ -45,7 +45,6 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
         </h3>
         <Link
           to="/allsongs"
-          state={{ songs }} // songs 데이터를 state로 함께 전달
           className="text-amber-500 text-sm font-medium hover:text-orange-600 transition-colors flex items-center gap-1 bg-zinc-800/50 px-3 py-1.5 rounded-full hover:bg-zinc-800 transition-all"
         >
           모두 보기

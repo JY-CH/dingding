@@ -2,7 +2,6 @@ import React, { useState, useCallback, memo } from 'react';
 
 import {
   ResponsiveContainer,
-  LineChart,
   Line,
   CartesianGrid,
   XAxis,
