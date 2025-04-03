@@ -47,6 +47,7 @@ const VideoStreamingPage: React.FC = () => {
 
   // 비디오 URL이 없는 경우 기본값 설정
   const videoUrl = state?.videoUrl || '/src/assets/sample-video.mp4';
+
   const song = state?.song || {
     title: '비디오 제목',
     artist: '연습 모드',

@@ -32,6 +32,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       setAuth(
         {
           username: response.username,
+          userProfile: response.userProfile,
         },
         response.accesToken,
       );

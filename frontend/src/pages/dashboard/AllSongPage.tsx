@@ -3,13 +3,13 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Search, Play, Music, Filter, ChevronDown } from 'lucide-react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import apiClient from '../../services/dashboardapi';
 
-interface Replay {
+interface Replays {
   replayId: number;
-  songTitle: string;
+  song: Song;
   score: number;
   mode: string;
   videoPath: string;
@@ -17,22 +17,31 @@ interface Replay {
 }
 
 interface Song {
-  title: string;
-  artist: string;
-  duration: string;
-  score: number;
-  thumbnail: string;
-  videoPath?: string;
-  replayId?: number;
+  songDuration: string;
+  songId: number;
+  songImage: string;
+  songTitle: string;
+  songWriter: string;
 }
 
 interface ApiResponse {
-  replaysList: Replay[];
+  replaysList: Replays[]; // 필드명이 replaysList로 변경됨
+}
+
+interface TransformedSong {
+  title: string;
+  mode: string;
+  artist: string;
+  duration: string;
+  date: string;
+  score: number;
+  thumbnail: string;
+  videoPath: string;
+  replayId: number;
 }
 
 const AllSongsPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   // 검색 및 필터링 상태
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,9 +49,18 @@ const AllSongsPage: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'score'>('date');
 
-  // URL을 통해 전달받은 songs 배열이 있으면 사용하고, 없으면 API로 가져온 데이터 사용
-  const preloadedSongs: Song[] = location.state?.songs || [];
-  const shouldFetchData = preloadedSongs.length === 0;
+  function parseDuration(duration: string): string {
+    const parts = duration.split(':');
+    if (parts.length !== 3) return duration;
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    const seconds = parseInt(parts[2], 10);
+    let result = '';
+    if (hours > 0) result += `${hours}시간 `;
+    if (minutes > 0) result += `${minutes}분 `;
+    if (hours === 0 && seconds > 0) result += `${seconds}초`;
+    return result.trim();
+  }
 
   // API에서 모든 리플레이 데이터 가져오기
   const {
@@ -52,29 +70,28 @@ const AllSongsPage: React.FC = () => {
   } = useQuery<ApiResponse>({
     queryKey: ['replays'],
     queryFn: async () => {
-      const { data } = await apiClient.get('/mypage/replay');
+      const { data } = await apiClient.get('/replay');
       return data;
     },
-    enabled: shouldFetchData, // preloadedSongs가 없을 때만 API 호출
   });
 
-  // API 데이터를 Song 형식으로 변환
-  const transformApiData = (data: ApiResponse): Song[] => {
-    return data.replaysList.map((replay) => ({
-      title: replay.songTitle,
-      artist: replay.mode === 'PRACTICE' ? '연습 모드' : '연주 모드',
-      duration: formatDate(replay.practiceDate),
-      score: replay.score,
-      thumbnail: 'src/assets/노래.jpg', // 기본 이미지
-      videoPath: replay.videoPath,
-      replayId: replay.replayId,
-    }));
+  // API 데이터를 TransformedSong 형식으로 변환
+  const transformApiData = (data: ApiResponse): TransformedSong[] => {
+    return (
+      data?.replaysList?.map((replay) => ({
+        title: replay.song.songTitle,
+        mode: replay.mode,
+        artist: replay.song.songWriter,
+        duration: replay.song.songDuration,
+        date: formatDate(replay.practiceDate),
+        score: replay.score,
+        thumbnail: replay.song.songImage,
+        videoPath: replay.videoPath,
+        replayId: replay.replayId,
+      })) || []
+    );
   };
 
-  // 사용할 노래 데이터 결정
-  const songs = shouldFetchData && apiData ? transformApiData(apiData) : preloadedSongs;
-
-  // 날짜 포맷팅 함수
   function formatDate(dateString: string): string {
     try {
       const date = new Date(dateString);
@@ -89,35 +106,30 @@ const AllSongsPage: React.FC = () => {
     }
   }
 
-  // 노래 필터링
+  const songs: TransformedSong[] = apiData ? transformApiData(apiData) : [];
+
   const filteredSongs = songs.filter((song) => {
     const matchesSearch = song.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesMode =
       selectedMode === 'all' ||
-      (selectedMode === 'practice' && song.artist === '연습 모드') ||
-      (selectedMode === 'performance' && song.artist === '연주 모드');
-
+      (selectedMode === 'practice' && song.mode === 'PRACTICE') ||
+      (selectedMode === 'performance' && song.mode !== 'PRACTICE');
     return matchesSearch && matchesMode;
   });
 
-  // 정렬
   const sortedSongs = [...filteredSongs].sort((a, b) => {
     if (sortBy === 'score') {
       return b.score - a.score;
     } else {
-      // 날짜 기준 정렬 (최신순)
-      return new Date(b.duration).getTime() - new Date(a.duration).getTime();
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
     }
   });
 
-  // 애니메이션 변형 설정
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.05,
-      },
+      transition: { staggerChildren: 0.05 },
     },
   };
 
@@ -168,8 +180,8 @@ const AllSongsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white overflow-y-auto custom-scrollbar pb-20">
-      <div className="max-w-7xl mx-auto px-8 py-10">
+    <div className="min-h-screen bg-gradient-to-b p-8 from-zinc-900 via-zinc-900 to-black text-white overflow-y-auto custom-scrollbar pb-20">
+      <div className="max-w-7xl mx-auto">
         {/* 뒤로가기 버튼 및 헤더 */}
         <div className="flex items-center mb-8">
           <button
@@ -271,12 +283,10 @@ const AllSongsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 결과 표시 */}
         <p className="text-zinc-400 mb-6">
           총 <span className="text-amber-500 font-medium">{sortedSongs.length}</span>개의 연주 기록
         </p>
 
-        {/* 노래 카드 그리드 */}
         {sortedSongs.length > 0 ? (
           <motion.div
             variants={containerVariants}
@@ -299,7 +309,6 @@ const AllSongsPage: React.FC = () => {
                   }
                   className="cursor-pointer"
                 >
-                  {/* 앨범 커버 */}
                   <div className="relative w-full h-44 overflow-hidden">
                     <img
                       src={song.thumbnail}
@@ -310,12 +319,12 @@ const AllSongsPage: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            song.artist === '연습 모드'
-                              ? 'bg-green-500/20 text-green-400'
-                              : 'bg-blue-500/20 text-blue-400'
+                            song.mode === 'PRACTICE'
+                              ? 'bg-indigo-500/10 text-indigo-500'
+                              : 'bg-amber-500/10 text-amber-500'
                           }`}
                         >
-                          {song.artist}
+                          {song.mode}
                         </span>
                         <span className="bg-amber-500/20 text-amber-400 px-3 py-1 rounded-full text-xs font-medium">
                           {song.score}점
@@ -328,16 +337,16 @@ const AllSongsPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-
-                  {/* 노래 정보 */}
                   <div className="p-4">
                     <h3 className="text-white font-bold text-lg group-hover:text-amber-500 transition-colors line-clamp-1">
                       {song.title}
                     </h3>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-zinc-400 text-sm flex items-center gap-1">
+                        <span className="text-zinc-500 font-medium">{song.artist}</span>
+                        <span className="text-zinc-500">|</span>
                         <Music size={14} />
-                        {song.duration}
+                        {parseDuration(song.duration)}
                       </span>
                     </div>
                   </div>

@@ -6,6 +6,7 @@ interface LoginRequest {
 }
 
 interface LoginResponse {
+  userProfile: string;
   username: string;
   accesToken: string;
 }
@@ -249,12 +250,12 @@ export const fetchProtectedData = async () => {
 export const logout = async () => {
   try {
     const accessToken = sessionStorage.getItem('accessToken');
-    
+
     const response = await fetch(`${API_URL}/auth/logout`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json', // Content-Type을 JSON으로 설정
-        'Authorization': `Bearer ${accessToken}`, // Authorization 헤더에 토큰 추가
+        Authorization: `Bearer ${accessToken}`, // Authorization 헤더에 토큰 추가
       },
       credentials: 'include', // 쿠키를 서버로 보내기 위해 설정
     });

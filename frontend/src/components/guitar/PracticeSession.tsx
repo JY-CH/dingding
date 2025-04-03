@@ -1,15 +1,78 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useMemo } from 'react';
+import { useWebSocketStore } from '../../store/useWebSocketStore';
 import { Exercise, Performance } from '../../types/guitar';
 
 interface PracticeSessionProps {
   exercise: Exercise;
   onComplete: (performance: Performance) => void;
+  isReady: boolean;
+  setIsReady: (ready: boolean) => void;
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  messages: Array<{ type: string; message: string }>;
 }
 
-const PracticeSession: React.FC<PracticeSessionProps> = ({ exercise, onComplete }) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isReady, setIsReady] = useState(false);
+const PracticeSession: React.FC<PracticeSessionProps> = ({
+  exercise,
+  onComplete,
+  isReady,
+  setIsReady,
+  currentStep,
+  setCurrentStep,
+  messages,
+}) => {
+  const { connect, disconnect, isConnected, score } = useWebSocketStore();
+
+  // 현재 연습 중인 코드와 AI가 분석한 코드를 비교하여 점수를 계산
+  const currentScore = useMemo(() => {
+    if (!messages || messages.length === 0) return 0;
+
+    // 가장 최근의 AI 메시지를 찾습니다
+    const lastAiMessage = [...messages].reverse().find((msg) => msg.type === 'AI');
+    if (!lastAiMessage) return 0;
+
+    try {
+      // AI 메시지를 파싱합니다
+      const aiResponse = JSON.parse(lastAiMessage.message);
+      if (!aiResponse.feedback) return 0;
+
+      // 감지된 코드 정보를 추출
+      const detectedChord = aiResponse.feedback.match(/감지된 코드: ([A-G][#b]?m?)/)?.[1];
+
+      // 현재 연습 중인 코드와 일치하는지 확인
+      return detectedChord === exercise.chords[currentStep] ? aiResponse.score : 0;
+    } catch (error) {
+      // 기존 문자열 형식으로 처리
+      const detectedChord = lastAiMessage.message.match(/감지된 코드: ([A-G][#b]?m?)/)?.[1];
+      return detectedChord === exercise.chords[currentStep] ? score : 0;
+    }
+  }, [messages, exercise.chords, currentStep, score]);
+
+  const handleStart = () => {
+    setIsReady(true);
+    // URL에 roomId 추가
+    const newUrl = `/practice/${exercise.id}`;
+    window.history.pushState({}, '', newUrl);
+    connect(exercise.id);
+  };
+
+  // const handleStop = () => {
+  //   setIsReady(false);
+  //   // URL에서 roomId 제거
+  //   window.history.pushState({}, '', '/practice');
+  //   disconnect();
+  // };
+
+  // 웹소켓 연결 해제
+  useEffect(() => {
+    return () => {
+      if (isConnected) {
+        console.log('연습 종료 - 웹소켓 연결 해제');
+        disconnect();
+      }
+    };
+  }, [disconnect, isConnected]);
 
   return (
     <div className="bg-white/5 rounded-xl p-6">
@@ -29,7 +92,12 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({ exercise, onComplete 
                 {exercise.requirements.map((req, i) => (
                   <li key={i} className="flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                     {req}
                   </li>
@@ -37,7 +105,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({ exercise, onComplete 
               </ul>
             </div>
             <button
-              onClick={() => setIsReady(true)}
+              onClick={handleStart}
               className="px-6 py-3 bg-amber-500 text-white rounded-lg font-medium
                 hover:bg-amber-600 transition-colors"
             >
@@ -77,6 +145,14 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({ exercise, onComplete 
               </div>
             </div>
 
+            {/* 점수 표시 */}
+            <div className="bg-white/5 rounded-lg p-4 text-center">
+              <h3 className="text-2xl font-bold text-amber-500">현재 일치율</h3>
+              <div className="text-4xl font-bold text-white mt-2">
+                {currentScore ? `${currentScore}점` : '0점'}
+              </div>
+            </div>
+
             {/* 현재 코드 표시 */}
             <div className="text-center">
               <motion.div
@@ -100,19 +176,29 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({ exercise, onComplete 
                 className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                 disabled={currentStep === 0}
               >
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
               </button>
               <button
                 onClick={() => {
                   if (currentStep === exercise.chords.length - 1) {
                     onComplete({
-                      totalScore: 85, // 예시 값
-                      accuracy: 0.85,
-                      correctChords: 8,
-                      totalChords: 10,
-                      duration: 120
+                      totalScore: score || 0,
+                      accuracy: (score || 0) / 100,
+                      correctChords: Math.round((score || 0) / 10),
+                      totalChords: exercise.chords.length,
+                      duration: 120,
                     });
                   } else {
                     setCurrentStep(currentStep + 1);
@@ -130,4 +216,4 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({ exercise, onComplete 
   );
 };
 
-export default PracticeSession; 
+export default PracticeSession;
