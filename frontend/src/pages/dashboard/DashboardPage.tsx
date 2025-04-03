@@ -34,11 +34,19 @@ interface ChordScoreDtos {
 
 interface Replays {
   replayId: number;
-  songTitle: string;
+  song: Song;
   score: number;
   mode: string;
   videoPath: string;
   practiceDate: string;
+}
+
+interface Song {
+  songDuration: string;
+  songId: number;
+  songImage: string;
+  songTitle: string;
+  songWriter: string;
 }
 
 // API 요청 함수
@@ -65,9 +73,9 @@ const DashboardPage: React.FC = () => {
     if (!data?.replays?.length) return [];
 
     // 최근 7일간 날짜 배열 생성 (오늘 포함)
-    const days = Array.from({ length: 7 }, (_, i) => {
+    const days = Array.from({ length: 8 }, (_, i) => {
       const date = new Date();
-      date.setDate(date.getDate() - (6 - i)); // 과거 6일 ~ 오늘
+      date.setDate(date.getDate() - (7 - i)); // 과거 6일 ~ 오늘
       return {
         day: date.toLocaleDateString('ko-KR', { weekday: 'short' }),
         dateKey: formatDateKey(date),
@@ -122,11 +130,14 @@ const DashboardPage: React.FC = () => {
   const transformedSongList = useMemo(() => {
     return (
       data?.replays?.map((replay) => ({
-        title: replay.songTitle,
-        artist: replay.mode,
-        duration: formatDate(replay.practiceDate),
+        title: replay.song.songTitle,
+        mode: replay.mode,
+        artist: replay.song.songWriter,
+        duration: replay.song.songDuration,
+        date: formatDate(replay.practiceDate),
         score: replay.score,
-        thumbnail: 'src/assets/노래.jpg',
+        // thumbnail: 'src/assets/노래.jpg', // replay.song.songImage,
+        thumbnail: replay.song.songImage,
         videoPath: replay.videoPath,
         replayId: replay.replayId,
       })) || []

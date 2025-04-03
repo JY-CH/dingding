@@ -5,15 +5,14 @@ import { Link } from 'react-router-dom';
 
 interface Song {
   title: string;
-  // 향후 가수 데이터가 들어오면 song.singer로 대체할 수 있으므로, 없으면 기본값 사용
-  singer?: string;
-  // 현재는 song.artist가 모드 정보로 들어오므로 실제 가수 정보는 없음
   artist: string;
-  duration: string; // formatted practiceDate, 녹화일
+  duration: string;
+  date: string;
   score: number;
   thumbnail: string;
   videoPath?: string;
   replayId?: number;
+  mode?: string; // PRACTICE or PLAY
 }
 
 interface SongListTileProps {
@@ -22,6 +21,20 @@ interface SongListTileProps {
 }
 
 const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
+  function parseDuration(duration: string): string {
+    // Expecting format "hh:mm:ss"
+    const parts = duration.split(':');
+    if (parts.length !== 3) return duration;
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    const seconds = parseInt(parts[2], 10);
+    let result = '';
+    if (hours > 0) result += `${hours}시간 `;
+    if (minutes > 0) result += `${minutes}분 `;
+    // Optionally show seconds only if hours is 0
+    if (hours === 0 && seconds > 0) result += `${seconds}초`;
+    return result.trim();
+  }
   return (
     <div className="p-6 backdrop-blur-lg rounded-xl">
       {/* 헤더 부분 */}
@@ -43,14 +56,14 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
       {/* 컬럼 헤더 */}
       <div className="grid grid-cols-12 text-xs text-zinc-400 pb-3 border-b border-zinc-700/50 mb-3 px-3">
         <div className="col-span-5 font-medium">노래</div>
-        <div className="col-span-2 font-medium text-center">모드</div>
-        <div className="col-span-2 font-medium text-center">녹화일</div>
-        <div className="col-span-2 font-medium text-center">점수</div>
-        <div className="col-span-1 font-medium text-right pr-2">영상</div>
+        <div className="col-span-2 font-medium text-center  pr-2">모드</div>
+        <div className="col-span-2 font-medium text-center pr-2">녹화일</div>
+        <div className="col-span-2 font-medium text-center pr-4">점수</div>
+        <div className="col-span-1 font-medium text-right pr-3">영상</div>
       </div>
 
       {/* 스크롤 가능한 노래 목록 */}
-      <div className="overflow-y-auto custom-scrollbar h-[280px] pr-1">
+      <div className="overflow-y-auto custom-scrollbar h-[360px] pr-1">
         {songs.length > 0 ? (
           songs.map((song, index) => (
             <div
@@ -94,7 +107,7 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
                     {song.title}
                   </div>
                   <div className="text-xs text-zinc-400 truncate">
-                    {song.singer ? song.singer : '가수 미정'}
+                    {song.artist ? song.artist : '가수 미정'}
                   </div>
                 </div>
               </div>
@@ -103,17 +116,22 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
               <div className="col-span-2 text-center">
                 <span
                   className={`text-xs px-2 py-1 rounded-full ${
-                    song.artist === 'PRACTICE'
-                      ? 'bg-blue-500/10 text-blue-400'
-                      : 'bg-green-500/10 text-green-400'
+                    song.mode === 'PRACTICE'
+                      ? 'bg-indigo-500/10 text-indigo-500'
+                      : 'bg-amber-500/10 text-amber-500'
                   }`}
                 >
-                  {song.artist === 'PRACTICE' ? '연습 모드' : '연주 모드'}
+                  {song.mode === 'PRACTICE' ? '연습 모드' : '연주 모드'}
                 </span>
               </div>
 
               {/* 녹화일 */}
-              <div className="col-span-2 text-center text-xs text-zinc-400">{song.duration}</div>
+              <div className="col-span-2 text-center text-xs text-zinc-400">
+                {song.date}
+                <div className="text-xs text-zinc-400 truncate">
+                  ({parseDuration(song.duration)})
+                </div>
+              </div>
 
               {/* 점수 */}
               <div className="col-span-2 text-center">

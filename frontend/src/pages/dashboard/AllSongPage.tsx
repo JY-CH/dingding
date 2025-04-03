@@ -7,9 +7,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 import apiClient from '../../services/dashboardapi';
 
-interface Replay {
+interface Replays {
   replayId: number;
-  songTitle: string;
+  song: Song;
   score: number;
   mode: string;
   videoPath: string;
@@ -17,17 +17,15 @@ interface Replay {
 }
 
 interface Song {
-  title: string;
-  artist: string;
-  duration: string;
-  score: number;
-  thumbnail: string;
-  videoPath?: string;
-  replayId?: number;
+  songDuration: string;
+  songId: number;
+  songImage: string;
+  songTitle: string;
+  songWriter: string;
 }
 
 interface ApiResponse {
-  replaysList: Replay[];
+  replays: Replays[];
 }
 
 const AllSongsPage: React.FC = () => {
@@ -44,6 +42,21 @@ const AllSongsPage: React.FC = () => {
   const preloadedSongs: Song[] = location.state?.songs || [];
   const shouldFetchData = preloadedSongs.length === 0;
 
+  function parseDuration(duration: string): string {
+    // Expecting format "hh:mm:ss"
+    const parts = duration.split(':');
+    if (parts.length !== 3) return duration;
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    const seconds = parseInt(parts[2], 10);
+    let result = '';
+    if (hours > 0) result += `${hours}시간 `;
+    if (minutes > 0) result += `${minutes}분 `;
+    // Optionally show seconds only if hours is 0
+    if (hours === 0 && seconds > 0) result += `${seconds}초`;
+    return result.trim();
+  }
+
   // API에서 모든 리플레이 데이터 가져오기
   const {
     data: apiData,
@@ -55,17 +68,19 @@ const AllSongsPage: React.FC = () => {
       const { data } = await apiClient.get('/replay');
       return data;
     },
-    enabled: shouldFetchData, // preloadedSongs가 없을 때만 API 호출
   });
 
   // API 데이터를 Song 형식으로 변환
-  const transformApiData = (data: ApiResponse): Song[] => {
-    return data.replaysList.map((replay) => ({
-      title: replay.songTitle || '제목 없음',
-      artist: replay.mode === 'PRACTICE' ? '연습 모드' : '연주 모드',
-      duration: formatDate(replay.practiceDate),
+  const transformApiData = (data: ApiResponse) => {
+    data?.replays?.map((replay) => ({
+      title: replay.song.songTitle,
+      mode: replay.mode,
+      artist: replay.song.songWriter,
+      duration: replay.song.songDuration,
+      date: formatDate(replay.practiceDate),
       score: replay.score,
-      thumbnail: 'src/assets/노래.jpg', // 기본값, 필요시 변경
+      // thumbnail: 'src/assets/노래.jpg', // replay.song.songImage,
+      thumbnail: replay.song.songImage,
       videoPath: replay.videoPath,
       replayId: replay.replayId,
     }));
@@ -95,7 +110,7 @@ const AllSongsPage: React.FC = () => {
     const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesMode =
       selectedMode === 'all' ||
-      (selectedMode === 'practice' && song.artist === 'PRACTICE') ||
+      (selectedMode === 'practice' && song.mode === 'PRACTICE') ||
       (selectedMode === 'performance' && song.artist !== 'PRACTICE');
     return matchesSearch && matchesMode;
   });
@@ -310,12 +325,12 @@ const AllSongsPage: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            song.artist === '연습 모드'
-                              ? 'bg-green-500/20 text-green-400'
-                              : 'bg-blue-500/20 text-blue-400'
+                            song.mode === 'PRACTICE'
+                              ? 'bg-indigo-500/10 text-indigo-500'
+                              : 'bg-amber-500/10 text-amber-500'
                           }`}
                         >
-                          {song.artist}
+                          {song.mode}
                         </span>
                         <span className="bg-amber-500/20 text-amber-400 px-3 py-1 rounded-full text-xs font-medium">
                           {song.score}점
@@ -336,8 +351,10 @@ const AllSongsPage: React.FC = () => {
                     </h3>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-zinc-400 text-sm flex items-center gap-1">
+                        <span className="text-zinc-500 font-medium">{song.artist}</span>
+                        <span className="text-zinc-500">|</span>
                         <Music size={14} />
-                        {song.duration}
+                        {parseDuration(song.duration)}
                       </span>
                     </div>
                   </div>
