@@ -1,9 +1,11 @@
 package com.ssafy.ddingga.domain.rank.entity;
 
-import java.time.LocalTime;
+import java.time.Duration;
 
+import com.ssafy.ddingga.common.converter.DurationConverter;
 import com.ssafy.ddingga.domain.auth.entity.User;
 
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -36,7 +38,8 @@ public class Ranking {
 	@JoinColumn(name = "user_id", nullable = false) // 한 유저가 여러개의 랭킹을 가지니까 기본키로 못씀
 	private User user;
 
-	private LocalTime playTime;
+	@Convert(converter = DurationConverter.class)
+	private Duration playTime;
 	private Float score;
 	private Integer totalTry;
 }

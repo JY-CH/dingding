@@ -1,10 +1,6 @@
 package com.ssafy.ddingga.facade.rank.dto.response;
 
-import java.time.Duration;
-
-import com.ssafy.ddingga.common.converter.DurationConverter;
-
-import jakarta.persistence.Convert;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,16 +8,15 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TopRankingInfo {
+@Builder
+public class TopRankingInfoForPlayTime {
 	private Integer rank;
 	private String username;
-
-	@Convert(converter = DurationConverter.class)
-	private Duration playTime;
+	private String playTime;
 	private Integer totalTry;
 	private Float score;
 
-	public TopRankingInfo(Integer rank, String username, Duration playTime, Integer totalTry, Float score) {
+	public TopRankingInfoForPlayTime(Integer rank, String username, String playTime, Integer totalTry, Float score) {
 		this.rank = rank;
 		this.username = username;
 		this.playTime = playTime;

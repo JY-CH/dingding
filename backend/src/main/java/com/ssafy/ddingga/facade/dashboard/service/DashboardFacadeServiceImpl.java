@@ -1,6 +1,6 @@
 package com.ssafy.ddingga.facade.dashboard.service;
 
-import java.time.LocalTime;
+import java.time.Duration;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -37,7 +37,8 @@ public class DashboardFacadeServiceImpl implements DashboardFacadeService {
 		// rankingInfo가 null인 경우 기본값으로 생성
 		if (rankingInfo == null) {
 			rankingInfo = new RankingInfo(
-				LocalTime.of(0, 0, 0),  // 기본 플레이타임
+				// LocalTime.of(0, 0, 0),  // 기본 플레이타임
+				Duration.ofSeconds(0),
 				0,                      // 기본 시도 횟수
 				0.0f,                   // 기본 평균 점수
 				0,                      // 기본 플레이타임 랭크
@@ -56,13 +57,20 @@ public class DashboardFacadeServiceImpl implements DashboardFacadeService {
 		// 이번주 리플레이 조회
 		List<ReplayDto> replayDtos = dashboardService.getThisWeekReplays(userId);
 
+		Duration duration = Duration.ofSeconds(rankingInfo.getPlayTime().getSeconds());
+
+		// 시간, 분, 초를 두 자리로 포맷하고 이어붙임
+		String requestTime = String.format("%02d", duration.toHours()) + ":" +
+			String.format("%02d", duration.toMinutes() % 60) + ":" +
+			String.format("%02d", duration.getSeconds() % 60);
+
 		// dashboard Response 생성
 		return DashboardResponse.builder()
 			.userId(userId)
 			.username(username)
 			.loginId(user.getLoginId())
 			.createAt(user.getCreateAt().toString())
-			.playtime(rankingInfo.getPlayTime())
+			.playtime(requestTime)
 			.playtimeRank(rankingInfo.getPlayTimeRank())
 			.score(rankingInfo.getScore())
 			.scoreRank(rankingInfo.getScoreRank())
