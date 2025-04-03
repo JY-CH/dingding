@@ -34,17 +34,32 @@ interface ChordScoreDtos {
 
 interface Replays {
   replayId: number;
-  SongTitle: string;
+  song: Song;
   score: number;
   mode: string;
   videoPath: string;
   practiceDate: string;
 }
 
+interface Song {
+  songDuration: string;
+  songId: number;
+  songImage: string;
+  songTitle: string;
+  songWriter: string;
+}
+
 // API 요청 함수
 const fetchDashboardData = async (): Promise<DashboardData> => {
   const { data } = await apiClient.get('/mypage/dashboard');
   return data;
+};
+
+const formatDateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = ('0' + (date.getMonth() + 1)).slice(-2);
+  const day = ('0' + date.getDate()).slice(-2);
+  return `${year}-${month}-${day}`;
 };
 
 const DashboardPage: React.FC = () => {
@@ -58,12 +73,12 @@ const DashboardPage: React.FC = () => {
     if (!data?.replays?.length) return [];
 
     // 최근 7일간 날짜 배열 생성 (오늘 포함)
-    const days = Array.from({ length: 7 }, (_, i) => {
+    const days = Array.from({ length: 8 }, (_, i) => {
       const date = new Date();
-      date.setDate(date.getDate() - (6 - i)); // 과거 6일 ~ 오늘
+      date.setDate(date.getDate() - (7 - i)); // 과거 6일 ~ 오늘
       return {
         day: date.toLocaleDateString('ko-KR', { weekday: 'short' }),
-        dateStr: date.toDateString(),
+        dateKey: formatDateKey(date),
         practiceScores: [] as number[],
         performanceScores: [] as number[],
       };
@@ -72,19 +87,19 @@ const DashboardPage: React.FC = () => {
     // replays 배열에서 각 날짜별 모드 점수 할당
     data.replays.forEach((replay) => {
       const replayDate = new Date(replay.practiceDate);
-      const replayDateStr = replayDate.toDateString();
-      const dayEntry = days.find((d) => d.dateStr === replayDateStr);
+      const replayKey = formatDateKey(replayDate);
+      const dayEntry = days.find((d) => d.dateKey === replayKey);
       if (dayEntry) {
-        if (replay.mode === '연습 모드') {
+        if (replay.mode === 'PRACTICE') {
           dayEntry.practiceScores.push(replay.score);
-        } else if (replay.mode === '연주 모드') {
+        } else {
           dayEntry.performanceScores.push(replay.score);
         }
       }
     });
 
     // 각 날짜별 평균 계산
-    return days.map((d) => ({
+    const result = days.map((d) => ({
       day: d.day,
       current:
         d.practiceScores.length > 0
@@ -97,6 +112,7 @@ const DashboardPage: React.FC = () => {
             )
           : 0,
     }));
+    return result;
   }, [data?.replays]);
 
   // 바차트 데이터 메모이제이션
@@ -109,15 +125,19 @@ const DashboardPage: React.FC = () => {
     );
   }, [data?.chordScoreDtos]);
 
+  console.log(data?.replays);
   // 노래 목록 데이터 메모이제이션
   const transformedSongList = useMemo(() => {
     return (
       data?.replays?.map((replay) => ({
-        title: replay.SongTitle,
-        artist: replay.mode,
-        duration: formatDate(replay.practiceDate),
+        title: replay.song.songTitle,
+        mode: replay.mode,
+        artist: replay.song.songWriter,
+        duration: replay.song.songDuration,
+        date: formatDate(replay.practiceDate),
         score: replay.score,
-        thumbnail: 'src/assets/노래.jpg',
+        // thumbnail: 'src/assets/노래.jpg', // replay.song.songImage,
+        thumbnail: replay.song.songImage,
         videoPath: replay.videoPath,
         replayId: replay.replayId,
       })) || []

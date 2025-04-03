@@ -58,7 +58,7 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
             <Route path="/edit/:id" element={isAuthenticated ? <EditPage /> : <LoginPage />} />
             <Route path="/allsongs" element={isAuthenticated ? <AllSongsPage /> : <LoginPage />} />
             <Route
-              path="/stream"
+              path="/video-stream/:videoId"
               element={isAuthenticated ? <VideoStreamingPage /> : <LoginPage />}
             />
             <Route
@@ -80,8 +80,8 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
           ${isFullscreenPage ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}
           ${!shouldShowMusicPlayer && 'hidden'}
         `}
-        style={{ 
-          marginLeft: isExpanded ? '16rem' : '5rem'
+        style={{
+          marginLeft: isExpanded ? '16rem' : '5rem',
         }}
       >
         <div className="min-w-[976px] w-full">
