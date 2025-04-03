@@ -2,6 +2,7 @@ package com.ssafy.ddingga.domain.replay.service;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -13,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.dockerjava.api.exception.UnauthorizedException;
 import com.ssafy.ddingga.domain.auth.entity.User;
 import com.ssafy.ddingga.domain.auth.repository.AuthRepository;
+import com.ssafy.ddingga.domain.rank.entity.Ranking;
+import com.ssafy.ddingga.domain.rank.repository.RankingRepository;
+import com.ssafy.ddingga.domain.rank.service.RankingService;
 import com.ssafy.ddingga.domain.replay.entity.Replay;
 import com.ssafy.ddingga.domain.replay.repository.ReplayRepository;
 import com.ssafy.ddingga.domain.song.entity.Song;
@@ -37,6 +41,8 @@ public class ReplayServiceImpl implements ReplayService {
 	private final ReplayRepository replayRepository;
 	private final AuthRepository authRepository;
 	private final SongRepository songRepository;
+	private final RankingRepository rankingRepository;
+	private final RankingService rankingService;
 	private final S3Service service;
 	private final S3Service s3Service;
 
@@ -180,16 +186,37 @@ public class ReplayServiceImpl implements ReplayService {
 	public Replay createReplay(Integer userId, ReplayCreateRequestDto requestDto) {
 		// 1. 사용자와 곡 정보 조회
 
-		User user = authRepository.findById(userId)
-			.orElseThrow(() -> {
-				log.error("리플레이 - 사용자를 찾을 수 없음 : userId= {}", userId);
-				return new UserNotFoundException("사용자를 찾을 수 없습니다.");
-			});
-		Song song = songRepository.findById(requestDto.getSongId())
-			.orElseThrow(() -> {
-				log.error("리플레이 - 곡 정보를 찾을 수 없음 : songId = {}", requestDto.getSongId());
-				return new SongNotFoundException("곡을 찾을 수 없습니다.");
-			});
+		User user = authRepository.findById(userId).orElseThrow(() -> {
+			log.error("리플레이 - 사용자를 찾을 수 없음 : userId= {}", userId);
+			return new UserNotFoundException("사용자를 찾을 수 없습니다.");
+		});
+		Song song = songRepository.findById(requestDto.getSongId()).orElseThrow(() -> {
+			log.error("리플레이 - 곡 정보를 찾을 수 없음 : songId = {}", requestDto.getSongId());
+			return new SongNotFoundException("곡을 찾을 수 없습니다.");
+		});
+		Ranking ranking = rankingRepository.findById(user).orElse(null);
+		if (ranking == null) {
+			String[] timeArr = requestDto.getVideoTime().split(":");
+
+			Duration playTime = Duration.ofHours(Integer.parseInt(timeArr[0]))
+				.plusMinutes(Integer.parseInt(timeArr[1]))
+				.plusSeconds(Integer.parseInt(timeArr[2]));
+			rankingService.createRankingInfo(user.getUserId(), playTime, requestDto.getScore(), 1);
+		} else {
+			String[] timeArr = requestDto.getVideoTime().split(":");
+			Duration playTime = Duration.ofHours(Integer.parseInt(timeArr[0]))
+				.plusMinutes(Integer.parseInt(timeArr[1]))
+				.plusSeconds(Integer.parseInt(timeArr[2]));
+			float existingScore = ranking.getScore() * ranking.getTotalTry();
+			float resultScore = (existingScore + requestDto.getScore()) / (ranking.getTotalTry() + 1);
+
+			// 랭킹의 총 시간, 횟수, 점수 수정
+			ranking.setPlayTime(ranking.getPlayTime().plus(playTime));
+			ranking.setTotalTry(ranking.getTotalTry() + 1);
+			ranking.setScore(resultScore);
+
+			rankingRepository.save(ranking);
+		}
 
 		try {
 			// 2. S3에 비디오 파일 업로드

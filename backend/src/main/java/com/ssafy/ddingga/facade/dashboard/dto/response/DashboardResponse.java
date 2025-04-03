@@ -1,6 +1,5 @@
 package com.ssafy.ddingga.facade.dashboard.dto.response;
 
-import java.time.LocalTime;
 import java.util.List;
 
 import com.ssafy.ddingga.facade.replay.dto.response.ReplayDto;
@@ -20,7 +19,7 @@ public class DashboardResponse {
 	private String username;
 	private String loginId;
 	private String createAt;
-	private LocalTime playtime;
+	private String playtime;
 	private Float score;
 	private Integer scoreRank;
 	private Integer playtimeRank;

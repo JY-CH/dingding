@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TopRankingResponse {
-	private List<TopRankingInfo> playTimeTop10;    // 플레이 시간 상위 10명
-	private List<TopRankingInfo> totalTryTop10;    // 총 시도 횟수 상위 10명
-	private List<TopRankingInfo> scoreTop10;       // 점수 상위 10명
+	private List<TopRankingInfoForPlayTime> playTimeTop10;    // 플레이 시간 상위 10명
+	private List<TopRankingInfoForPlayTime> totalTryTop10;    // 총 시도 횟수 상위 10명
+	private List<TopRankingInfoForPlayTime> scoreTop10;       // 점수 상위 10명
 }
