@@ -10,16 +10,25 @@ interface WebcamViewProps {
 
 const WebcamView: React.FC<WebcamViewProps> = ({ isWebcamOn, setIsWebcamOn }) => {
   return (
-    <div className="bg-zinc-800 rounded-xl overflow-hidden">
-      <div className="aspect-video relative">
+    <div className="h-full bg-zinc-800 rounded-xl overflow-hidden">
+      <div className="h-full relative">
         {isWebcamOn ? (
           <>
-            <Webcam audio={false} className="w-full h-full object-cover" mirrored={true} />
+            <Webcam 
+              audio={false} 
+              className="w-full h-full object-cover" 
+              mirrored={true}
+              videoConstraints={{
+                width: { min: 480, ideal: 640, max: 800 },
+                height: { min: 360, ideal: 480, max: 600 },
+                aspectRatio: 4/3,
+              }}
+            />
             <button
               onClick={() => setIsWebcamOn(false)}
-              className="absolute top-4 right-4 p-2 bg-red-500/80 hover:bg-red-500 rounded-lg"
+              className="absolute top-4 right-4 p-2 bg-red-500/80 hover:bg-red-500 rounded-lg z-10"
             >
-              <HiOutlineVideoCameraSlash className="w-5 h-5" />
+              <HiOutlineVideoCameraSlash className="w-5 h-5 text-white" />
             </button>
           </>
         ) : (
