@@ -23,7 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
   const location = useLocation();
   const [trueUser, setTrueUser] = useState<string | null>(sessionStorage.getItem('accessToken'));
 
-  console.log(trueUser);
+  // console.log(trueUser);
   const isPlayPage = location.pathname === '/play';
   const menuItems = [
     {
