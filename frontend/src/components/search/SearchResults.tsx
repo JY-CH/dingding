@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 
 import RelatedPosts from './RelatedPosts';
 import RelatedSongs from './RelatedSongs';
+import { SearchSong, SearchCommunityPost } from '../../types';
 
 interface Song {
   id: number;
@@ -21,6 +22,8 @@ interface Post {
 
 interface SearchResultsProps {
   activeTab: string;
+  searchCommunity: SearchCommunityPost[];
+  searchSongs: SearchSong[];
 }
 
 // 더미 데이터 예시 (실제 API 또는 상위 컴포넌트에서 받아오도록 변경 가능)
@@ -68,7 +71,13 @@ const itemVariants = {
   },
 };
 
-const SearchResults: React.FC<SearchResultsProps> = ({ activeTab }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({
+  activeTab,
+  searchCommunity,
+  searchSongs,
+}) => {
+  console.log(searchCommunity, 'asdasdsad');
+  console.log(searchSongs);
   // activeTab에 따라 표시할 콘텐츠를 전환합니다.
   if (activeTab === 'all') {
     return (

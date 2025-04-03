@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
 
 import HotContent from '@/components/search/HotContent';
 import SearchBar from '@/components/search/SearchBar';
@@ -30,46 +29,34 @@ const SearchPage: React.FC = () => {
       setQuery(searchQuery);
     }
   }, [searchQuery, query]);
-
   // 게시물 검색 쿼리
-  const { data: searchCommunity = [] } = useQuery<SearchCommunityPost, Error>({
-    queryKey: ['articles', searchQuery], // URL 검색어 직접 사용
+  const { data: searchCommunity = [] } = useQuery<SearchCommunityPost[], Error>({
+    queryKey: ['articles', searchQuery],
     queryFn: async () => {
-      try {
-        console.log('게시물 API 호출 시작:', searchQuery);
-        const { data } = await _axiosAuth.get<SearchCommunityPost>('/article/search', {
-          params: { keyword: searchQuery },
-        });
-        console.log('게시물 API 응답:', data);
-        return data;
-      } catch (err) {
-        console.error('게시물 가져오기 오류:', err);
-        throw err;
-      }
+      const { data } = await _axiosAuth.get<{ results: SearchCommunityPost[] }>('/article/search', {
+        params: { keyword: searchQuery },
+      });
+      return data.results; // ✅ 배열 반환 보장
     },
-    staleTime: 1000 * 60, // 1분간 캐시 유지
-    enabled: !!searchQuery || !!query, // ✅ 둘 중 하나라도 존재하면 실행
+    staleTime: 1000 * 60,
+    enabled: !!searchQuery || !!query,
   });
 
   // 노래 검색 쿼리
-  const { data: searchSongs = [] } = useQuery<SearchSong, Error>({
-    queryKey: ['songs', searchQuery], // URL 검색어 직접 사용
+  const { data: searchSongs = [] } = useQuery<SearchSong[], Error>({
+    queryKey: ['songs', searchQuery],
     queryFn: async () => {
-      try {
-        console.log('노래 API 호출 시작:', searchQuery);
-        const { data } = await _axiosAuth.get<SearchSong>('/song/search', {
-          params: { keyword: searchQuery },
-        });
-        console.log('노래 API 응답:', data);
-        return data;
-      } catch (err) {
-        console.error('노래 가져오기 오류:', err);
-        throw err;
-      }
+      const { data } = await _axiosAuth.get<{ results: SearchSong[] }>('/song/search', {
+        params: { keyword: searchQuery },
+      });
+      console.log(data);
+      return data.results; // ✅ 배열 반환 보장
     },
-    staleTime: 1000 * 60, // 1분간 캐시 유지
-    enabled: !!searchQuery || !!query, // ✅ 둘 중 하나라도 존재하면 실행
+    staleTime: 1000 * 60,
+    enabled: !!searchQuery || !!query,
   });
+  // console.log(searchCommunity);
+  // console.log(searchSongs);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900/95 to-black overflow-y-auto custom-scrollbar p-8 ">
