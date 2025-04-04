@@ -99,7 +99,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     return (
       <motion.div className="p-6" variants={containerVariants} initial="hidden" animate="visible">
         <motion.div variants={itemVariants}>
-          <RelatedSongs songs={relatedSongs} />
+          <RelatedSongs songs={searchSongs} />
         </motion.div>
       </motion.div>
     );
@@ -107,7 +107,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     return (
       <motion.div className="p-6" variants={containerVariants} initial="hidden" animate="visible">
         <motion.div variants={itemVariants}>
-          <RelatedPosts posts={relatedPosts} />
+          <RelatedPosts posts={searchCommunity} />
         </motion.div>
       </motion.div>
     );
