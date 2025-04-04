@@ -99,3 +99,20 @@ export interface CommunityPost {
   recommend?: number;
   popularPost?: boolean;
 }
+
+export interface SearchCommunityPost {
+  articleId: number;
+  username: string;
+  title: string;
+  createdAt: string; // Date 객체로 변환할 수도 있음
+  category: string;
+  popularPost: boolean;
+  recommend: number;
+}
+
+export interface SearchSong {
+  songId: string;
+  songTitle: string;
+  songImage: string;
+  songWriter: string;
+}

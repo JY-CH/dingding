@@ -79,7 +79,9 @@ const MainPage = () => {
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter' && query.trim()) {
-                      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+                      navigate(`/search?q=${encodeURIComponent(query.trim())}`, {
+                        state: { query },
+                      });
                     }
                   }}
                   className="py-2 px-4 pl-10 bg-white/5 border border-white/10 rounded-full text-sm text-white placeholder-gray-400 focus:outline-none focus:border-amber-500 w-64 transition-all"
