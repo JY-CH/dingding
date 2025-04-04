@@ -33,7 +33,7 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     }
 
     console.log('Connecting to WebSocket with roomId:', roomId);
-    const wsUrl = `http://192.168.100.109:8000/api/ws?room_id=${roomId}&token=${token}`;
+    const wsUrl = `https://j12d105.p.ssafy.io/ws?room_id=${roomId}&token=${token}`;
     console.log('WebSocket URL:', wsUrl);
 
     // roomId만 전달

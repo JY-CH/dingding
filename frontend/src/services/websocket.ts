@@ -1,4 +1,4 @@
-const WS_URL = 'http://192.168.100.109:8000/api/ws';
+const WS_URL = 'https://j12d105.p.ssafy.io/ws/';
 
 class WebSocketService {
   private ws: WebSocket | null = null;
