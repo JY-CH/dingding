@@ -194,15 +194,19 @@ public class ReplayServiceImpl implements ReplayService {
 			log.error("리플레이 - 곡 정보를 찾을 수 없음 : songId = {}", requestDto.getSongId());
 			return new SongNotFoundException("곡을 찾을 수 없습니다.");
 		});
-		Ranking ranking = rankingRepository.findById(user).orElse(null);
+
+		Ranking ranking = rankingRepository.findByUser_UserId(user.getUserId()).orElse(null);
 		if (ranking == null) {
+			log.info("리플레이 - 랭킹 정보가 없으므로 새로 생성 : userId={}", userId);
 			String[] timeArr = requestDto.getVideoTime().split(":");
 
 			Duration playTime = Duration.ofHours(Integer.parseInt(timeArr[0]))
 				.plusMinutes(Integer.parseInt(timeArr[1]))
 				.plusSeconds(Integer.parseInt(timeArr[2]));
 			rankingService.createRankingInfo(user.getUserId(), playTime, requestDto.getScore(), 1);
+			log.info("리플레이 - 랭킹 정보 생성 완료 : userId={}", userId);
 		} else {
+			log.info("리플레이 - 기존 랭킹 정보 존재, 점수 업데이트 시작 : userId={}", userId);
 			String[] timeArr = requestDto.getVideoTime().split(":");
 			Duration playTime = Duration.ofHours(Integer.parseInt(timeArr[0]))
 				.plusMinutes(Integer.parseInt(timeArr[1]))
@@ -216,6 +220,7 @@ public class ReplayServiceImpl implements ReplayService {
 			ranking.setScore(resultScore);
 
 			rankingRepository.save(ranking);
+			log.info("리플레이 - 기존 랭킹 정보 업데이트 완료 : userId={}", userId);
 		}
 
 		try {
