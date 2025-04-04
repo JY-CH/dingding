@@ -1,19 +1,19 @@
 import React from 'react';
 
 import { FileText, MessageSquare, ThumbsUp } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-interface Post {
-  id: number;
-  title: string;
-  excerpt: string;
-  thumbnail: string;
-}
+import { SearchCommunityPost } from '../../types/index';
 
 interface RelatedPostsProps {
-  posts: Post[];
+  posts: SearchCommunityPost[];
 }
 
 const RelatedPosts: React.FC<RelatedPostsProps> = ({ posts }) => {
+  const navigate = useNavigate();
+  const handlePostClick = (postId: number) => {
+    navigate(`/community`, { state: { articleId: postId } });
+  };
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-4">
@@ -22,35 +22,33 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({ posts }) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {posts.map((post) => (
-          <div
-            key={post.id}
-            className="bg-zinc-800/50 backdrop-blur-sm hover:bg-zinc-800/80 border border-white/5 hover:border-amber-500/30 rounded-xl overflow-hidden group transition-all h-full flex flex-col"
-          >
-            <div className="relative w-full h-32 overflow-hidden">
-              <img
-                src={post.thumbnail}
-                alt={post.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/90 to-transparent opacity-60"></div>
-            </div>
-            <div className="p-4 flex-1 flex flex-col">
-              <h3 className="text-white font-semibold mb-2 group-hover:text-amber-500 transition-colors">
-                {post.title}
-              </h3>
-              <p className="text-zinc-400 text-sm mb-4 line-clamp-2 flex-1">{post.excerpt}</p>
-              <div className="flex justify-between text-xs text-zinc-500">
-                <div className="flex items-center gap-1">
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span>23</span>
+          <button onClick={() => handlePostClick(post.articleId)} key={post.articleId}>
+            <div
+              key={post.articleId}
+              className="bg-zinc-800/50 backdrop-blur-sm hover:bg-zinc-800/80 border border-white/5 hover:border-amber-500/30 rounded-xl overflow-hidden group transition-all h-full flex flex-col"
+            >
+              <div className="p-4 flex-1 flex flex-col">
+                <div className="flex flex-row gap-3 items-center mb-2">
+                  <h3 className="text-white font-semibold group-hover:text-amber-500 transition-colors items-center">
+                    <span>{post.title}</span>
+                  </h3>
+                  <div className="bg-gray-700 rounded-full px-3 py-1 text-sm text-gray-300">
+                    <span className="text-gray-500">{post.category}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <ThumbsUp className="w-3.5 h-3.5" />
-                  <span>48</span>
+                <div className="flex justify-between text-xs text-zinc-500">
+                  <div className="flex items-center gap-1">
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>{post.username}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <ThumbsUp className="w-3.5 h-3.5" />
+                    <span>{post.recommend}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
       {posts.length === 0 && (

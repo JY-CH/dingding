@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 
@@ -7,19 +8,56 @@ import HotContent from '@/components/search/HotContent';
 import SearchBar from '@/components/search/SearchBar';
 import SearchResults from '@/components/search/SearchResults';
 import SearchTabs from '@/components/search/SearchTabs';
+import { SearchSong, SearchCommunityPost } from '@/types/index';
+
+import { _axiosAuth } from '../services/JYapi';
 
 const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState<string>(searchParams.get('q') || '');
   const [activeTab, setActiveTab] = useState<string>('all');
 
-  // URL의 query 파라미터가 변경될 때만 검색어 상태 업데이트
+  // URL에서 직접 검색어를 사용 (중간 상태 변수 제거)
+  const searchQuery = searchParams.get('q') || '';
+
+  // 디버깅용
+  console.log('현재 검색어:', searchQuery);
+
+  // useEffect 단순화: 값이 다를 때만 업데이트
   useEffect(() => {
-    const searchQuery = searchParams.get('q');
-    if (searchQuery) {
+    if (searchQuery !== query) {
       setQuery(searchQuery);
     }
-  }, [searchParams]);
+  }, [searchQuery, query]);
+  // 게시물 검색 쿼리
+  const { data: searchCommunity = [] } = useQuery<SearchCommunityPost[], Error>({
+    queryKey: ['articles', searchQuery],
+    queryFn: async () => {
+      const { data } = await _axiosAuth.get<SearchCommunityPost[]>('/article/search', {
+        params: { keyword: searchQuery },
+      });
+      // console.log(data);
+      return data; // ✅ 배열 반환 보장
+    },
+    staleTime: 1000 * 60,
+    enabled: !!searchQuery || !!query,
+  });
+
+  // 노래 검색 쿼리
+  const { data: searchSongs = [] } = useQuery<SearchSong[], Error>({
+    queryKey: ['songs', searchQuery],
+    queryFn: async () => {
+      const { data } = await _axiosAuth.get<SearchSong[]>('/song/search', {
+        params: { keyword: searchQuery },
+      });
+      // console.log(data);
+      return data; // ✅ 배열 반환 보장
+    },
+    staleTime: 1000 * 60,
+    enabled: !!searchQuery || !!query,
+  });
+  // console.log(searchCommunity);
+  // console.log(searchSongs);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900/95 to-black overflow-y-auto custom-scrollbar p-8 ">
@@ -36,10 +74,10 @@ const SearchPage: React.FC = () => {
           className="mb-8"
         >
           <h1 className="text-3xl font-bold text-white mb-2">
-            {query ? `"${query}" 검색 결과` : '탐색하기'}
+            {searchQuery ? `"${searchQuery}" 검색 결과` : '탐색하기'}
           </h1>
           <p className="text-zinc-400">
-            {query
+            {searchQuery
               ? '마음에 드는 노래, 아티스트, 또는 커뮤니티 게시글을 찾아보세요'
               : '새로운 음악을 발견하고 다른 기타리스트들과 연결하세요'}
           </p>
@@ -72,8 +110,12 @@ const SearchPage: React.FC = () => {
           transition={{ delay: 0.3 }}
           className="bg-zinc-800/30 backdrop-blur-sm rounded-xl border border-white/5 shadow-xl overflow-hidden"
         >
-          {searchParams.get('q') ? ( // URL의 query 파라미터 기준으로 검색 결과 표시
-            <SearchResults activeTab={activeTab} />
+          {searchQuery ? (
+            <SearchResults
+              activeTab={activeTab}
+              searchCommunity={searchCommunity}
+              searchSongs={searchSongs}
+            />
           ) : (
             <HotContent activeTab={activeTab} />
           )}

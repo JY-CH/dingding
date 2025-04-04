@@ -24,6 +24,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [tempQuery, setTempQuery] = useState(query);
 
   // 임시 연관 검색어 데이터 (실제로는 API에서 가져와야 함)
   const mockSuggestions: SearchSuggestion[] = [
@@ -95,17 +96,15 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }
   };
 
   // 검색 처리 함수 추가
-  const handleSearch = () => {
-    if (query.trim()) {
-      // 최근 검색어에 추가
-      if (!recentSearches.includes(query.trim())) {
-        setRecentSearches((prev) => [query.trim(), ...prev].slice(0, 5));
-      }
-      // 검색 페이지로 이동하면서 query 파라미터 전달
-      navigate({
-        pathname: '/search',
-        search: `?q=${encodeURIComponent(query.trim())}`,
-      });
+  const handleSearch = (searchValue: string) => {
+    if (searchValue.trim()) {
+      navigate(
+        {
+          pathname: '/search',
+          search: `?q=${encodeURIComponent(searchValue.trim())}`,
+        },
+        { replace: true },
+      );
       setIsFocused(false);
     }
   };
@@ -113,7 +112,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }
   // 키보드 이벤트 핸들러 추가
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleSearch();
+      setQuery(tempQuery); // ✅ 엔터를 눌렀을 때만 query 업데이트
+      handleSearch(tempQuery);
     }
   };
 
@@ -131,10 +131,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }
           ref={inputRef}
           type="text"
           placeholder="노래, 아티스트, 코드를 검색하세요..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          value={tempQuery} // ✅ 실시간 입력값만 표시
+          onChange={(e) => setTempQuery(e.target.value)} // ✅ query 변경 X
           onFocus={() => setIsFocused(true)}
-          onKeyPress={handleKeyPress}
+          onKeyPress={handleKeyPress} // ✅ 엔터 시에만 반영
           className="w-full py-3 px-4 pl-12 bg-zinc-800/70 backdrop-blur-sm border border-white/10 rounded-full text-white placeholder-zinc-400 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition-all"
         />
 
