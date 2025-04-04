@@ -33,10 +33,11 @@ const SearchPage: React.FC = () => {
   const { data: searchCommunity = [] } = useQuery<SearchCommunityPost[], Error>({
     queryKey: ['articles', searchQuery],
     queryFn: async () => {
-      const { data } = await _axiosAuth.get<{ results: SearchCommunityPost[] }>('/article/search', {
+      const { data } = await _axiosAuth.get<SearchCommunityPost[]>('/article/search', {
         params: { keyword: searchQuery },
       });
-      return data.results; // ✅ 배열 반환 보장
+      // console.log(data);
+      return data; // ✅ 배열 반환 보장
     },
     staleTime: 1000 * 60,
     enabled: !!searchQuery || !!query,
@@ -46,11 +47,11 @@ const SearchPage: React.FC = () => {
   const { data: searchSongs = [] } = useQuery<SearchSong[], Error>({
     queryKey: ['songs', searchQuery],
     queryFn: async () => {
-      const { data } = await _axiosAuth.get<{ results: SearchSong[] }>('/song/search', {
+      const { data } = await _axiosAuth.get<SearchSong[]>('/song/search', {
         params: { keyword: searchQuery },
       });
-      console.log(data);
-      return data.results; // ✅ 배열 반환 보장
+      // console.log(data);
+      return data; // ✅ 배열 반환 보장
     },
     staleTime: 1000 * 60,
     enabled: !!searchQuery || !!query,
