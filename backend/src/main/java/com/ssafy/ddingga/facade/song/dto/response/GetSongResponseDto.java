@@ -1,7 +1,5 @@
 package com.ssafy.ddingga.facade.song.dto.response;
 
-import java.time.LocalTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +17,6 @@ public class GetSongResponseDto {
 	private String songImage;
 	private String songWriter;
 
-	// 추가된 시간 정보 컬럼
-	private LocalTime songDuration;  // 노래 시간 (분:초) 형태로 저장
+	// 노래의 재생 시간을 "HH:MM:SS" 형식으로 저장
+	private String songDuration;  // 예: "00:03:30" (3분 30초)
 }

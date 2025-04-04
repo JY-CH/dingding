@@ -7,6 +7,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -29,9 +30,12 @@ public class SheetMusic {
 	private Integer sheetMusicId;
 
 	@ManyToOne  // 악보 조회 시 곡 정보도 필요하니 EAGER
+	@JoinColumn(name = "song_id", nullable = false)
 	private Song song;
 
 	private String sheetImage;
 	private Integer sheetOrder;
-
+	private String chord;
+	private Integer chordOrder;
+	private Float chordTiming;
 }
