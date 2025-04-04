@@ -12,6 +12,7 @@ spring:
       idle-timeout: 30000
       max-lifetime: 600000
       connection-timeout: 30000
+      leak-detection-threshold: 30000 # 30초 이상 점유되면 로그로 찍힘
   application:
     name: ddingga
   jpa:
