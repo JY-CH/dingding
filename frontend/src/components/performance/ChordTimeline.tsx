@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { HiArrowsPointingOut, HiArrowsPointingIn } from 'react-icons/hi2';
 import { Song, Note, ChordChange } from '../../types/performance';
 
@@ -18,11 +18,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [testNotes, setTestNotes] = useState<Note[]>([]);
-  const [activeStrings, setActiveStrings] = useState<number[]>([]);
+  const [activeStrings, ] = useState<number[]>([]);
   const [currentNotes, setCurrentNotes] = useState<Note[]>([]);
-  const [score, setScore] = useState(0);
-  const [combo, setCombo] = useState(0);
-  const [isMintAreaActive, setIsMintAreaActive] = useState(false);
+
   const [shadowNotes, setShadowNotes] = useState<Note[]>([]);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
 
@@ -260,25 +258,30 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
               {/* 앞면 */}
-              <div className="relative text-yellow-400 text-2xl font-extrabold" style={{ 
-                transform: 'translateZ(2px)',
-                textShadow: '0px 2px 2px rgba(0,0,0,0.5)'
+              <div className="relative text-yellow-400 text-4xl font-black" style={{ 
+                transform: 'translateZ(4px)',
+                textShadow: '3px 3px 6px rgba(0,0,0,0.8), -3px -3px 6px rgba(255,255,255,0.5)',
+                WebkitTextStroke: '2px rgba(0,0,0,0.7)',
+                letterSpacing: '-1px',
+                filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))'
               }}>
                 {note.fret}
               </div>
               {/* 윗면 */}
               <div className="absolute top-0 left-0 w-full" style={{ 
-                transform: 'rotateX(-90deg) translateZ(-2px)',
+                transform: 'rotateX(-90deg) translateZ(-4px)',
                 transformOrigin: 'top',
-                height: '4px',
-                background: 'rgba(251, 191, 36, 0.8)'
+                height: '6px',
+                background: 'rgba(251, 191, 36, 0.95)',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.6)'
               }} />
               {/* 오른쪽면 */}
               <div className="absolute top-0 right-0 h-full" style={{ 
-                transform: 'rotateY(90deg) translateZ(6px)',
+                transform: 'rotateY(90deg) translateZ(8px)',
                 transformOrigin: 'right',
-                width: '4px',
-                background: 'rgba(251, 191, 36, 0.6)'
+                width: '6px',
+                background: 'rgba(251, 191, 36, 0.85)',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.6)'
               }} />
             </div>
           </div>
@@ -449,25 +452,30 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
                       {/* 앞면 */}
-                      <div className="relative text-yellow-400 text-2xl font-extrabold" style={{ 
-                        transform: 'translateZ(2px)',
-                        textShadow: '0px 2px 2px rgba(0,0,0,0.5)'
+                      <div className="relative text-yellow-400 text-4xl font-black" style={{ 
+                        transform: 'translateZ(4px)',
+                        textShadow: '3px 3px 6px rgba(0,0,0,0.8), -3px -3px 6px rgba(255,255,255,0.5)',
+                        WebkitTextStroke: '2px rgba(0,0,0,0.7)',
+                        letterSpacing: '-1px',
+                        filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))'
                       }}>
                         {note.fret}
                       </div>
                       {/* 윗면 */}
                       <div className="absolute top-0 left-0 w-full" style={{ 
-                        transform: 'rotateX(-90deg) translateZ(-2px)',
+                        transform: 'rotateX(-90deg) translateZ(-4px)',
                         transformOrigin: 'top',
-                        height: '4px',
-                        background: 'rgba(251, 191, 36, 0.8)'
+                        height: '6px',
+                        background: 'rgba(251, 191, 36, 0.95)',
+                        boxShadow: '0 4px 8px rgba(0,0,0,0.6)'
                       }} />
                       {/* 오른쪽면 */}
                       <div className="absolute top-0 right-0 h-full" style={{ 
-                        transform: 'rotateY(90deg) translateZ(6px)',
+                        transform: 'rotateY(90deg) translateZ(8px)',
                         transformOrigin: 'right',
-                        width: '4px',
-                        background: 'rgba(251, 191, 36, 0.6)'
+                        width: '6px',
+                        background: 'rgba(251, 191, 36, 0.85)',
+                        boxShadow: '0 4px 8px rgba(0,0,0,0.6)'
                       }} />
                     </div>
                   </div>
@@ -512,11 +520,12 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                       <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
                         {/* 앞면 */}
-                        <div className="relative text-yellow-400 text-3xl font-black" style={{ 
+                        <div className="relative text-yellow-400 text-4xl font-black" style={{ 
                           transform: 'translateZ(4px)',
-                          textShadow: '2px 2px 4px rgba(0,0,0,0.8), -2px -2px 4px rgba(255,255,255,0.5)',
-                          WebkitTextStroke: '1px rgba(0,0,0,0.5)',
-                          letterSpacing: '-0.5px'
+                          textShadow: '3px 3px 6px rgba(0,0,0,0.8), -3px -3px 6px rgba(255,255,255,0.5)',
+                          WebkitTextStroke: '2px rgba(0,0,0,0.7)',
+                          letterSpacing: '-1px',
+                          filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))'
                         }}>
                           {note.fret}
                         </div>
@@ -524,17 +533,17 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
                         <div className="absolute top-0 left-0 w-full" style={{ 
                           transform: 'rotateX(-90deg) translateZ(-4px)',
                           transformOrigin: 'top',
-                          height: '4px',
-                          background: 'rgba(251, 191, 36, 0.9)',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                          height: '6px',
+                          background: 'rgba(251, 191, 36, 0.95)',
+                          boxShadow: '0 4px 8px rgba(0,0,0,0.6)'
                         }} />
                         {/* 오른쪽면 */}
                         <div className="absolute top-0 right-0 h-full" style={{ 
                           transform: 'rotateY(90deg) translateZ(8px)',
                           transformOrigin: 'right',
-                          width: '4px',
-                          background: 'rgba(251, 191, 36, 0.7)',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                          width: '6px',
+                          background: 'rgba(251, 191, 36, 0.85)',
+                          boxShadow: '0 4px 8px rgba(0,0,0,0.6)'
                         }} />
                       </div>
                     </div>

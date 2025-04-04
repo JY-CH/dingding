@@ -26,10 +26,9 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
   onComplete,
   onReady,
   onStepChange,
-  sampleExercise,
   onRoomIdChange,
 }) => {
-  const { connect, disconnect, isConnected, score, sendMessage, messages } = useWebSocketStore();
+  const { connect, disconnect, isConnected, score, messages } = useWebSocketStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [isReady, setIsReady] = useState(false);
 

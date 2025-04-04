@@ -38,7 +38,7 @@ const PerformanceView: React.FC = () => {
   const startTimeRef = useRef<number>(0);
   const [pressedStrings, setPressedStrings] = useState<number[]>([]);
   const [currentChord, setCurrentChord] = useState<ChordChange | null>(null);
-  const [currentTime, setCurrentTime] = useState(0);
+  const [, setCurrentTime] = useState(0);
   const [isWebcamOn, setIsWebcamOn] = useState(false);
 
   // 디버깅을 위한 로그

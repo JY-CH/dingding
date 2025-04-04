@@ -16,7 +16,7 @@ import { GuitarString, Visualization } from '../types/guitar';
 
 const PlayPage: React.FC = () => {
   const navigate = useNavigate();
-  const { sendMessage, messages, isConnected } = useWebSocketStore();
+  const { sendMessage, isConnected } = useWebSocketStore();
   const [selectedMode, setSelectedMode] = useState<'practice' | 'performance'>('practice');
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
@@ -56,15 +56,33 @@ const PlayPage: React.FC = () => {
       difficulty: 'beginner' as const,
       type: 'chord' as const,
       bpm: 60,
-      duration: 300,
-      description: '기본적인 오픈 코드를 연습합니다',
-      requirements: [
-        '기타 튜닝이 되어있어야 합니다',
-        '웹캠이 필요합니다',
-        '조용한 환경이 필요합니다',
-      ],
-      chords: ['Em', 'C', 'G', 'D'],
-      thumbnail: '/guitar-practice.jpg',
+      duration: 120,
+      description: '기본적인 코드 연습을 위한 연습곡입니다.',
+      requirements: ['기타', '피크'],
+      chords: ['C', 'G', 'Am', 'F'],
+      thumbnail: 'https://example.com/thumbnail.jpg',
+      steps: [
+        {
+          description: 'C 코드 연습',
+          duration: 30,
+          chord: 'C'
+        },
+        {
+          description: 'G 코드 연습',
+          duration: 30,
+          chord: 'G'
+        },
+        {
+          description: 'Am 코드 연습',
+          duration: 30,
+          chord: 'Am'
+        },
+        {
+          description: 'F 코드 연습',
+          duration: 30,
+          chord: 'F'
+        }
+      ]
     }),
     [],
   );

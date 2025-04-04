@@ -7,7 +7,7 @@ interface HitEffectProps {
   type: 'perfect' | 'good' | 'miss';
 }
 
-const HitEffect: React.FC<HitEffectProps> = ({ stringNumber, position, type }) => {
+const HitEffect: React.FC<HitEffectProps> = ({ position, type }) => {
   const getColor = () => {
     switch (type) {
       case 'perfect':
