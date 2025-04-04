@@ -53,7 +53,9 @@ public class S3Service {
 			.build();
 
 		s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-		return fileKey;
+
+		// URL 생성 및 반환
+		return getFileUrl(fileKey); // 파일 URL을 반환
 	}
 
 	// 파일 삭제
