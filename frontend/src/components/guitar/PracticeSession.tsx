@@ -1,28 +1,36 @@
+
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useWebSocketStore } from '../../store/useWebSocketStore';
 import { Exercise, Performance } from '../../types/guitar';
 
 interface PracticeSessionProps {
   exercise: Exercise;
   onComplete: (performance: Performance) => void;
-  isReady: boolean;
-  setIsReady: (ready: boolean) => void;
-  currentStep: number;
-  setCurrentStep: (step: number) => void;
-  messages: Array<{ type: string; message: string }>;
+  onReady: (ready: boolean) => void;
+  onStepChange: (step: number) => void;
+  sampleExercise: {
+    title: string;
+    description: string;
+    steps: {
+      description: string;
+      duration: number;
+      chord?: string;
+    }[];
+  };
+  onRoomIdChange?: (roomId: string) => void;
 }
 
 const PracticeSession: React.FC<PracticeSessionProps> = ({
   exercise,
   onComplete,
-  isReady,
-  setIsReady,
-  currentStep,
-  setCurrentStep,
-  messages,
+  onReady,
+  onStepChange,
+  onRoomIdChange,
 }) => {
-  const { connect, disconnect, isConnected, score } = useWebSocketStore();
+  const { connect, disconnect, isConnected, score, messages } = useWebSocketStore();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isReady, setIsReady] = useState(false);
 
   // 현재 연습 중인 코드와 AI가 분석한 코드를 비교하여 점수를 계산
   const currentScore = useMemo(() => {
@@ -49,12 +57,43 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
     }
   }, [messages, exercise.chords, currentStep, score]);
 
+  // 컴포넌트 마운트 시 웹소켓 연결
+  useEffect(() => {
+    // UUID v4 형식으로 roomId 생성
+    const roomId = `room_${crypto.randomUUID()}`;
+    console.log('Generated roomId:', roomId);
+    connect(roomId);
+
+    // 컴포넌트 언마운트 시 웹소켓 연결 해제
+    return () => {
+      disconnect();
+    };
+  }, [connect, disconnect]);
+
+  // 웹소켓 연결 상태 변경 시 상위 컴포넌트에 알림
+  useEffect(() => {
+    onReady(isConnected);
+  }, [isConnected, onReady]);
+
+  // 현재 단계 변경 시 상위 컴포넌트에 알림
+  useEffect(() => {
+    onStepChange(currentStep);
+  }, [currentStep, onStepChange]);
+
   const handleStart = () => {
+    // UUID v4 형식으로 roomId 생성
+    const roomId = `room_${crypto.randomUUID()}`;
+    console.log('Generated roomId:', roomId);
+    
+    // 웹소켓 연결
+    connect(roomId);
+    
+    // 상위 컴포넌트에 roomId 전달
+    if (onRoomIdChange) {
+      onRoomIdChange(roomId);
+    }
+    
     setIsReady(true);
-    // URL에 roomId 추가
-    const newUrl = `/practice/${exercise.id}`;
-    window.history.pushState({}, '', newUrl);
-    connect(exercise.id);
   };
 
   // const handleStop = () => {
@@ -63,16 +102,6 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
   //   window.history.pushState({}, '', '/practice');
   //   disconnect();
   // };
-
-  // 웹소켓 연결 해제
-  useEffect(() => {
-    return () => {
-      if (isConnected) {
-        console.log('연습 종료 - 웹소켓 연결 해제');
-        disconnect();
-      }
-    };
-  }, [disconnect, isConnected]);
 
   return (
     <div className="bg-white/5 rounded-xl p-6">
