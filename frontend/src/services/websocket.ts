@@ -1,4 +1,4 @@
-const WS_URL = 'ws://localhost:8000/api/ws';
+const WS_URL = 'ws://192.168.100.109:8000/api/ws';
 
 class WebSocketService {
   private ws: WebSocket | null = null;

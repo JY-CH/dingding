@@ -16,8 +16,7 @@ import { GuitarString, Visualization } from '../types/guitar';
 
 const PlayPage: React.FC = () => {
   const navigate = useNavigate();
-  // const { roomId } = useParams<{ roomId: string }>();
-  const { sendMessage, messages, isConnected, disconnect } = useWebSocketStore();
+  const { sendMessage, messages, isConnected } = useWebSocketStore();
   const [selectedMode, setSelectedMode] = useState<'practice' | 'performance'>('practice');
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
@@ -25,6 +24,7 @@ const PlayPage: React.FC = () => {
   const [, setPracticeStreak] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
 
   // 기타 줄 상태
   const [strings] = useState<GuitarString[]>([
@@ -132,11 +132,6 @@ const PlayPage: React.FC = () => {
     webcamMirrored: true,
   });
 
-  // 웹소켓 연결 상태 변경 시 로깅
-  useEffect(() => {
-    console.log('웹소켓 연결 상태:', isConnected);
-  }, [isConnected]);
-
   // 웹캠 캡처 및 이미지 전송
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -144,7 +139,7 @@ const PlayPage: React.FC = () => {
     const captureAndSendImage = async () => {
       try {
         const webcam = webcamRef.current;
-        if (!webcam || !isConnected || !sampleExercise) {
+        if (!webcam || !isConnected || !sampleExercise || !currentRoomId) {
           return;
         }
 
@@ -157,7 +152,7 @@ const PlayPage: React.FC = () => {
           type: 'image',
           data: imageData,
           chord: sampleExercise.chords[currentStep],
-          room_id: sampleExercise.id,
+          room_id: currentRoomId,
         });
       } catch (error) {
         console.error('이미지 처리 중 오류:', error);
@@ -165,7 +160,6 @@ const PlayPage: React.FC = () => {
     };
 
     if (isReady) {
-      // 더 빠른 간격으로 이미지 캡처 및 전송
       intervalId = setInterval(captureAndSendImage, 200);
     }
 
@@ -174,17 +168,17 @@ const PlayPage: React.FC = () => {
         clearInterval(intervalId);
       }
     };
-  }, [isReady, isConnected, currentStep, sendMessage, sampleExercise]);
+  }, [isReady, isConnected, currentStep, sendMessage, sampleExercise, currentRoomId]);
 
-  // 컴포넌트 언마운트 시 웹소켓 연결 해제
-  useEffect(() => {
-    return () => {
-      if (isConnected) {
-        disconnect();
-      }
-    };
-  }, [isConnected, disconnect]);
+  const handleComplete = (performance: any) => {
+    console.log('Practice completed:', performance);
+    setPracticeStreak((prev) => prev + 1);
+  };
 
+  const handleRoomIdChange = (roomId: string) => {
+    setCurrentRoomId(roomId);
+  };
+  
   return (
     <div className="flex-1 overflow-auto bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 h-full">
       {/* 상단 네비게이션 바 */}
@@ -357,15 +351,11 @@ const PlayPage: React.FC = () => {
             >
               <PracticeSession
                 exercise={sampleExercise}
-                onComplete={(performance) => {
-                  console.log('Practice completed:', performance);
-                  setPracticeStreak((prev) => prev + 1);
-                }}
-                isReady={isReady}
-                setIsReady={setIsReady}
-                currentStep={currentStep}
-                setCurrentStep={setCurrentStep}
-                messages={messages}
+                onComplete={handleComplete}
+                onRoomIdChange={handleRoomIdChange}
+                onReady={setIsReady}
+                onStepChange={setCurrentStep}
+                sampleExercise={sampleExercise}
               />
             </motion.div>
           </div>

@@ -24,6 +24,7 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   const [combo, setCombo] = useState(0);
   const [isMintAreaActive, setIsMintAreaActive] = useState(false);
   const [shadowNotes, setShadowNotes] = useState<Note[]>([]);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
 
   const stringColors = [
     'rgba(251, 191, 36, 0.6)',   // 1번줄 - amber-400 (가장 얇은 줄)
@@ -45,17 +46,17 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   ];
 
   // 각 줄의 위치를 직접 설정 (0% ~ 100% 사이의 값으로 설정)
-  // 예시: 1번줄 0%, 2번줄 15%, 3번줄 30% ...
+  // 예시: 6번줄 0%, 5번줄 15%, 4번줄 30% ...
   // 여기서 각 줄의 위치를 직접 조정할 수 있습니다.
   // 0%는 가장 위쪽, 100%는 가장 아래쪽을 의미합니다.
   // 각 줄의 간격을 원하는 대로 조정하세요.
   const stringPositions = [
-    10,    // 1번줄 위치 (최상단)
-    25,   // 2번줄 위치
-    40,   // 3번줄 위치
-    55,   // 4번줄 위치
-    70,   // 5번줄 위치
-    85,   // 6번줄 위치
+    85,   // 1번줄 위치 (최하단)
+    70,   // 2번줄 위치
+    55,   // 3번줄 위치
+    40,   // 4번줄 위치
+    25,   // 5번줄 위치
+    10,   // 6번줄 위치 (최상단)
   ];
 
   // 줄 위치 계산 함수
@@ -120,9 +121,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   // C코드 손모양 노트 생성 함수
   const createCChordNote = () => {
     const cChordNotes = [
-      { stringNumber: 2, position: 100, offset: 5 },    // 2번 줄 (가장 앞)
-      { stringNumber: 4, position: 100, offset: 0 },    // 4번 줄 (중간)
-      { stringNumber: 5, position: 100, offset: -5 }    // 5번 줄 (가장 뒤)
+      { stringNumber: 2, position: 100, offset: 5, fret: 3 },    // 2번 줄 (3번 프렛)
+      { stringNumber: 3, position: 100, offset: 0, fret: 2 },    // 3번 줄 (2번 프렛)
+      { stringNumber: 5, position: 100, offset: -5, fret: 1 }    // 5번 줄 (1번 프렛)
     ];
 
     const newNotes = cChordNotes.map(note => ({
@@ -131,7 +132,8 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
       position: note.position + note.offset,
       timing: Date.now(),
       isChord: true,
-      chord: 'C'
+      chord: 'C',
+      fret: note.fret
     }));
 
     // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 C코드 손모양 유지)
@@ -141,7 +143,8 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
       position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
       timing: Date.now(),
       isChord: true,
-      chord: 'C'
+      chord: 'C',
+      fret: note.fret
     })));
     setTestNotes(prev => [...prev, ...newNotes]);
   };
@@ -149,9 +152,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   // A코드 손모양 노트 생성 함수
   const createAChordNote = () => {
     const aChordNotes = [
-      { stringNumber: 2, position: 100, offset: 5 },    // 2번 줄 (가장 앞)
-      { stringNumber: 3, position: 100, offset: 0 },    // 3번 줄 (중간)
-      { stringNumber: 4, position: 100, offset: -5 }    // 4번 줄 (가장 뒤)
+      { stringNumber: 3, position: 100, offset: -5, fret: 2 },    // 3번 줄 (2번 프렛)
+      { stringNumber: 4, position: 100, offset: 0, fret: 2 },    // 4번 줄 (2번 프렛)
+      { stringNumber: 5, position: 100, offset: 5, fret: 2 }    // 5번 줄 (2번 프렛)
     ];
 
     const newNotes = aChordNotes.map(note => ({
@@ -160,7 +163,8 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
       position: note.position + note.offset,
       timing: Date.now(),
       isChord: true,
-      chord: 'A'
+      chord: 'A',
+      fret: note.fret
     }));
 
     // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 A코드 손모양 유지)
@@ -170,9 +174,15 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
       position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
       timing: Date.now(),
       isChord: true,
-      chord: 'A'
+      chord: 'A',
+      fret: note.fret
     })));
     setTestNotes(prev => [...prev, ...newNotes]);
+  };
+
+  // 배속 변경 함수
+  const changePlaybackSpeed = (speed: number) => {
+    setPlaybackSpeed(speed);
   };
 
   // 테스트용 노트 이동 함수
@@ -182,7 +192,7 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
         setTestNotes(prevNotes => {
           const newNotes = prevNotes.map(note => ({
             ...note,
-            position: note.position - 0.5
+            position: note.position - (0.5 * playbackSpeed)
           })).filter(note => note.position > -10);
 
           // C코드나 A코드의 모든 노트가 민트색 바닥 영역(25% ~ 37.5%)을 지나쳤는지 확인
@@ -201,7 +211,7 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
 
       return () => clearInterval(interval);
     }
-  }, [testNotes]);
+  }, [testNotes, playbackSpeed]);
 
   // 노트가 지나갈 때 해당 줄을 활성화하는 효과
   useEffect(() => {
@@ -212,8 +222,8 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
         setCurrentNotes(prevNotes => {
           const newNotes = prevNotes.map(note => ({
             ...note,
-            position: note.position - 1  // 2에서 1로 속도 감소
-          })).filter(note => note.position > -10); // 화면 밖으로 나간 노트 제거
+            position: note.position - (1 * playbackSpeed)
+          })).filter(note => note.position > -10);
 
           // 새로운 노트 추가
           const newNotesToAdd = notes.filter(note => 
@@ -223,17 +233,17 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
 
           return [...newNotes, ...newNotesToAdd];
         });
-      }, 16); // 60fps
+      }, 16);
 
       return () => clearInterval(interval);
     }
-  }, [isPlaying, currentSong, notes]);
+  }, [isPlaying, currentSong, notes, playbackSpeed]);
 
   const renderNote = (note: Note) => {
     const isChordNote = note.isChord;
     const isCurrentChord = currentChord && note.chordId === currentChord.id;
 
-    return (
+  return (
       <div
         key={note.id}
         className={`absolute w-4 h-4 rounded-full transition-all duration-300 ${
@@ -241,11 +251,39 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
         } ${isCurrentChord ? 'ring-2 ring-white' : ''}`}
         style={{
           left: `${note.position}%`,
-          top: `${getStringPosition(note.stringNumber - 1)}px`,
+          top: `${getStringPosition(note.stringNumber - 1)}%`,
           transform: 'translate(-50%, -50%)',
           opacity: isPlaying ? 1 : 0.5
         }}
-      />
+      >
+        {note.fret && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
+              {/* 앞면 */}
+              <div className="relative text-yellow-400 text-2xl font-extrabold" style={{ 
+                transform: 'translateZ(2px)',
+                textShadow: '0px 2px 2px rgba(0,0,0,0.5)'
+              }}>
+                {note.fret}
+              </div>
+              {/* 윗면 */}
+              <div className="absolute top-0 left-0 w-full" style={{ 
+                transform: 'rotateX(-90deg) translateZ(-2px)',
+                transformOrigin: 'top',
+                height: '4px',
+                background: 'rgba(251, 191, 36, 0.8)'
+              }} />
+              {/* 오른쪽면 */}
+              <div className="absolute top-0 right-0 h-full" style={{ 
+                transform: 'rotateY(90deg) translateZ(6px)',
+                transformOrigin: 'right',
+                width: '4px',
+                background: 'rgba(251, 191, 36, 0.6)'
+              }} />
+            </div>
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -395,17 +433,46 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
             {shadowNotes.length > 0 && shadowNotes.map((note) => (
               <div
                 key={`shadow-${note.id}`}
-                className="absolute w-8 h-8"
+                className="absolute w-10 h-10 rounded-full"
                 style={{
                   top: `${getStringPosition(note.stringNumber - 1)}%`,
                   left: `${note.position}%`,
-                  transform: 'translate(-50%, -50%)',
-                  background: 'radial-gradient(circle, rgba(251, 191, 36, 0.6) 0%, transparent 70%)',
-                  boxShadow: '0 0 20px rgba(251, 191, 36, 0.6), 0 0 40px rgba(251, 191, 36, 0.4)',
+                  transform: 'translate(-50%, -50%) perspective(1000px) rotateX(20deg)',
+                  background: 'radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 0.9) 0%, rgba(251, 191, 36, 0.7) 20%, rgba(251, 191, 36, 0.5) 40%, rgba(251, 191, 36, 0.3) 60%, transparent 100%)',
+                  boxShadow: '0 0 15px rgba(251, 191, 36, 0.8), 0 0 30px rgba(251, 191, 36, 0.6), inset 0 0 15px rgba(251, 191, 36, 0.8), 0 10px 20px rgba(0, 0, 0, 0.5)',
                   animation: 'shadowPulse 1s ease-in-out infinite',
-                  zIndex: 1
+                  zIndex: 1,
+                  filter: 'brightness(1.2)',
                 }}
-              />
+              >
+                {note.fret && (
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
+                      {/* 앞면 */}
+                      <div className="relative text-yellow-400 text-2xl font-extrabold" style={{ 
+                        transform: 'translateZ(2px)',
+                        textShadow: '0px 2px 2px rgba(0,0,0,0.5)'
+                      }}>
+                        {note.fret}
+                      </div>
+                      {/* 윗면 */}
+                      <div className="absolute top-0 left-0 w-full" style={{ 
+                        transform: 'rotateX(-90deg) translateZ(-2px)',
+                        transformOrigin: 'top',
+                        height: '4px',
+                        background: 'rgba(251, 191, 36, 0.8)'
+                      }} />
+                      {/* 오른쪽면 */}
+                      <div className="absolute top-0 right-0 h-full" style={{ 
+                        transform: 'rotateY(90deg) translateZ(6px)',
+                        transformOrigin: 'right',
+                        width: '4px',
+                        background: 'rgba(251, 191, 36, 0.6)'
+                      }} />
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
 
             {/* 노트 애니메이션 */}
@@ -414,22 +481,65 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
               return (
                 <div
                   key={note.id}
-                  className="absolute w-8 h-8"
+                  className="absolute w-10 h-10 rounded-full"
                   style={{
                     top: `${getStringPosition(note.stringNumber - 1)}%`,
                     left: `${note.position}%`,
-                    transform: 'translate(-50%, -50%)',
+                    transform: 'translate(-50%, -50%) perspective(1000px) rotateX(20deg) rotateY(10deg)',
                     background: isOnTargetLine 
-                      ? 'radial-gradient(circle, rgba(251, 191, 36, 1) 0%, rgba(251, 191, 36, 0.8) 50%, transparent 70%)'
-                      : `radial-gradient(circle, ${stringColors[note.stringNumber - 1]} 0%, transparent 70%)`,
+                      ? 'radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 1) 0%, rgba(251, 191, 36, 0.9) 20%, rgba(251, 191, 36, 0.7) 40%, rgba(251, 191, 36, 0.4) 60%, transparent 100%)'
+                      : `radial-gradient(circle at 30% 30%, ${stringColors[note.stringNumber - 1].replace(')', ', 1)')} 0%, ${stringColors[note.stringNumber - 1].replace(')', ', 0.9)')} 20%, ${stringColors[note.stringNumber - 1].replace(')', ', 0.7)')} 40%, ${stringColors[note.stringNumber - 1].replace(')', ', 0.4)')} 60%, transparent 100%)`,
                     animation: isOnTargetLine 
                       ? 'noteHit 0.3s ease-in-out' 
                       : 'notePulse 1s ease-in-out infinite',
                     boxShadow: isOnTargetLine
-                      ? '0 0 30px rgba(251, 191, 36, 0.8), 0 0 60px rgba(251, 191, 36, 0.5), 0 0 90px rgba(251, 191, 36, 0.3)'
-                      : `0 0 20px ${stringColors[note.stringNumber - 1]}`,
+                      ? '0 0 20px rgba(251, 191, 36, 0.8), 0 0 40px rgba(251, 191, 36, 0.5), 0 0 60px rgba(251, 191, 36, 0.3), inset 0 0 20px rgba(251, 191, 36, 0.8), 0 10px 20px rgba(0, 0, 0, 0.5), 0 20px 40px rgba(0, 0, 0, 0.3)'
+                      : `0 0 15px ${stringColors[note.stringNumber - 1]}, 0 0 30px ${stringColors[note.stringNumber - 1]}, inset 0 0 15px ${stringColors[note.stringNumber - 1]}, 0 10px 20px rgba(0, 0, 0, 0.5), 0 20px 40px rgba(0, 0, 0, 0.3)`,
+                    filter: 'brightness(1.2) contrast(1.2)',
+                    transformStyle: 'preserve-3d',
                   }}
-                />
+                >
+                  {/* 노트의 3D 효과를 위한 추가 요소들 */}
+                  <div className="absolute inset-0 rounded-full" style={{
+                    background: 'radial-gradient(circle at 70% 70%, rgba(255,255,255,0.2) 0%, transparent 70%)',
+                    transform: 'translateZ(2px)',
+                  }} />
+                  <div className="absolute inset-0 rounded-full" style={{
+                    background: 'radial-gradient(circle at 30% 30%, rgba(0,0,0,0.2) 0%, transparent 70%)',
+                    transform: 'translateZ(-2px)',
+                  }} />
+                  {note.fret && (
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
+                        {/* 앞면 */}
+                        <div className="relative text-yellow-400 text-3xl font-black" style={{ 
+                          transform: 'translateZ(4px)',
+                          textShadow: '2px 2px 4px rgba(0,0,0,0.8), -2px -2px 4px rgba(255,255,255,0.5)',
+                          WebkitTextStroke: '1px rgba(0,0,0,0.5)',
+                          letterSpacing: '-0.5px'
+                        }}>
+                          {note.fret}
+                        </div>
+                        {/* 윗면 */}
+                        <div className="absolute top-0 left-0 w-full" style={{ 
+                          transform: 'rotateX(-90deg) translateZ(-4px)',
+                          transformOrigin: 'top',
+                          height: '4px',
+                          background: 'rgba(251, 191, 36, 0.9)',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                        }} />
+                        {/* 오른쪽면 */}
+                        <div className="absolute top-0 right-0 h-full" style={{ 
+                          transform: 'rotateY(90deg) translateZ(8px)',
+                          transformOrigin: 'right',
+                          width: '4px',
+                          background: 'rgba(251, 191, 36, 0.7)',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                        }} />
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
             })}
 
@@ -554,6 +664,32 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
         >
           A코드
         </button>
+        {/* 배속 드롭다운 */}
+        <div className="relative">
+          <select
+            value={playbackSpeed}
+            onChange={(e) => changePlaybackSpeed(Number(e.target.value))}
+            className="px-3 py-1 bg-zinc-800/80 hover:bg-zinc-700/80 rounded-lg text-white transition-colors appearance-none cursor-pointer"
+            style={{
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'white\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 0.5rem center',
+              backgroundSize: '1.5em 1.5em',
+              paddingRight: '2.5rem'
+            }}
+          >
+            <option value={0.2}>0.2x</option>
+            <option value={0.4}>0.4x</option>
+            <option value={0.6}>0.6x</option>
+            <option value={0.8}>0.8x</option>
+            <option value={1.0}>1.0x</option>
+            <option value={1.2}>1.2x</option>
+            <option value={1.4}>1.4x</option>
+            <option value={1.6}>1.6x</option>
+            <option value={1.8}>1.8x</option>
+            <option value={2.0}>2.0x</option>
+          </select>
+        </div>
       </div>
 
       <button
