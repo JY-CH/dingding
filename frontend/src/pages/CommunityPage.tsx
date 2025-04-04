@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
 
 import { _axiosAuth } from '@/services/JYapi';
 import { Post } from '@/types/index'; // 필요한 경로로 조정하세요
@@ -17,6 +18,14 @@ export const CommunityPage: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태
   const postsPerPage = 4; // 페이지당 표시할 게시물 수
+  const location = useLocation();
+  console.log(location);
+
+  useEffect(() => {
+    if (location.state?.articleId) {
+      setSelectedPost(location.state.articleId);
+    }
+  }, [location.state]);
 
   const { data: posts = [], error } = useQuery<CommunityResponse, Error>({
     queryKey: ['articles'],
