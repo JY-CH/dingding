@@ -10,8 +10,14 @@ from PIL import Image
 import io
 import json
 import time
+import uuid
 from ai_handler import AIHandler
 import logging
+from dotenv import load_dotenv
+import uvicorn
+
+# .env 파일 로드
+load_dotenv()
 
 app = FastAPI()
 
@@ -138,18 +144,41 @@ def verify_token(token: str):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-@app.websocket("/api/ws")
-async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
+def generate_room_id() -> str:
+    """고유한 room ID를 생성합니다."""
+    return f"room_{uuid.uuid4()}"
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket, room_id: str = None, token: str = None):
     try:
-        payload = verify_token(token)
-        print(
-            f"WebSocket connection attempt from user: {payload.get('username')}")
+        # room_id가 제공되지 않으면 자동 생성
+        if not room_id:
+            room_id = generate_room_id()
+            logger.info(f"자동 생성된 room ID: {room_id}")
+
+        # 토큰 검증
+        if token:
+            payload = verify_token(token)
+            logger.info(
+                f"WebSocket connection attempt from user: {payload.get('username')}")
+        else:
+            logger.info("Anonymous WebSocket connection attempt")
+
         await handler.handle_connection(websocket, room_id)
     except HTTPException as e:
-        print(f"WebSocket connection rejected: {e.detail}")
+        logger.error(f"WebSocket connection rejected: {e.detail}")
         await websocket.close(code=4001, reason="Authentication failed")
     except Exception as e:
-        print(f"WebSocket connection error: {str(e)}")
+        logger.error(f"WebSocket connection error: {str(e)}")
         await websocket.close(code=4000, reason="Internal server error")
 
 print("angs~ 서버 시작됨!")
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )

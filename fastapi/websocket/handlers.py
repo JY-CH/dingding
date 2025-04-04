@@ -2,6 +2,9 @@ from fastapi import WebSocket
 from .connection import WebSocketManager
 from ai_handler import AIHandler
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class WebSocketHandler:
@@ -10,15 +13,23 @@ class WebSocketHandler:
         self.ai_handler = AIHandler()
 
     async def handle_connection(self, websocket: WebSocket, room_id: str):
-        await self.manager.connect(websocket, room_id)
         try:
+            await self.manager.connect(websocket, room_id)
+            logger.info(f"웹소켓 연결 성공 - 방 ID: {room_id}")
+
             while True:
-                data = await websocket.receive_text()
-                await self.handle_message(websocket, room_id, data)
+                try:
+                    data = await websocket.receive_text()
+                    await self.handle_message(websocket, room_id, data)
+                except Exception as e:
+                    logger.error(f"메시지 처리 중 오류 발생: {str(e)}")
+                    break
+
         except Exception as e:
-            print(f"Error: {e}")
+            logger.error(f"웹소켓 연결 처리 중 오류 발생: {str(e)}")
         finally:
             self.manager.disconnect(websocket, room_id)
+            logger.info(f"웹소켓 연결 종료 - 방 ID: {room_id}")
 
     async def handle_message(self, websocket: WebSocket, room_id: str, message: str):
         try:
@@ -48,3 +59,9 @@ class WebSocketHandler:
         except json.JSONDecodeError:
             # JSON 파싱 실패시 일반 텍스트로 처리
             await self.manager.broadcast_to_room(room_id, message)
+        except Exception as e:
+            logger.error(f"메시지 처리 중 오류 발생: {str(e)}")
+            await websocket.send_json({
+                "type": "error",
+                "message": str(e)
+            })
