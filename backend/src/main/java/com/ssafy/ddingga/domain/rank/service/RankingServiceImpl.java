@@ -165,7 +165,7 @@ public class RankingServiceImpl implements RankingService {
 	public Ranking updateRankingInfo(int userId, Duration playtime, float score, int totalTry) {
 		try {
 			User user = authRepository.findByUserId(userId).orElseThrow(() -> new NotFoundException("없는 유저 id 입니다."));
-			Ranking response = rankingRepository.findById(user)
+			Ranking response = rankingRepository.findById(user.getUserId())
 				.orElseThrow(() -> new NotFoundException("랭킹이 존재하지 않습니다."));
 			response.setPlayTime(playtime);
 			response.setScore(score);

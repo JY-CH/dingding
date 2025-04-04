@@ -195,33 +195,33 @@ public class ReplayServiceImpl implements ReplayService {
 			return new SongNotFoundException("곡을 찾을 수 없습니다.");
 		});
 
-		// Ranking ranking = rankingRepository.findById(user).orElse(null);
-		// if (ranking == null) {
-		// 	log.info("리플레이 - 랭킹 정보가 없으므로 새로 생성 : userId={}", userId);
-		// 	String[] timeArr = requestDto.getVideoTime().split(":");
-		//
-		// 	Duration playTime = Duration.ofHours(Integer.parseInt(timeArr[0]))
-		// 		.plusMinutes(Integer.parseInt(timeArr[1]))
-		// 		.plusSeconds(Integer.parseInt(timeArr[2]));
-		// 	rankingService.createRankingInfo(user.getUserId(), playTime, requestDto.getScore(), 1);
-		// 	log.info("리플레이 - 랭킹 정보 생성 완료 : userId={}", userId);
-		// } else {
-		// 	log.info("리플레이 - 기존 랭킹 정보 존재, 점수 업데이트 시작 : userId={}", userId);
-		// 	String[] timeArr = requestDto.getVideoTime().split(":");
-		// 	Duration playTime = Duration.ofHours(Integer.parseInt(timeArr[0]))
-		// 		.plusMinutes(Integer.parseInt(timeArr[1]))
-		// 		.plusSeconds(Integer.parseInt(timeArr[2]));
-		// 	float existingScore = ranking.getScore() * ranking.getTotalTry();
-		// 	float resultScore = (existingScore + requestDto.getScore()) / (ranking.getTotalTry() + 1);
-		//
-		// 	// 랭킹의 총 시간, 횟수, 점수 수정
-		// 	ranking.setPlayTime(ranking.getPlayTime().plus(playTime));
-		// 	ranking.setTotalTry(ranking.getTotalTry() + 1);
-		// 	ranking.setScore(resultScore);
-		//
-		// 	rankingRepository.save(ranking);
-		// 	log.info("리플레이 - 기존 랭킹 정보 업데이트 완료 : userId={}", userId);
-		// }
+		Ranking ranking = rankingRepository.findByUser_UserId(user.getUserId()).orElse(null);
+		if (ranking == null) {
+			log.info("리플레이 - 랭킹 정보가 없으므로 새로 생성 : userId={}", userId);
+			String[] timeArr = requestDto.getVideoTime().split(":");
+
+			Duration playTime = Duration.ofHours(Integer.parseInt(timeArr[0]))
+				.plusMinutes(Integer.parseInt(timeArr[1]))
+				.plusSeconds(Integer.parseInt(timeArr[2]));
+			rankingService.createRankingInfo(user.getUserId(), playTime, requestDto.getScore(), 1);
+			log.info("리플레이 - 랭킹 정보 생성 완료 : userId={}", userId);
+		} else {
+			log.info("리플레이 - 기존 랭킹 정보 존재, 점수 업데이트 시작 : userId={}", userId);
+			String[] timeArr = requestDto.getVideoTime().split(":");
+			Duration playTime = Duration.ofHours(Integer.parseInt(timeArr[0]))
+				.plusMinutes(Integer.parseInt(timeArr[1]))
+				.plusSeconds(Integer.parseInt(timeArr[2]));
+			float existingScore = ranking.getScore() * ranking.getTotalTry();
+			float resultScore = (existingScore + requestDto.getScore()) / (ranking.getTotalTry() + 1);
+
+			// 랭킹의 총 시간, 횟수, 점수 수정
+			ranking.setPlayTime(ranking.getPlayTime().plus(playTime));
+			ranking.setTotalTry(ranking.getTotalTry() + 1);
+			ranking.setScore(resultScore);
+
+			rankingRepository.save(ranking);
+			log.info("리플레이 - 기존 랭킹 정보 업데이트 완료 : userId={}", userId);
+		}
 
 		try {
 			// 2. S3에 비디오 파일 업로드

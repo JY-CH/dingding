@@ -25,7 +25,7 @@ public class ReplayCreateRequestDto {
 	@Schema(description = "점수", example = "77")
 	private Integer score;
 
-	@Schema(description = "게임 모드", example = "HARD")
+	@Schema(description = "게임 모드", example = "PRACTICE")
 	private String mode;
 
 	@Schema(description = "업로드할 MP4 파일", type = "string", format = "binary")
