@@ -39,16 +39,24 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     // roomId만 전달
     websocketService.connect(roomId);
     websocketService.setOnOpenHandler(() => {
-      console.log('웹소켓 연결됨');
+      console.log('🟢 [WebSocket 연결됨]');
+      console.log('➡️ 현재 시간:', new Date().toISOString());
+      // console.log('➡️ WebSocket URL:', websocketService?.getUrl?.() ?? '(주소 없음)');
       set({ isConnected: true });
-      // 웹소켓 상태 변경 이벤트 발생
       window.dispatchEvent(new Event('websocketStateChange'));
     });
 
-    websocketService.setOnCloseHandler(() => {
-      console.log('웹소켓 연결 끊김');
+    websocketService.setOnCloseHandler((event?: CloseEvent) => {
+      console.log('🔴 [WebSocket 연결 끊김]');
+      console.log('➡️ 연결 해제 시간:', new Date().toISOString());
+      if (event) {
+        console.log('🔍 Close Event:', {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+        });
+      }
       set({ isConnected: false });
-      // 웹소켓 상태 변경 이벤트 발생
       window.dispatchEvent(new Event('websocketStateChange'));
     });
 
