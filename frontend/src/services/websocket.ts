@@ -51,8 +51,9 @@ class WebSocketService {
         this.onErrorHandler(error);
       }
     };
-
+    const token = sessionStorage.getItem('accessToken');
     this.ws.onclose = (event) => {
+      console.log('현재 토큰:', token);
       console.log('WebSocket 연결 종료:', {
         code: event.code,
         reason: event.reason,
