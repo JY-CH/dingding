@@ -38,15 +38,22 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
 
     // roomId만 전달
     websocketService.connect(roomId);
+
+    websocketService.setOnErrorHandler((error) => {
+      console.error('🟡 [WebSocket 에러 발생]');
+      console.error('➡️ 에러 정보:', error);
+      set({ isConnected: false });
+      window.dispatchEvent(new Event('websocketStateChange'));
+    });
+
     websocketService.setOnOpenHandler(() => {
       console.log('🟢 [WebSocket 연결됨]');
       console.log('➡️ 현재 시간:', new Date().toISOString());
-      // console.log('➡️ WebSocket URL:', websocketService?.getUrl?.() ?? '(주소 없음)');
       set({ isConnected: true });
       window.dispatchEvent(new Event('websocketStateChange'));
     });
 
-    websocketService.setOnCloseHandler((event?: CloseEvent) => {
+    websocketService.setOnCloseHandler((event) => {
       console.log('🔴 [WebSocket 연결 끊김]');
       console.log('➡️ 연결 해제 시간:', new Date().toISOString());
       if (event) {
