@@ -1,4 +1,3 @@
-
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useWebSocketStore } from '../../store/useWebSocketStore';
@@ -57,19 +56,6 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
     }
   }, [messages, exercise.chords, currentStep, score]);
 
-  // 컴포넌트 마운트 시 웹소켓 연결
-  useEffect(() => {
-    // UUID v4 형식으로 roomId 생성
-    const roomId = `room_${crypto.randomUUID()}`;
-    console.log('Generated roomId:', roomId);
-    connect(roomId);
-
-    // 컴포넌트 언마운트 시 웹소켓 연결 해제
-    return () => {
-      disconnect();
-    };
-  }, [connect, disconnect]);
-
   // 웹소켓 연결 상태 변경 시 상위 컴포넌트에 알림
   useEffect(() => {
     onReady(isConnected);
@@ -84,24 +70,24 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
     // UUID v4 형식으로 roomId 생성
     const roomId = `room_${crypto.randomUUID()}`;
     console.log('Generated roomId:', roomId);
-    
+
     // 웹소켓 연결
     connect(roomId);
-    
+
     // 상위 컴포넌트에 roomId 전달
     if (onRoomIdChange) {
       onRoomIdChange(roomId);
     }
-    
+
     setIsReady(true);
   };
 
-  // const handleStop = () => {
-  //   setIsReady(false);
-  //   // URL에서 roomId 제거
-  //   window.history.pushState({}, '', '/practice');
-  //   disconnect();
-  // };
+  // 컴포넌트 언마운트 시 웹소켓 연결 해제
+  useEffect(() => {
+    return () => {
+      disconnect();
+    };
+  }, [disconnect]);
 
   return (
     <div className="bg-white/5 rounded-xl p-6">
