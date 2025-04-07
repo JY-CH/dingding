@@ -35,12 +35,15 @@ pipeline {
                     def startTime = System.currentTimeMillis()
 
                     withCredentials([string(credentialsId: 'GitLab-SecretText-Accesstoken', variable: 'GIT_TOKEN'), 
+                    string(credentialsId: 'VITE_BACKEND_URL', variable: 'VITE_BACKEND_URL'),
                     string(credentialsId: 'VITE_BASE_URL', variable: 'VITE_BASE_URL')]) {
                         sh """
                         echo "🔐 GitLab Access Token을 .env 파일에 저장"
                         echo "GIT_CREDENTIALS=\$GIT_TOKEN" > .env
                         echo "VITE_BASE_URL=\$VITE_BASE_URL" >> .env
+                        echo "VITE_BACKEND_URL=\$VITE_BACKEND_URL" >> .env
                         export VITE_BASE_URL=\$VITE_BASE_URL
+                        export VITE_BACKEND_URL=\$VITE_BACKEND_URL
 
                         echo "🚀 Docker Image 빌드 시작"
                         docker build --build-arg VITE_BASE_URL=\$VITE_BASE_URL -t ${IMAGE_NAME} . 

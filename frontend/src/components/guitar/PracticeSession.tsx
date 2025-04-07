@@ -1,5 +1,8 @@
-import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useMemo, useState } from 'react';
+
+import { AnimatePresence, motion } from 'framer-motion';
+
+import useIndexedDB from '../../hooks/useIndexedDB';
 import { useWebSocketStore } from '../../store/useWebSocketStore';
 import { Exercise, Performance } from '../../types/guitar';
 
@@ -30,6 +33,58 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
   const { connect, disconnect, isConnected, score, messages } = useWebSocketStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [isReady, setIsReady] = useState(false);
+  // indexedDB 훅을 사용하여 데이터 저장 및 읽기
+  const { saveData, getAllData } = useIndexedDB('PracticeSessionDB', 'sessionData');
+  const calculateAverageScore = async (): Promise<number> => {
+    try {
+      const sessionData = await getAllData();
+      console.log('IndexedDB에서 가져온 데이터:', sessionData);
+
+      // 점수만 추출하여 평균 계산
+      const scores = sessionData.map((data: any) => data.score || 0); // 점수가 없으면 0으로 처리
+      const totalScore = scores.reduce((acc: number, score: number) => acc + score, 0);
+      const averageScore = scores.length > 0 ? totalScore / scores.length : 0;
+
+      console.log('평균 점수:', averageScore);
+      return averageScore;
+    } catch (error) {
+      console.error('평균 점수 계산 중 오류:', error);
+      return 0; // 오류 발생 시 0 반환
+    }
+  };
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      saveData(lastMessage)
+        .then(() => console.log('IndexedDB에 데이터 저장 성공:', lastMessage))
+        .catch((error) => console.error('IndexedDB 저장 실패:', error));
+    }
+  }, [messages, saveData]);
+  const handleComplete = async () => {
+    if (currentStep === exercise.chords.length - 1) {
+      try {
+        const averageScore = await calculateAverageScore(); // 함수 호출
+        const sessionData = await getAllData();
+
+        onComplete({
+          totalScore: score || 0,
+          accuracy: (score || 0) / 100,
+          correctChords: Math.round((score || 0) / 10),
+          totalChords: exercise.chords.length,
+          duration: 120,
+          sessionData,
+          averageScore, // 평균 점수 포함
+        });
+
+        setIsReady(false);
+      } catch (error) {
+        console.error('완료 처리 중 오류:', error);
+      }
+    } else {
+      setCurrentStep(currentStep + 1);
+    }
+  };
 
   // 현재 연습 중인 코드와 AI가 분석한 코드를 비교하여 점수를 계산
   const currentScore = useMemo(() => {
@@ -206,19 +261,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                 </svg>
               </button>
               <button
-                onClick={() => {
-                  if (currentStep === exercise.chords.length - 1) {
-                    onComplete({
-                      totalScore: score || 0,
-                      accuracy: (score || 0) / 100,
-                      correctChords: Math.round((score || 0) / 10),
-                      totalChords: exercise.chords.length,
-                      duration: 120,
-                    });
-                  } else {
-                    setCurrentStep(currentStep + 1);
-                  }
-                }}
+                onClick={handleComplete} // handleComplete 함수 호출
                 className="px-6 py-2 rounded-lg bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors"
               >
                 {currentStep === exercise.chords.length - 1 ? '완료' : '다음'}
