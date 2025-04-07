@@ -46,13 +46,15 @@ public class WeekSongRankingFacadeServiceImpl implements WeekSongRankingFacadeSe
 			}
 
 			for (Replay replay : replays) {
-				// weekRankingMap 에 해당 유저가 없으면 추가하고,
-				if (!weekRankingMap.containsKey(replay.getUser().getUsername())) {
-					weekRankingMap.put(replay.getUser().getUsername(), replay.getScore());
-				} else {
-					// 없으면 weekRankingMap 에 점수 비교해서 다시 담기
-					if (weekRankingMap.get(replay.getUser().getUsername()) < replay.getScore()) {
+				if (weekSong.getSong().getSongId().equals(replay.getSong().getSongId())) {
+					// weekRankingMap 에 해당 유저가 없으면 추가하고,
+					if (!weekRankingMap.containsKey(replay.getUser().getUsername())) {
 						weekRankingMap.put(replay.getUser().getUsername(), replay.getScore());
+					} else {
+						// 없으면 weekRankingMap 에 점수 비교해서 다시 담기
+						if (weekRankingMap.get(replay.getUser().getUsername()) < replay.getScore()) {
+							weekRankingMap.put(replay.getUser().getUsername(), replay.getScore());
+						}
 					}
 				}
 			}
