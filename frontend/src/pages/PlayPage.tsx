@@ -16,7 +16,7 @@ import { GuitarString, Visualization } from '../types/guitar';
 
 const PlayPage: React.FC = () => {
   const navigate = useNavigate();
-  const { sendMessage, isConnected } = useWebSocketStore();
+  const { sendMessage, isConnected, messages } = useWebSocketStore();
   const [selectedMode, setSelectedMode] = useState<'practice' | 'performance'>('practice');
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
@@ -65,24 +65,24 @@ const PlayPage: React.FC = () => {
         {
           description: 'C 코드 연습',
           duration: 30,
-          chord: 'C'
+          chord: 'C',
         },
         {
           description: 'G 코드 연습',
           duration: 30,
-          chord: 'G'
+          chord: 'G',
         },
         {
           description: 'Am 코드 연습',
           duration: 30,
-          chord: 'Am'
+          chord: 'Am',
         },
         {
           description: 'F 코드 연습',
           duration: 30,
-          chord: 'F'
-        }
-      ]
+          chord: 'F',
+        },
+      ],
     }),
     [],
   );
@@ -196,7 +196,7 @@ const PlayPage: React.FC = () => {
   const handleRoomIdChange = (roomId: string) => {
     setCurrentRoomId(roomId);
   };
-  
+
   return (
     <div className="flex-1 overflow-auto bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 h-full">
       {/* 상단 네비게이션 바 */}
@@ -426,7 +426,9 @@ const PlayPage: React.FC = () => {
                     exit={{ opacity: 0, x: 20 }}
                     className="p-3 rounded-lg bg-green-500/20 text-green-400"
                   >
-                    코드 진행이 정확합니다
+                    {messages.length > 0
+                      ? messages[messages.length - 1].message
+                      : '점수: 0.0점 이미지 분석: 기타 코드를 감지하지 못했습니다.'}
                   </motion.div>
                   <motion.div
                     key="feedback-2"
