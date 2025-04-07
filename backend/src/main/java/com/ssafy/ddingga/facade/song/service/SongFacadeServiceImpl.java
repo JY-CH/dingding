@@ -27,16 +27,18 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 		List<GetSongResponseDto> responseDto = new ArrayList<>();
 
 		for (Song song : songs) {
-			GetSongResponseDto getSongResponseDto = GetSongResponseDto.builder()
-				.songId(song.getSongId())
-				.songTitle(song.getSongTitle())
-				.songImage(song.getSongImage())
-				.songWriter(song.getSongWriter())
-				.songSinger(song.getSongSinger())
-				// .songDuration(song.getSongDuration())
-				.build();
+			if (song.getSongId() >= 15) {
+				GetSongResponseDto getSongResponseDto = GetSongResponseDto.builder()
+					.songId(song.getSongId())
+					.songTitle(song.getSongTitle())
+					.songImage(song.getSongImage())
+					.songWriter(song.getSongWriter())
+					.songSinger(song.getSongSinger())
+					// .songDuration(song.getSongDuration())
+					.build();
 
-			responseDto.add(getSongResponseDto);
+				responseDto.add(getSongResponseDto);
+			}
 		}
 
 		return responseDto;
