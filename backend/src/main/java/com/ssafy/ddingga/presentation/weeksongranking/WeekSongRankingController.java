@@ -1,7 +1,5 @@
 package com.ssafy.ddingga.presentation.weeksongranking;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,15 +28,15 @@ public class WeekSongRankingController {
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 댓글입니다.")
 	})
 	@GetMapping(value = "")
-	public ResponseEntity<List<GetWeekSongRankingResponseDto>> getSong() {
-		List<GetWeekSongRankingResponseDto> responseDto = null;
+	public ResponseEntity<GetWeekSongRankingResponseDto> getSong() {
+		GetWeekSongRankingResponseDto responseDto = null;
 
 		try {
 			responseDto = weekSongRankingFacadeService.getWeekSongRanking();
-			if (responseDto.isEmpty()) {
+			if (responseDto == null) {
 				log.info("이주의 랭킹이 없습니다.");
 			} else {
-				log.info("이주의 랭킹 조회 성공, {}개의 데이터 반환", responseDto.size());
+				log.info("이주의 랭킹 조회 성공, {}개의 데이터 반환", responseDto.getUserInfo().size());
 			}
 		} catch (Exception e) {
 			log.error("이주의 랭킹 조회 중 예외 발생: ", e);

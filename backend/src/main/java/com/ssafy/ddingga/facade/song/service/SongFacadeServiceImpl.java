@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.ssafy.ddingga.domain.song.entity.SheetMusic;
 import com.ssafy.ddingga.domain.song.entity.Song;
 import com.ssafy.ddingga.domain.song.service.SongService;
 import com.ssafy.ddingga.facade.song.dto.response.GetSongResponseDto;
@@ -30,7 +31,8 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 				.songTitle(song.getSongTitle())
 				.songImage(song.getSongImage())
 				.songWriter(song.getSongWriter())
-				.songDuration(song.getSongDuration())
+				.songSinger(song.getSongSinger())
+				// .songDuration(song.getSongDuration())
 				.build();
 
 			responseDto.add(getSongResponseDto);
@@ -39,17 +41,36 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 		return responseDto;
 	}
 
+	// private String sheetImage;
+	// private Integer sheetOrder;
+	// private String chord;
+	// private Integer chordOrder;
+	// private Float chordTiming;
+
 	@Override
-	public SelectSongResponseDto selectSong(int songId) {
-		Song song = songService.selectSong(songId);
-		SelectSongResponseDto responseDto = SelectSongResponseDto.builder()
-			.songId(song.getSongId())
-			.songTitle(song.getSongTitle())
-			.songImage(song.getSongImage())
-			.songWriter(song.getSongWriter())
-			.songDuration(song.getSongDuration())
-			.build();
-		return responseDto;
+	public List<SelectSongResponseDto> selectSong(int songId) {
+		List<SheetMusic> sheetMusics = songService.selectSong(songId);
+		List<SelectSongResponseDto> result = new ArrayList<>();
+
+		for (SheetMusic sheetMusic : sheetMusics) {
+			SelectSongResponseDto responseDto = SelectSongResponseDto.builder()
+				.songId(sheetMusic.getSong().getSongId())
+				.songTitle(sheetMusic.getSong().getSongTitle())
+				.songImage(sheetMusic.getSong().getSongImage())
+				.songWriter(sheetMusic.getSong().getSongWriter())
+				.songSinger(sheetMusic.getSong().getSongSinger())
+				// .songDuration(sheetMusic.getSong().getSongDuration())
+				// .sheetImage(sheetMusic.getSheetImage())
+				.sheetOrder(sheetMusic.getSheetOrder())
+				.chord(sheetMusic.getChord())
+				.chordOrder(sheetMusic.getChordOrder())
+				.chordTiming(sheetMusic.getChordTiming())
+				.build();
+
+			result.add(responseDto);
+		}
+
+		return result;
 	}
 
 	@Override
@@ -63,7 +84,8 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 				.songTitle(song.getSongTitle())
 				.songImage(song.getSongImage())
 				.songWriter(song.getSongWriter())
-				.songDuration(song.getSongDuration())
+				.songSinger(song.getSongSinger())
+				// .songDuration(song.getSongDuration())
 				.build();
 
 			responseDto.add(getSongResponseDto);

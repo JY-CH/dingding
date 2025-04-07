@@ -1,7 +1,5 @@
 package com.ssafy.ddingga.domain.song.entity;
 
-import java.time.LocalTime;
-
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -35,7 +33,8 @@ public class Song {
 
 	@Column(name = "song_writer")
 	private String songWriter;
+	private String songSinger;
 
-	// 추가된 시간 정보 컬럼
-	private LocalTime songDuration;  // 노래 시간 (분:초) 형태로 저장
+	// 노래의 재생 시간을 "HH:MM:SS" 형식으로 저장
+	// private String songDuration;  // 예: "00:03:30" (3분 30초)
 }

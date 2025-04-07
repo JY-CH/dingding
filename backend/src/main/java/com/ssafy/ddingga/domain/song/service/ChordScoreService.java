@@ -2,6 +2,7 @@ package com.ssafy.ddingga.domain.song.service;
 
 import java.util.List;
 
+import com.ssafy.ddingga.facade.chordscore.dto.request.CreateChordScoresRequestDto;
 import com.ssafy.ddingga.facade.dashboard.dto.response.ChordScoreDto;
 
 public interface ChordScoreService {
@@ -12,4 +13,6 @@ public interface ChordScoreService {
 	 * @return 유저의 모든 코드 점수
 	 */
 	List<ChordScoreDto> getChordScores(Integer userId);
+
+	void createChordScores(int userId, List<CreateChordScoresRequestDto> request);
 }
