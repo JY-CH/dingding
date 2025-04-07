@@ -1,11 +1,17 @@
 // src/hooks/useAudioAnalysis.ts
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 import { useQuery, useMutation } from '@tanstack/react-query';
 
 import { guitarChordApi } from './guitarChordApi';
-import { TemplateData } from '../types/guitar-chord';
 import TemplateMatcher from '../utils/TemplateMatcher';
+
+// 타입 정의 추가
+interface TemplateDataResponse {
+  templates: any[]; // 적절한 타입으로 변경
+  duration: number;
+  // 기타 필요한 속성들
+}
 
 interface UseAudioAnalysisProps {
   onResult?: (result: {
@@ -35,20 +41,28 @@ export const useAudioAnalysis = ({
   const chunksRef = useRef<Blob[]>([]);
   const templateMatcherRef = useRef<TemplateMatcher | null>(null);
 
-  // 템플릿 데이터 가져오기
-  const { data: templateData, isLoading: isLoadingTemplates } = useQuery({
+  // 템플릿 데이터 가져오기 - 타입 명시 및 onSuccess 제거
+  const {
+    data: templateData,
+    isLoading: isLoadingTemplates,
+    isSuccess,
+  } = useQuery<TemplateDataResponse, Error>({
     queryKey: ['templateData'],
     queryFn: guitarChordApi.getTemplateData,
     staleTime: Infinity, // 캐시 영구 보존
-    onSuccess: (data) => {
+  });
+
+  // useEffect를 사용하여 데이터 로딩 완료 후 처리
+  useEffect(() => {
+    if (isSuccess && templateData) {
       // 템플릿 매처 초기화
       templateMatcherRef.current = new TemplateMatcher(
-        data.templates,
-        data.duration,
+        templateData.templates,
+        templateData.duration,
         confidenceThreshold,
       );
-    },
-  });
+    }
+  }, [isSuccess, templateData, confidenceThreshold]);
 
   // 백엔드 API 호출 뮤테이션
   const { mutate: analyzeAudio, isPending: isAnalyzing } = useMutation({

@@ -6,19 +6,19 @@ import { TemplateData } from '../types/guitar-chord';
 class TemplateMatcher {
   private templates: TemplateData[] = [];
   private sampleRate: number = 22050;
-  private duration: number = 1.0;
+  // private duration: number = 1.0;
   private confidenceThreshold: number = 0.7;
   private fftSize: number = 2048;
   private hopSize: number = 1024;
 
   constructor(
     templates: TemplateData[],
-    duration: number = 1.0,
+    // duration: number = 1.0,
     confidenceThreshold: number = 0.7,
     sampleRate: number = 22050,
   ) {
     this.templates = templates;
-    this.duration = duration;
+    // this.duration = duration;
     this.confidenceThreshold = confidenceThreshold;
     this.sampleRate = sampleRate;
   }
@@ -62,7 +62,10 @@ class TemplateMatcher {
       const frame = audioData.slice(i, i + this.fftSize);
 
       // Meyda를 사용하여 크로마 계산
-      const features = Meyda.extract(['chroma'], frame, this.fftSize);
+      const features = Meyda.extract(['chroma'], frame, {
+        bufferSize: this.fftSize,
+        sampleRate: this.sampleRate,
+      } as any);
 
       if (features && features.chroma) {
         chromaFrames.push(new Float32Array(features.chroma));
