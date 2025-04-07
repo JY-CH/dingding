@@ -46,7 +46,7 @@ pipeline {
                         export VITE_BACKEND_URL=\$VITE_BACKEND_URL
 
                         echo "🚀 Docker Image 빌드 시작"
-                        docker build --build-arg VITE_BASE_URL=\$VITE_BASE_URL -t ${IMAGE_NAME} . 
+                        docker build --build-arg VITE_BASE_URL=\$VITE_BASE_URL --build-arg VITE_BACKEND_URL=\$VITE_BACKEND_URL -t ${IMAGE_NAME} .
                         """
                     }
 
