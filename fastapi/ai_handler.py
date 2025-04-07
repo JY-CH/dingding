@@ -23,7 +23,7 @@ class AIHandler:
         self.class_names = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 
         # 모델 로드
-        model_path = os.path.join(os.path.dirname(__file__), 'best.pt')
+        model_path = os.path.join(os.path.dirname(__file__), 'best11m.pt')
         print(f"모델 파일 경로: {model_path}")
 
         # YOLO 모델 초기화
