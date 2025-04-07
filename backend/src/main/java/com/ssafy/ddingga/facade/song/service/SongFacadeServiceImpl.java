@@ -11,6 +11,7 @@ import com.ssafy.ddingga.domain.song.service.SongService;
 import com.ssafy.ddingga.facade.song.dto.response.GetSongResponseDto;
 import com.ssafy.ddingga.facade.song.dto.response.SearchSongResponseDto;
 import com.ssafy.ddingga.facade.song.dto.response.SelectSongResponseDto;
+import com.ssafy.ddingga.facade.song.dto.response.SheetMusicResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -48,27 +49,33 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 	// private Float chordTiming;
 
 	@Override
-	public List<SelectSongResponseDto> selectSong(int songId) {
+	public SelectSongResponseDto selectSong(int songId) {
 		List<SheetMusic> sheetMusics = songService.selectSong(songId);
-		List<SelectSongResponseDto> result = new ArrayList<>();
+		List<SheetMusicResponseDto> sheetMusicResponseDto = new ArrayList<>();
+		SelectSongResponseDto result = new SelectSongResponseDto();
 
+		Song song = new Song();
+
+		int count = 0;
 		for (SheetMusic sheetMusic : sheetMusics) {
-			SelectSongResponseDto responseDto = SelectSongResponseDto.builder()
-				.songId(sheetMusic.getSong().getSongId())
-				.songTitle(sheetMusic.getSong().getSongTitle())
-				.songImage(sheetMusic.getSong().getSongImage())
-				.songWriter(sheetMusic.getSong().getSongWriter())
-				.songSinger(sheetMusic.getSong().getSongSinger())
-				// .songDuration(sheetMusic.getSong().getSongDuration())
-				// .sheetImage(sheetMusic.getSheetImage())
+			if (count == 0) {
+				result.setSongId(sheetMusic.getSong().getSongId());
+				result.setSongTitle(sheetMusic.getSong().getSongTitle());
+				result.setSongImage(sheetMusic.getSong().getSongImage());
+				result.setSongWriter(sheetMusic.getSong().getSongWriter());
+				result.setSongSinger(sheetMusic.getSong().getSongSinger());
+				count++;
+			}
+			SheetMusicResponseDto responseDto = SheetMusicResponseDto.builder()
 				.sheetOrder(sheetMusic.getSheetOrder())
 				.chord(sheetMusic.getChord())
 				.chordOrder(sheetMusic.getChordOrder())
 				.chordTiming(sheetMusic.getChordTiming())
 				.build();
 
-			result.add(responseDto);
+			sheetMusicResponseDto.add(responseDto);
 		}
+		result.setSheetMusicResponseDtos(sheetMusicResponseDto);
 
 		return result;
 	}

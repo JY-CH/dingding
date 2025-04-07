@@ -9,7 +9,7 @@ import com.ssafy.ddingga.facade.song.dto.response.SelectSongResponseDto;
 public interface SongFacadeService {
 	List<GetSongResponseDto> getSong();
 
-	List<SelectSongResponseDto> selectSong(int songId);
+	SelectSongResponseDto selectSong(int songId);
 
 	List<SearchSongResponseDto> searchSong(String keyword);
 }

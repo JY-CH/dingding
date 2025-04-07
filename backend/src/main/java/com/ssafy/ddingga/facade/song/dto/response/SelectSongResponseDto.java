@@ -1,5 +1,7 @@
 package com.ssafy.ddingga.facade.song.dto.response;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,13 +20,5 @@ public class SelectSongResponseDto {
 	private String songWriter;
 	private String songSinger;
 
-	// 노래의 재생 시간을 "HH:MM:SS" 형식으로 저장
-	// private String songDuration;  // 예: "00:03:30" (3분 30초)
-
-	// 악보 정보
-	// private String sheetImage;
-	private Integer sheetOrder;
-	private String chord;
-	private Integer chordOrder;
-	private Float chordTiming;
+	private List<SheetMusicResponseDto> sheetMusicResponseDtos;
 }

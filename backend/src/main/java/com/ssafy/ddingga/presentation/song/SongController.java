@@ -42,8 +42,8 @@ public class SongController {
 		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 노래입니다.")})
 	@GetMapping(value = "/{songId}")
-	public ResponseEntity<List<SelectSongResponseDto>> selectSong(@PathVariable int songId) {
-		List<SelectSongResponseDto> responseDto = songFacadeService.selectSong(songId);
+	public ResponseEntity<SelectSongResponseDto> selectSong(@PathVariable int songId) {
+		SelectSongResponseDto responseDto = songFacadeService.selectSong(songId);
 
 		return ResponseEntity.ok().body(responseDto);
 	}
