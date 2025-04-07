@@ -43,6 +43,9 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
     isCorrect: boolean;
   } | null>(null);
 
+  // 선택된 시간을 초 단위로 저장하는 ref
+  const [recordingDuration, setRecordingDuration] = useState(1);
+
   // indexedDB 훅을 사용하여 데이터 저장 및 읽기
   const { saveData, getAllData } = useIndexedDB('PracticeSessionDB', 'sessionData');
 
@@ -86,6 +89,24 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
     [exercise.chords, currentStep],
   );
 
+  // 커스텀 녹음 시작 함수
+  const startRecordingWithDuration = useCallback((duration: number) => {
+    if (startRecording) {
+      console.log(`${duration}초 동안 녹음 시작...`);
+
+      // 녹음 시작
+      startRecording();
+
+      // 지정된 시간 후에 녹음 중지
+      setTimeout(() => {
+        console.log(`${duration}초 지남, 녹음 중지...`);
+        if (stopRecording) {
+          stopRecording();
+        }
+      }, duration * 1000);
+    }
+  }, []);
+
   const {
     isRecording,
     isAnalyzing,
@@ -97,6 +118,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
     onResult: handleAudioResult,
     targetChord: exercise.chords[currentStep],
     confidenceThreshold: 0.5,
+    recordingDuration: recordingDuration, // 선택한 녹음 시간 전달
   });
 
   const calculateAverageScore = async (): Promise<number> => {
@@ -165,7 +187,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
       // 자동으로 다음 코드 녹음 시작
       if (isReady && !isRecording && !isAnalyzing) {
         setTimeout(() => {
-          startRecording();
+          startRecordingWithDuration(recordingDuration);
         }, 500); // 다음 코드로 넘어간 후 0.5초 후 녹음 시작
       }
     }
@@ -183,15 +205,34 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
     // 단계 변경 시 자동 녹음 시작
     if (isReady && !isRecording && !isAnalyzing) {
       setTimeout(() => {
-        startRecording();
+        startRecordingWithDuration(recordingDuration);
       }, 1000); // 단계 변경 후 1초 후 녹음 시작
     }
-  }, [currentStep, onStepChange, isReady, isRecording, isAnalyzing, startRecording]);
+  }, [
+    currentStep,
+    onStepChange,
+    isReady,
+    isRecording,
+    isAnalyzing,
+    startRecordingWithDuration,
+    recordingDuration,
+  ]);
+
+  // 선택 시간이 변경될 때 녹음 시간 업데이트
+  useEffect(() => {
+    if (selectTime > 0) {
+      setRecordingDuration(selectTime);
+    }
+  }, [selectTime]);
 
   const handleStart = () => {
     // UUID v4 형식으로 roomId 생성
     const roomId = `room_${crypto.randomUUID()}`;
     console.log('Generated roomId:', roomId);
+
+    // 선택된 녹음 시간 설정
+    setRecordingDuration(selectTime);
+    console.log(`선택된 녹음 시간: ${selectTime}초`);
 
     // 웹소켓 연결
     connect(roomId);
@@ -205,7 +246,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
 
     // 연습 시작 시 첫 번째 코드 녹음 시작 (약간의 지연 추가)
     setTimeout(() => {
-      startRecording();
+      startRecordingWithDuration(selectTime);
     }, 1000);
   };
 
@@ -324,7 +365,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                 {isRecording ? (
                   <span className="inline-flex items-center text-red-500">
                     <span className="animate-ping h-2 w-2 rounded-full bg-red-500 mr-2"></span>
-                    녹음 중...
+                    녹음 중... ({recordingDuration}초)
                   </span>
                 ) : isAnalyzing ? (
                   <span className="inline-flex items-center text-amber-500">
@@ -342,7 +383,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
               </div>
               <div>
                 <button
-                  onClick={startRecording}
+                  onClick={() => startRecordingWithDuration(recordingDuration)}
                   disabled={isRecording || isAnalyzing}
                   className={`px-3 py-1 rounded text-sm ${
                     isRecording || isAnalyzing
@@ -350,7 +391,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                       : 'bg-green-600 hover:bg-green-700'
                   }`}
                 >
-                  녹음
+                  녹음 ({recordingDuration}초)
                 </button>
               </div>
             </div>
