@@ -31,7 +31,8 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 				.songTitle(song.getSongTitle())
 				.songImage(song.getSongImage())
 				.songWriter(song.getSongWriter())
-				.songDuration(song.getSongDuration())
+				.songSinger(song.getSongSinger())
+				// .songDuration(song.getSongDuration())
 				.build();
 
 			responseDto.add(getSongResponseDto);
@@ -57,9 +58,9 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 				.songTitle(sheetMusic.getSong().getSongTitle())
 				.songImage(sheetMusic.getSong().getSongImage())
 				.songWriter(sheetMusic.getSong().getSongWriter())
-				.singer(sheetMusic.getSong().getSinger())
-				.songDuration(sheetMusic.getSong().getSongDuration())
-				.sheetImage(sheetMusic.getSheetImage())
+				.songSinger(sheetMusic.getSong().getSongSinger())
+				// .songDuration(sheetMusic.getSong().getSongDuration())
+				// .sheetImage(sheetMusic.getSheetImage())
 				.sheetOrder(sheetMusic.getSheetOrder())
 				.chord(sheetMusic.getChord())
 				.chordOrder(sheetMusic.getChordOrder())
@@ -83,8 +84,8 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 				.songTitle(song.getSongTitle())
 				.songImage(song.getSongImage())
 				.songWriter(song.getSongWriter())
-				.singer(song.getSinger())
-				.songDuration(song.getSongDuration())
+				.songSinger(song.getSongSinger())
+				// .songDuration(song.getSongDuration())
 				.build();
 
 			responseDto.add(getSongResponseDto);

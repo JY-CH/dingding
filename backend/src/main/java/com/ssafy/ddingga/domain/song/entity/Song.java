@@ -33,8 +33,8 @@ public class Song {
 
 	@Column(name = "song_writer")
 	private String songWriter;
-	private String singer;
+	private String songSinger;
 
 	// 노래의 재생 시간을 "HH:MM:SS" 형식으로 저장
-	private String songDuration;  // 예: "00:03:30" (3분 30초)
+	// private String songDuration;  // 예: "00:03:30" (3분 30초)
 }
