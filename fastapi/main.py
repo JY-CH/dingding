@@ -539,29 +539,54 @@ try:
     template_data_path = os.path.join(MODEL_DIR, "guitar_chord_templates.pkl")
     scaler_path = os.path.join(MODEL_DIR, "guitar_chord_scaler.pkl")
 
+    print(f"=== 모델 로드 시작 ===")
+    print(f"ml_models_path: {ml_models_path}")
+    print(f"label_encoder_path: {label_encoder_path}")
+    print(f"template_data_path: {template_data_path}")
+    print(f"scaler_path: {scaler_path}")
+
     # 필수 파일 존재 여부 확인
     for path in [ml_models_path, label_encoder_path, template_data_path]:
         if not os.path.exists(path):
+            print(f"파일을 찾을 수 없음: {path}")
             raise FileNotFoundError(f"모델 파일을 찾을 수 없습니다: {path}")
+        else:
+            print(f"파일 존재 확인: {path}")
 
     # 모델 및 데이터 로드
+    print("모델 로드 중...")
     ml_models = joblib.load(ml_models_path)
+    print("ml_models 로드 완료")
+
     label_encoder = joblib.load(label_encoder_path)
+    print("label_encoder 로드 완료")
+
     template_data = joblib.load(template_data_path)
+    print("template_data 로드 완료")
 
     # 스케일러 로드 (있는 경우)
     if os.path.exists(scaler_path):
         scaler = joblib.load(scaler_path)
+        print("scaler 로드 완료")
+    else:
+        print("scaler 파일 없음")
 
     # 템플릿 데이터 추출
-    template_mels = template_data["template_mels"]
-    template_chromas = template_data["template_chromas"]
+    template_mels = np.array(template_data["template_mels"])
+    template_chromas = np.array(template_data["template_chromas"])
     labels = template_data["labels"]
 
     # 세그먼트 길이 (duration) 정보 추출
     duration = template_data.get("duration", 1.0)
 
     print("모델 로드 완료!")
+    print(
+        f"template_mels shape: {template_mels.shape if template_mels is not None else 'None'}")
+    print(
+        f"template_chromas shape: {template_chromas.shape if template_chromas is not None else 'None'}")
+    print(f"labels: {labels}")
+    print(f"duration: {duration}")
+    print("=========================")
 except Exception as e:
     print(f"모델 로드 오류: {str(e)}")
     print("서버는 계속 실행되지만 모델이 로드되지 않았습니다.")
