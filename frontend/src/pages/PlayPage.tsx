@@ -8,6 +8,7 @@ import { RiMusicLine, RiSettings4Line } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
+import GameModeNavbar from '../components/common/GameModeNavbar';
 import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
 import FretboardVisualizer from '../components/guitar/FretboardVisualizer';
 import PracticeSession from '../components/guitar/PracticeSession';
@@ -199,51 +200,16 @@ const PlayPage: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-auto bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 h-full">
-      {/* 상단 네비게이션 바 */}
-      <nav className="bg-black/30 backdrop-blur-sm border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <GiGuitar className="w-6 h-6 text-amber-500" />
-            <h1 className="text-xl font-bold text-white">ThingThing Guitar</h1>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-700 hover:text-white transition-colors">
-              <GiGuitar className="w-5 h-5" />
-              연습 모드
-            </button>
-            <button
-              onClick={() => navigate('/performance')}
-              className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
-            >
-              <RiMusicLine className="w-5 h-5" />
-              연주 모드
-            </button>
-            <button
-              onClick={() => setShowStats(!showStats)}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
-            >
-              <IoStatsChartOutline className="w-5 h-5 text-zinc-400 group-hover:text-amber-500" />
-            </button>
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 ㅋㅌtransition-colors group"
-            >
-              <RiSettings4Line className="w-5 h-5 text-zinc-400 group-hover:text-amber-500" />
-            </button>
-            <div className="h-8 w-px bg-white/10" />
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
-                <span className="text-amber-500 font-medium">7</span>
-              </div>
-              <div className="text-sm">
-                <div className="text-zinc-400">연습 스트릭</div>
-                <div className="text-white font-medium">7일 연속</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* 네비바 - 4rem 고정 */}
+      <div className="h-16">
+        <GameModeNavbar
+          showStats={showStats}
+          setShowStats={setShowStats}
+          showSettings={showSettings}
+          setShowSettings={setShowSettings}
+          currentMode="performance"
+        />
+      </div>
 
       <div className="p-8">
         {/* 메인 콘텐츠 그리드 */}

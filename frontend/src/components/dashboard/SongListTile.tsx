@@ -167,9 +167,13 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={1.5}
-                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                d="M9 19V6l12-3v13
+       M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z
+       M9 10l12-3
+       M21 16c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"
               />
             </svg>
+
             <p className="text-sm">최근 연주한 노래가 없습니다</p>
           </div>
         )}
