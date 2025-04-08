@@ -25,6 +25,66 @@ interface UseAudioAnalysisProps {
   recordingDuration?: number; // 녹음 시간 설정 추가
 }
 
+// AudioBuffer를 WAV Blob으로 변환하는 함수
+const encodeWAV = (audioBuffer: AudioBuffer, sampleRate: number = 22050): Promise<Blob> => {
+  return new Promise((resolve) => {
+    // 모노로 변환
+    const numChannels = 1;
+    const numSamples = Math.floor(audioBuffer.duration * sampleRate);
+    const buffer = new ArrayBuffer(44 + numSamples * 2);
+    const view = new DataView(buffer);
+
+    // WAV 헤더 작성 (RIFF 포맷)
+    const writeString = (offset: number, string: string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+
+    // "RIFF" 청크 Descriptor
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + numSamples * 2, true);
+    writeString(8, 'WAVE');
+
+    // "fmt " 서브청크
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true); // fmt 청크 크기
+    view.setUint16(20, 1, true); // PCM 포맷 (1)
+    view.setUint16(22, numChannels, true); // 채널 수
+    view.setUint32(24, sampleRate, true); // 샘플레이트
+    view.setUint32(28, sampleRate * numChannels * 2, true); // 바이트레이트
+    view.setUint16(32, numChannels * 2, true); // 블록 얼라인
+    view.setUint16(34, 16, true); // 비트퍼샘플
+
+    // "data" 서브청크
+    writeString(36, 'data');
+    view.setUint32(40, numSamples * 2, true); // 데이터 크기
+
+    // 단순하게 직접 변환하는 방식으로 수정
+    // 오디오 데이터를 모노로 변환하고 리샘플링
+    const channelData = audioBuffer.getChannelData(0);
+    const resampleRatio = audioBuffer.sampleRate / sampleRate;
+    let offset = 44;
+
+    for (let i = 0; i < numSamples; i++) {
+      // 간단한 리샘플링 (선형 보간)
+      const originalIndex = Math.floor(i * resampleRatio);
+      const sample = originalIndex < channelData.length ? channelData[originalIndex] : 0;
+
+      // 샘플 클리핑 및 16비트 변환
+      const clippedSample = Math.max(-1, Math.min(1, sample));
+      view.setInt16(
+        offset,
+        clippedSample < 0 ? clippedSample * 0x8000 : clippedSample * 0x7fff,
+        true,
+      );
+      offset += 2;
+    }
+
+    resolve(new Blob([buffer], { type: 'audio/wav' }));
+  });
+};
+
 export const useAudioAnalysis = ({
   onResult,
   targetChord,
@@ -209,24 +269,23 @@ export const useAudioAnalysis = ({
 
       // 녹음 완료 처리
       mediaRecorder.onstop = async () => {
-        // 오디오 데이터 생성 - MIME 타입 명시
-        const audioBlob = new Blob(chunksRef.current, { type: selectedType || 'audio/wav' });
-        console.log('녹음된 오디오 정보:', {
-          size: audioBlob.size,
-          type: audioBlob.type,
-          chunks: chunksRef.current.length,
-        });
-
-        setAudioBlob(audioBlob);
-
         try {
-          // 프론트엔드 처리
+          // 원본 녹음 오디오 (WebM/Opus 등)
+          const originalBlob = new Blob(chunksRef.current, { type: selectedType || 'audio/webm' });
+          console.log('원본 녹음 오디오:', {
+            size: originalBlob.size,
+            type: originalBlob.type,
+            chunks: chunksRef.current.length,
+          });
+
+          // 오디오 컨텍스트 초기화
           const audioContext = initAudioContext();
           if (!audioContext) {
             throw new Error('오디오 컨텍스트가 초기화되지 않았습니다.');
           }
 
-          const arrayBuffer = await audioBlob.arrayBuffer();
+          // 원본 오디오 디코딩
+          const arrayBuffer = await originalBlob.arrayBuffer();
           console.log('오디오 버퍼 크기:', arrayBuffer.byteLength);
 
           if (arrayBuffer.byteLength === 0) {
@@ -240,40 +299,63 @@ export const useAudioAnalysis = ({
             numberOfChannels: audioBuffer.numberOfChannels,
           });
 
-          // 템플릿 매칭으로 분석
-          if (templateMatcherRef.current) {
-            console.log('템플릿 매칭 분석 시작...');
-            const result = await templateMatcherRef.current.processAudio(audioBuffer);
-            console.log('템플릿 매칭 결과:', result);
+          // 템플릿 매칭 부분 - 별도의 try-catch로 분리
+          try {
+            if (templateMatcherRef.current) {
+              console.log('템플릿 매칭 분석 시작...');
+              const result = await templateMatcherRef.current.processAudio(audioBuffer);
+              console.log('템플릿 매칭 결과:', result);
 
-            setLocalResult(result);
+              setLocalResult(result);
 
-            // 프론트엔드 결과 콜백
-            if (onResult) {
-              onResult({
-                ...result,
-                source: 'frontend',
-                isCorrect: targetChord ? result.chord === targetChord : undefined,
-              });
+              // 프론트엔드 결과 콜백
+              if (onResult) {
+                onResult({
+                  ...result,
+                  source: 'frontend',
+                  isCorrect: targetChord ? result.chord === targetChord : undefined,
+                });
+              }
             }
-
-            // 항상 백엔드 분석 요청
-            console.log('백엔드 분석 요청...');
-            analyzeAudio(audioBlob);
-          } else {
-            // 템플릿 매처가 없는 경우 백엔드로 직접 요청
-            console.log('템플릿 매처 없음, 백엔드 분석 요청...');
-            analyzeAudio(audioBlob);
+          } catch (templateError) {
+            console.error('템플릿 매칭 오류:', templateError);
+            // 템플릿 매칭 오류 발생 시에도 계속 진행
           }
+
+          // WAV로 변환 (librosa 호환성 향상) - 템플릿 매칭과 독립적으로 진행
+          console.log('WAV 형식으로 변환 시작...');
+          const wavBlob = await encodeWAV(audioBuffer, 22050);
+
+          // WAV 검증
+          const wavArray = await wavBlob.arrayBuffer();
+          const wavView = new Uint8Array(wavArray);
+
+          // RIFF 헤더 확인
+          if (
+            wavView.length < 44 ||
+            wavView[0] !== 82 || // R
+            wavView[1] !== 73 || // I
+            wavView[2] !== 70 || // F
+            wavView[3] !== 70 // F
+          ) {
+            throw new Error('WAV 변환 실패: 유효한 RIFF 헤더가 아닙니다.');
+          }
+
+          console.log('WAV 변환 완료 및 검증됨:', {
+            size: wavBlob.size,
+            type: 'audio/wav',
+            header: String.fromCharCode(wavView[0], wavView[1], wavView[2], wavView[3]),
+          });
+
+          // WAV 파일 저장
+          setAudioBlob(wavBlob);
+
+          // 백엔드 분석 요청 - 템플릿 매칭 성공 여부와 관계없이 실행
+          console.log('WAV 형식으로 백엔드 분석 요청...');
+          analyzeAudio(wavBlob);
         } catch (error) {
-          console.error('오디오 프론트엔드 처리 오류:', error);
+          console.error('오디오 처리 오류:', error);
           setError(`오디오 처리 오류: ${(error as Error).message}`);
-
-          // 오류 발생해도 백엔드 분석 진행
-          if (chunksRef.current.length > 0) {
-            console.log('오류 발생, 백엔드 분석만 요청...');
-            analyzeAudio(audioBlob);
-          }
         }
       };
 
