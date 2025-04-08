@@ -27,14 +27,17 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 		List<GetSongResponseDto> responseDto = new ArrayList<>();
 
 		for (Song song : songs) {
-			if (song.getSongId() >= 15 && song.getSongId() != 17) {
+			if (song.getSongId() >= 16) {    // 1~14 코드, 15 연습모드일때 노래를 이걸로 하기로 함 16번 부터 노래
 				GetSongResponseDto getSongResponseDto = GetSongResponseDto.builder()
 					.songId(song.getSongId())
 					.songTitle(song.getSongTitle())
 					.songImage(song.getSongImage())
 					.songWriter(song.getSongWriter())
 					.songSinger(song.getSongSinger())
-					// .songDuration(song.getSongDuration())
+					.songVoiceFileUrl(song.getSongVoiceFileUrl())
+					.releaseDate(song.getReleaseDate())
+					.category(song.getCategory())
+					.songDuration(song.getSongDuration())
 					.build();
 
 				responseDto.add(getSongResponseDto);
@@ -94,7 +97,10 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 				.songImage(song.getSongImage())
 				.songWriter(song.getSongWriter())
 				.songSinger(song.getSongSinger())
-				// .songDuration(song.getSongDuration())
+				.songVoiceFileUrl(song.getSongVoiceFileUrl())
+				.releaseDate(song.getReleaseDate())
+				.category(song.getCategory())
+				.songDuration(song.getSongDuration())
 				.build();
 
 			responseDto.add(getSongResponseDto);
