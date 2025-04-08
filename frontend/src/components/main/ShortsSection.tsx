@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 
 // import { mockShorts } from '../../data/mockData';
 import { _axiosAuth } from '../../services/JYapi';
+import ShortsComponents from '../main/ShortsComponents';
 
 interface Short {
   username: string;
@@ -20,6 +21,8 @@ const ShortsSection = () => {
   const [isModal, setIsModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [title, setTitle] = useState<string>('');
+  const [selectedShort, setSelectedShort] = useState<Short | null>(null); // 선택된 short 상태
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
 
   const { data: shorts } = useQuery({
     queryKey: ['shorts'],
@@ -81,6 +84,11 @@ const ShortsSection = () => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     uploadVide.mutate();
+  };
+
+  const handleShortClick = (short: Short) => {
+    setSelectedShort(short); // 선택된 short 설정
+    setIsModalOpen(true); // 모달 열기
   };
 
   return (
@@ -189,6 +197,7 @@ const ShortsSection = () => {
                 className="relative group"
                 onMouseEnter={() => setHoveredShort(short.fileUrl)}
                 onMouseLeave={() => setHoveredShort(null)}
+                onClick={() => handleShortClick(short)}
               >
                 <div
                   className={`aspect-[9/16] rounded-xl overflow-hidden relative transition-transform duration-300 ease-out transform ${
@@ -198,7 +207,7 @@ const ShortsSection = () => {
                   <video
                     src={short.fileUrl}
                     controls
-                    className="w-full h-full object-cover transition-transform duration-700"
+                    className="w-full h-full object-cover transition-transform duration-700" // object-cover 추가
                   />
                   <div
                     className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 ${
@@ -206,6 +215,9 @@ const ShortsSection = () => {
                     }`}
                   />
                 </div>
+                <span className="text-amber-500">
+                  {short.title.length > 10 ? `${short.title.slice(0, 10)}...` : short.title}
+                </span>
               </motion.div>
             ))
           ) : (
@@ -214,6 +226,12 @@ const ShortsSection = () => {
             </div>
           )}
         </div>
+        {isModalOpen && selectedShort && (
+          <ShortsComponents
+            short={selectedShort}
+            onClose={() => setIsModalOpen(false)} // 모달 닫기 핸들러
+          />
+        )}
       </motion.div>
     </>
   );
