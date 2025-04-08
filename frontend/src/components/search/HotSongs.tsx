@@ -3,17 +3,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Headphones, Clock } from 'lucide-react';
 
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  thumbnail: string;
-  plays?: string;
-  duration?: string;
-}
+import { SearchSong } from '@/types/index';
 
 interface HotSongsProps {
-  songs: Song[];
+  songs: SearchSong[];
 }
 
 const HotSongs: React.FC<HotSongsProps> = ({ songs }) => {
@@ -22,7 +15,7 @@ const HotSongs: React.FC<HotSongsProps> = ({ songs }) => {
       <div className="bg-zinc-800 rounded-xl overflow-hidden">
         {songs.map((song, index) => (
           <motion.div
-            key={song.id}
+            key={song.songId}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -30,22 +23,22 @@ const HotSongs: React.FC<HotSongsProps> = ({ songs }) => {
           >
             <div className="w-6 text-center text-gray-400 mr-3">{index + 1}</div>
             <img
-              src={song.thumbnail}
-              alt={song.title}
+              src={song.songImage}
+              alt={song.songTitle}
               className="w-12 h-12 object-cover rounded-md"
             />
             <div className="ml-4 flex-1 min-w-0">
-              <div className="text-sm font-medium text-white truncate">{song.title}</div>
-              <div className="text-xs text-gray-400 mt-1">{song.artist}</div>
+              <div className="text-sm font-medium text-white truncate">{song.songTitle}</div>
+              <div className="text-xs text-gray-400 mt-1">{song.songSinger}</div>
             </div>
             <div className="flex items-center gap-3 ml-auto text-xs text-gray-400">
               <div className="flex items-center gap-1">
                 <Headphones className="w-3 h-3" />
-                <span>{song.plays}</span>
+                <span>{song.category}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                <span>{song.duration}</span>
+                <span>{song.songDuration}</span>
               </div>
             </div>
           </motion.div>

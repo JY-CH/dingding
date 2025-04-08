@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-import { Search, X, Clock, Disc, User } from 'lucide-react';
+import { Search, X, Disc, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
@@ -11,7 +11,7 @@ interface SearchBarProps {
 
 // 연관 검색어 타입 정의
 interface SearchSuggestion {
-  type: 'album' | 'artist' | 'recent';
+  type: 'album' | 'artist';
   title: string;
   subtitle?: string;
   imageUrl?: string;
@@ -20,7 +20,6 @@ interface SearchSuggestion {
 const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }) => {
   const navigate = useNavigate();
   const [isFocused, setIsFocused] = useState(false);
-  const [recentSearches, setRecentSearches] = useState(['아이돌', '발라드', '힙합', '인디']);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -46,7 +45,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }
       subtitle: 'BTS',
       imageUrl: '/album-covers/be.jpg',
     },
-    // ... 더 많은 연관 검색어
   ];
 
   // 검색어 입력시 연관 검색어 필터링
@@ -89,12 +87,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }
     setIsFocused(false);
   };
 
-  // 검색어 삭제 처리
-  const removeSearchTerm = (termToRemove: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setRecentSearches(recentSearches.filter((term) => term !== termToRemove));
-  };
-
   // 검색 처리 함수 추가
   const handleSearch = (searchValue: string) => {
     if (searchValue.trim()) {
@@ -130,7 +122,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }
         <input
           ref={inputRef}
           type="text"
-          placeholder="노래, 아티스트, 코드를 검색하세요..."
+          placeholder="노래, 코드를 검색하세요..."
           value={tempQuery} // ✅ 실시간 입력값만 표시
           onChange={(e) => setTempQuery(e.target.value)} // ✅ query 변경 X
           onFocus={() => setIsFocused(true)}
@@ -149,94 +141,58 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }
       </div>
 
       {/* 드롭다운 메뉴 수정 */}
-      {isFocused && (suggestions.length > 0 || recentSearches.length > 0) && (
+      {isFocused && suggestions.length > 0 && (
         <div className="absolute z-30 left-0 right-0 mt-2 bg-zinc-800/90 backdrop-blur-md rounded-xl shadow-xl border border-white/10 overflow-hidden">
           {/* 연관 검색어 */}
-          {suggestions.length > 0 && (
-            <div className="py-3">
-              <div className="px-4 py-1">
-                <h4 className="text-sm font-medium text-zinc-400 flex items-center gap-1.5">
-                  <Search className="w-3.5 h-3.5 text-amber-500" />
-                  연관 검색어
-                </h4>
-              </div>
-              <div className="max-h-64 overflow-y-auto custom-scrollbar">
-                {suggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleSelectSuggestion(suggestion.title)}
-                    className="flex items-center px-4 py-3 hover:bg-zinc-700/50 cursor-pointer transition-all group"
-                  >
-                    {/* 앨범/아티스트 이미지 */}
-                    <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 mr-3 group-hover:shadow-md group-hover:shadow-amber-500/10 transition-all">
-                      {suggestion.imageUrl ? (
-                        <img
-                          src={suggestion.imageUrl}
-                          alt={suggestion.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-zinc-700/80 to-zinc-800/80 flex items-center justify-center">
-                          {suggestion.type === 'album' ? (
-                            <Disc className="w-5 h-5 text-amber-500" />
-                          ) : (
-                            <User className="w-5 h-5 text-amber-500" />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {/* 텍스트 정보 */}
-                    <div className="flex-1 min-w-0">
-                      <div className="text-white text-sm truncate group-hover:text-amber-500 transition-colors">
-                        {suggestion.title}
+          <div className="py-3">
+            <div className="px-4 py-1">
+              <h4 className="text-sm font-medium text-zinc-400 flex items-center gap-1.5">
+                <Search className="w-3.5 h-3.5 text-amber-500" />
+                연관 검색어
+              </h4>
+            </div>
+            <div className="max-h-64 overflow-y-auto custom-scrollbar">
+              {suggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  onClick={() => handleSelectSuggestion(suggestion.title)}
+                  className="flex items-center px-4 py-3 hover:bg-zinc-700/50 cursor-pointer transition-all group"
+                >
+                  {/* 앨범/아티스트 이미지 */}
+                  <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 mr-3 group-hover:shadow-md group-hover:shadow-amber-500/10 transition-all">
+                    {suggestion.imageUrl ? (
+                      <img
+                        src={suggestion.imageUrl}
+                        alt={suggestion.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-zinc-700/80 to-zinc-800/80 flex items-center justify-center">
+                        {suggestion.type === 'album' ? (
+                          <Disc className="w-5 h-5 text-amber-500" />
+                        ) : (
+                          <User className="w-5 h-5 text-amber-500" />
+                        )}
                       </div>
-                      {suggestion.subtitle && (
-                        <div className="text-zinc-400 text-xs truncate">{suggestion.subtitle}</div>
-                      )}
-                    </div>
-                    {/* 타입 표시 */}
-                    <div className="text-xs text-amber-500 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
-                      {suggestion.type === 'album' ? '앨범' : '아티스트'}
-                    </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 최근 검색어 */}
-          {recentSearches.length > 0 && (
-            <div className="py-3 border-t border-zinc-700/50">
-              <div className="px-4 py-1">
-                <h4 className="text-sm font-medium text-zinc-400 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-amber-500" />
-                  최근 검색어
-                </h4>
-              </div>
-              <div className="max-h-64 overflow-y-auto custom-scrollbar">
-                {recentSearches.map((term, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleSelectSuggestion(term)}
-                    className="flex items-center justify-between px-4 py-2.5 hover:bg-zinc-700/50 cursor-pointer transition-all group"
-                  >
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 text-zinc-500 mr-3 group-hover:text-amber-500 transition-colors" />
-                      <span className="text-zinc-300 group-hover:text-white transition-colors">
-                        {term}
-                      </span>
+                  {/* 텍스트 정보 */}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white text-sm truncate group-hover:text-amber-500 transition-colors">
+                      {suggestion.title}
                     </div>
-                    <button
-                      onClick={(e) => removeSearchTerm(term, e)}
-                      className="p-1 rounded-full text-zinc-500 hover:text-white hover:bg-zinc-600/50 transition-colors"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
+                    {suggestion.subtitle && (
+                      <div className="text-zinc-400 text-xs truncate">{suggestion.subtitle}</div>
+                    )}
                   </div>
-                ))}
-              </div>
+                  {/* 타입 표시 */}
+                  <div className="text-xs text-amber-500 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
+                    {suggestion.type === 'album' ? '앨범' : '아티스트'}
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>

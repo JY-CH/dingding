@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-
+import React, { useState, useEffect, useRef } from 'react';
 import GameModeNavbar from '../components/common/GameModeNavbar';
 import ChordTimeline from '../components/performance/ChordTimeline';
 import Playlist from '../components/performance/Playlist';
 import RealtimeFeedback from '../components/performance/RealtimeFeedback';
-import WebcamView from '../components/performance/WebcamView';
+import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
 import { Song } from '../types/performance';
+import { Visualization } from '../types/guitar';
 
 // 피드백 메시지 목록
 const feedbackMessages = [
@@ -52,6 +52,68 @@ const PerformancePage: React.FC = () => {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentFeedback, setCurrentFeedback] = useState(feedbackMessages[0]);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [, setAnalyser] = useState<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  
+  // 시각화 데이터
+  const [visualization, setVisualization] = useState<Visualization>({
+    type: '3d',
+    data: new Array(128).fill(0),
+    peak: 1,
+  });
+
+  // 오디오 초기화 및 시각화 효과
+  useEffect(() => {
+    let isActive = true;
+
+    const initAudio = async () => {
+      try {
+        const context = new AudioContext();
+        const analyserNode = context.createAnalyser();
+        analyserNode.fftSize = 64;
+        analyserNode.smoothingTimeConstant = 0.8;
+
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const source = context.createMediaStreamSource(stream);
+        source.connect(analyserNode);
+
+        if (isActive) {
+          setAudioContext(context);
+          setAnalyser(analyserNode);
+
+          const updateVisualization = () => {
+            if (!isActive) return;
+
+            const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
+            analyserNode.getByteFrequencyData(dataArray);
+
+            setVisualization((prev) => ({
+              ...prev,
+              data: Array.from(dataArray).map((value) => (value / 255) * 0.7),
+              peak: Math.max(...dataArray) / 255 || 1,
+            }));
+
+            animationFrameRef.current = requestAnimationFrame(updateVisualization);
+          };
+
+          updateVisualization();
+        }
+      } catch (err) {
+        console.error('마이크 접근 실패:', err);
+      }
+    };
+
+    initAudio();
+
+    return () => {
+      isActive = false;
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      audioContext?.close();
+    };
+  }, []);
 
   // 피드백 메시지 업데이트 함수
   const updateFeedback = () => {
@@ -85,30 +147,48 @@ const PerformancePage: React.FC = () => {
         />
       </div>
 
-      {/* 플레이리스트와 웹캠 영역 - 남은 공간의 절반 */}
-      <div className="h-[calc(40vh-4rem)] flex gap-4 p-4 justify-between">
+      {/* 상단 컴포넌트 영역 */}
+      <div className="h-[calc(44vh-4rem)] flex gap-4 p-4">
         {/* 왼쪽: 플레이리스트 */}
-        <div className="w-1/4 h-full">
+        <div className="w-[25%] h-full">
           <Playlist onSongSelect={handleSongSelect} />
         </div>
-        {/* 가운데: 실시간 피드백 */}
-        <div className="w-1/3 h-full">
-          <RealtimeFeedback
+
+        {/* 중앙: 실시간 피드백 */}
+        <div className="w-[30%] h-full">
+          <RealtimeFeedback 
             feedback={currentFeedback.message}
             isPositive={currentFeedback.isPositive}
           />
         </div>
-        {/* 오른쪽: 웹캠 */}
-        <div className="w-1/4 h-full">
-          <WebcamView isWebcamOn={isWebcamOn} setIsWebcamOn={setIsWebcamOn} />
+        
+        {/* 오른쪽 영역: 음향 시각화 + 웹캠 */}
+        <div className="w-[45%] h-full flex gap-4">
+          {/* 음향 시각화 */}
+          <div className="w-[40%] h-full">
+            <div className="bg-black/30 backdrop-blur-sm p-3 rounded-xl h-full flex flex-col border border-white/10 shadow-xl">
+              <h3 className="text-sm font-semibold text-white/80 mb-2 flex items-center">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>
+                음향 시각화
+              </h3>
+              <div className="flex-grow">
+                <AudioVisualizer3D visualization={visualization} />
+              </div>
+            </div>
+          </div>
+          
+          {/* 웹캠 */}
+          <div className="w-[60%] h-full">
+            <WebcamView isWebcamOn={isWebcamOn} setIsWebcamOn={setIsWebcamOn} />
+          </div>
         </div>
       </div>
 
       {/* 코드 타임라인 영역 */}
-      <div className="h-[85vh] mb-2 p-4">
-        <div className="h-full bg-gray-800/50 rounded-lg overflow-hidden">
-          <ChordTimeline
-            isPlaying={isPlaying}
+      <div className="h-[calc(60vh-0.5rem)] mb-2 p-4">
+        <div className="h-full bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-white/5 shadow-lg">
+          <ChordTimeline 
+            isPlaying={isPlaying} 
             currentSong={currentSong}
             notes={currentSong?.notes || []}
             currentChord={null}

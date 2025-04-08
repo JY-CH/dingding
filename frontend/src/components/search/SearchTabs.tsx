@@ -9,7 +9,7 @@ interface SearchTabsProps {
 
 const tabs = [
   { key: 'all', label: '전체' },
-  { key: 'artists', label: '아티스트' },
+  // { key: 'artists', label: '아티스트' },
   { key: 'albums', label: '앨범' },
   { key: 'community', label: '커뮤니티' },
 ];
