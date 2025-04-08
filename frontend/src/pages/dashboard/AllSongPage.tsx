@@ -305,7 +305,7 @@ const AllSongsPage: React.FC = () => {
                 <div
                   onClick={() =>
                     navigate(`/video-stream/${song.replayId || index}`, {
-                      state: { song, videoUrl: song.videoPath },
+                      state: { song, videoUrl: song.videoPath, replayId: song.replayId },
                     })
                   }
                   className="cursor-pointer"

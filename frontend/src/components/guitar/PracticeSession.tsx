@@ -9,6 +9,7 @@ import RecordingService from '../../services/recordingApi';
 import { useWebSocketStore } from '../../store/useWebSocketStore';
 import { Exercise, Performance } from '../../types/guitar';
 
+
 interface PracticeSessionProps {
   exercise: Exercise;
   onComplete: (performance: Performance) => void;
