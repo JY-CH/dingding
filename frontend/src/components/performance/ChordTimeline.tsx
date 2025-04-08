@@ -122,17 +122,17 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   `;
 
   // 테스트용 노트 생성 함수
-  const createTestNote = (stringNumber: number) => {
-    const newNote: Note = {
-      id: Date.now() + Math.random(),
-      stringNumber,
-      position: 100, // 오른쪽에서 시작
-      timing: Date.now(),
-      isChord: false,
-      chord: '' // 빈 문자열로 초기화
-    };
-    setTestNotes(prev => [...prev, newNote]);
-  };
+  // const createTestNote = (stringNumber: number) => {
+  //   const newNote: Note = {
+  //     id: Date.now() + Math.random(),
+  //     stringNumber,
+  //     position: 100, // 오른쪽에서 시작
+  //     timing: Date.now(),
+  //     isChord: false,
+  //     chord: '' // 빈 문자열로 초기화
+  //   };
+  //   setTestNotes(prev => [...prev, newNote]);
+  // };
 
   // C코드 손모양 노트 생성 함수
   const createCChordNote = () => {
@@ -682,8 +682,8 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   }, [isPlaying, currentSong, notes, playbackSpeed]);
 
   const renderNote = (note: Note) => {
-    const isChordNote = note.isChord;
-    const isCurrentChord = currentChord && note.chordId === currentChord.id;
+    // const isChordNote = note.isChord;
+    // const isCurrentChord = currentChord && note.chordId === currentChord.id;
     const isOnTargetLine = Math.abs(note.position - 25) < 1;
 
   return (
