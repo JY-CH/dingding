@@ -29,7 +29,7 @@ const useIndexedDB = (dbName: string, storeName: string) => {
         transaction.onerror = () => reject(transaction.error);
       });
     },
-    [openDatabase, storeName]
+    [openDatabase, storeName],
   );
 
   const getAllData = useCallback(async (): Promise<any[]> => {

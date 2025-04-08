@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom';
-import { IoArrowBack } from 'react-icons/io5';
 import { GiGuitar } from 'react-icons/gi';
+import { IoArrowBack } from 'react-icons/io5';
 import { IoStatsChartOutline } from 'react-icons/io5';
 import { RiMusicLine, RiSettings4Line } from 'react-icons/ri';
+import { useNavigate } from 'react-router-dom';
 
 interface GameModeNavbarProps {
   showStats: boolean;
@@ -17,7 +17,7 @@ const GameModeNavbar: React.FC<GameModeNavbarProps> = ({
   setShowStats,
   showSettings,
   setShowSettings,
-  currentMode
+  currentMode,
 }) => {
   const navigate = useNavigate();
 
@@ -36,8 +36,8 @@ const GameModeNavbar: React.FC<GameModeNavbarProps> = ({
           </button>
           <div className="h-8 w-px bg-white/10" />
           <div className="flex items-center gap-2">
-            <GiGuitar className="w-6 h-6 text-amber-500" />
-            <h1 className="text-xl font-bold text-white">ThingThing Guitar</h1>
+            <img src="/ding.svg" alt="Ding Ding Logo" className="w-8 h-8 mt-0.5" />
+            <h1 className="text-xl font-bold text-white">Ding Ding</h1>
           </div>
         </div>
 
@@ -57,7 +57,8 @@ const GameModeNavbar: React.FC<GameModeNavbarProps> = ({
               연습 모드
             </button>
             <div className="absolute left-1/2 -translate-x-1/2 -bottom-1 translate-y-full flex items-center justify-center">
-              <div className="h-7 px-3 bg-zinc-700 rounded-lg shadow-xl 
+              <div
+                className="h-7 px-3 bg-zinc-700 rounded-lg shadow-xl 
                 flex items-center justify-center
                 opacity-0 group-hover:opacity-100 
                 translate-y-1 group-hover:translate-y-0
@@ -65,7 +66,9 @@ const GameModeNavbar: React.FC<GameModeNavbarProps> = ({
                 pointer-events-none
                 border border-zinc-600/50"
               >
-                <span className="text-xs font-medium text-zinc-200 whitespace-nowrap">단계별 연습과 피드백</span>
+                <span className="text-xs font-medium text-zinc-200 whitespace-nowrap">
+                  단계별 연습과 피드백
+                </span>
               </div>
             </div>
           </div>
@@ -84,7 +87,8 @@ const GameModeNavbar: React.FC<GameModeNavbarProps> = ({
               연주 모드
             </button>
             <div className="absolute left-1/2 -translate-x-1/2 -bottom-1 translate-y-full flex items-center justify-center">
-              <div className="h-7 px-3 bg-zinc-700 rounded-lg shadow-xl 
+              <div
+                className="h-7 px-3 bg-zinc-700 rounded-lg shadow-xl 
                 flex items-center justify-center
                 opacity-0 group-hover:opacity-100 
                 translate-y-1 group-hover:translate-y-0
@@ -92,7 +96,9 @@ const GameModeNavbar: React.FC<GameModeNavbarProps> = ({
                 pointer-events-none
                 border border-zinc-600/50"
               >
-                <span className="text-xs font-medium text-zinc-200 whitespace-nowrap">실시간 연주 분석</span>
+                <span className="text-xs font-medium text-zinc-200 whitespace-nowrap">
+                  실시간 연주 분석
+                </span>
               </div>
             </div>
           </div>
@@ -125,4 +131,4 @@ const GameModeNavbar: React.FC<GameModeNavbarProps> = ({
   );
 };
 
-export default GameModeNavbar; 
+export default GameModeNavbar;

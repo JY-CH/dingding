@@ -21,20 +21,21 @@ interface SongListTileProps {
 }
 
 const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
-  function parseDuration(duration: string): string {
-    // Expecting format "hh:mm:ss"
-    const parts = duration.split(':');
-    if (parts.length !== 3) return duration;
-    const hours = parseInt(parts[0], 10);
-    const minutes = parseInt(parts[1], 10);
-    const seconds = parseInt(parts[2], 10);
-    let result = '';
-    if (hours > 0) result += `${hours}시간 `;
-    if (minutes > 0) result += `${minutes}분 `;
-    // Optionally show seconds only if hours is 0
-    if (hours === 0 && seconds > 0) result += `${seconds}초`;
-    return result.trim();
-  }
+  // function parseDuration(duration: string): string {
+  //   if (!duration) return '시간 정보 없음'; // or 그냥 빈 문자열 ''
+  //   // Expecting format "hh:mm:ss"
+  //   const parts = duration.split(':');
+  //   if (parts.length !== 3) return duration;
+  //   const hours = parseInt(parts[0], 10);
+  //   const minutes = parseInt(parts[1], 10);
+  //   const seconds = parseInt(parts[2], 10);
+  //   let result = '';
+  //   if (hours > 0) result += `${hours}시간 `;
+  //   if (minutes > 0) result += `${minutes}분 `;
+  //   // Optionally show seconds only if hours is 0
+  //   if (hours === 0 && seconds > 0) result += `${seconds}초`;
+  //   return result.trim();
+  // }
   return (
     <div className="p-6 backdrop-blur-lg rounded-xl">
       {/* 헤더 부분 */}
@@ -127,9 +128,9 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
               {/* 녹화일 */}
               <div className="col-span-2 text-center text-xs text-zinc-400">
                 {song.date}
-                <div className="text-xs text-zinc-400 truncate">
+                {/* <div className="text-xs text-zinc-400 truncate">
                   ({parseDuration(song.duration)})
-                </div>
+                </div> */}
               </div>
 
               {/* 점수 */}
@@ -167,9 +168,13 @@ const SongListTile: React.FC<SongListTileProps> = ({ title, songs }) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={1.5}
-                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                d="M9 19V6l12-3v13
+       M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z
+       M9 10l12-3
+       M21 16c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"
               />
             </svg>
+
             <p className="text-sm">최근 연주한 노래가 없습니다</p>
           </div>
         )}

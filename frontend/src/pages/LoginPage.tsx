@@ -53,20 +53,9 @@ const LoginPage = () => {
         >
           <div className="inline-flex items-center">
             <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
-              <svg
-                className="w-12 h-12 text-amber-500"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                />
-              </svg>
-              <span className="ml-2 text-2xl font-bold text-white">ThingThing</span>
+              <img src="/ding.svg" alt="Ding Ding Logo" className="w-12 h-12 ml-5 mr-1 mt-0.5" />
+
+              <span className="ml-2 text-2xl font-bold text-white">Ding Ding</span>
             </div>
           </div>
         </motion.nav>
@@ -83,7 +72,7 @@ const LoginPage = () => {
             >
               <h1 className="text-4xl font-bold text-white drop-shadow-lg">로그인</h1>
               <p className="mt-2 text-white/90 text-lg drop-shadow">
-                ThingThing에서 음악을 시작하세요
+                Ding Ding에서 음악을 시작하세요
               </p>
             </motion.div>
 
@@ -180,7 +169,7 @@ const LoginPage = () => {
                 </button>
               </p>
               <p className="text-sm text-white/80 drop-shadow">
-                계속 진행하면 ThingThing의{' '}
+                계속 진행하면 Ding Ding의{' '}
                 <a href="#" className="text-amber-400 hover:text-amber-300">
                   서비스 약관
                 </a>

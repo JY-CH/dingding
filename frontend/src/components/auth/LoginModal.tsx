@@ -72,7 +72,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-white mb-2">로그인</h2>
-          <p className="text-zinc-400">ThingThing에서 음악을 시작하세요</p>
+          <p className="text-zinc-400">Ding Ding에서 음악을 시작하세요</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-5">

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { Visualization } from '../../types/guitar';
 
 interface AudioVisualizer3DProps {
@@ -20,7 +21,7 @@ const AudioVisualizer3D: React.FC<AudioVisualizer3DProps> = ({ visualization }) 
             style={{
               height: `${value * 100}%`,
               transformOrigin: 'bottom',
-              transition: 'height 80ms' // 트랜지션 시간 증가로 더 부드럽게
+              transition: 'height 80ms', // 트랜지션 시간 증가로 더 부드럽게
             }}
           />
         ))}
@@ -29,4 +30,4 @@ const AudioVisualizer3D: React.FC<AudioVisualizer3DProps> = ({ visualization }) 
   );
 };
 
-export default AudioVisualizer3D; 
+export default AudioVisualizer3D;
