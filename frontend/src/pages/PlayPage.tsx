@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { GiGuitar } from 'react-icons/gi';
@@ -49,12 +49,12 @@ const PlayPage: React.FC = () => {
   // AudioContext 관련 state들
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [, setAnalyser] = useState<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | null>(null); // null 초기값 추가
+  const animationFrameRef = useRef<number | null>(null);
 
   // 시각화 데이터
   const [visualization, setVisualization] = useState<Visualization>({
     type: '3d',
-    data: new Array(128).fill(0),
+    data: new Array(256).fill(0),
     peak: 1,
   });
 
@@ -88,14 +88,14 @@ const PlayPage: React.FC = () => {
   const webcamRef = useRef<Webcam>(null);
 
   useEffect(() => {
-    let isActive = true; // cleanup을 위한 flag
+    let isActive = true;
 
     const initAudio = async () => {
       try {
         const context = new AudioContext();
         const analyserNode = context.createAnalyser();
-        analyserNode.fftSize = 64;
-        analyserNode.smoothingTimeConstant = 0.8;
+        analyserNode.fftSize = 256;
+        analyserNode.smoothingTimeConstant = 0.3;
 
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const source = context.createMediaStreamSource(stream);
@@ -106,16 +106,19 @@ const PlayPage: React.FC = () => {
           setAnalyser(analyserNode);
 
           const updateVisualization = () => {
-            if (!isActive) return;
+            if (!isActive || !analyserNode) return;
 
             const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
             analyserNode.getByteFrequencyData(dataArray);
 
-            setVisualization((prev) => ({
-              ...prev,
-              data: Array.from(dataArray).map((value) => (value / 255) * 0.7),
-              peak: Math.max(...dataArray) / 255 || 1,
-            }));
+            setVisualization((prev) => {
+              const newData = Array.from(dataArray).map((value) => (value / 255) * 0.8);
+              return {
+                ...prev,
+                data: newData,
+                peak: Math.max(...dataArray) / 255 || 1,
+              };
+            });
 
             animationFrameRef.current = requestAnimationFrame(updateVisualization);
           };
@@ -129,7 +132,6 @@ const PlayPage: React.FC = () => {
 
     initAudio();
 
-    // 클린업
     return () => {
       isActive = false;
       if (animationFrameRef.current) {
@@ -137,7 +139,7 @@ const PlayPage: React.FC = () => {
       }
       audioContext?.close();
     };
-  }, []); // 빈 의존성 배열 유지
+  }, []);
 
   // 새로운 상태들 추가
   const [settings, setSettings] = useState({

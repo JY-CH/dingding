@@ -13,7 +13,6 @@ interface FretboardVisualizerProps {
 
 const FretboardVisualizer: React.FC<FretboardVisualizerProps> = ({
   strings,
-  frets,
   activeNotes = [],
   currentChord,
 }) => {
