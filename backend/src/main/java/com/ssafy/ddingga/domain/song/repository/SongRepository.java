@@ -17,4 +17,6 @@ public interface SongRepository extends JpaRepository<Song, Integer> {
 
 	// @Query("SELECT s FROM Song s WHERE s.songTitle LIKE %:keyword% OR s.songWriter LIKE %:keyword%")
 	// List<Song> findBySongTitleOrSongWriterContaining(@Param("keyword") String keyword);
+
+	List<Song> findBySongIdGreaterThanEqual(Integer songId);
 }
