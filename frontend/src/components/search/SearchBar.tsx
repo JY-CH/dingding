@@ -130,7 +130,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }
         <input
           ref={inputRef}
           type="text"
-          placeholder="노래, 아티스트, 코드를 검색하세요..."
+          placeholder="노래, 코드를 검색하세요..."
           value={tempQuery} // ✅ 실시간 입력값만 표시
           onChange={(e) => setTempQuery(e.target.value)} // ✅ query 변경 X
           onFocus={() => setIsFocused(true)}

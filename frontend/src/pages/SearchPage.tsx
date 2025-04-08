@@ -79,7 +79,7 @@ const SearchPage: React.FC = () => {
           </h1>
           <p className="text-zinc-400">
             {searchQuery
-              ? '마음에 드는 노래, 아티스트, 또는 커뮤니티 게시글을 찾아보세요'
+              ? '마음에 드는 노래, 또는 커뮤니티 게시글을 찾아보세요'
               : '새로운 음악을 발견하고 다른 기타리스트들과 연결하세요'}
           </p>
         </motion.div>
