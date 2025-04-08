@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Search, Play, Music, Filter, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Search, Play, Filter, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import apiClient from '../../services/dashboardapi';
@@ -49,18 +49,19 @@ const AllSongsPage: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'score'>('date');
 
-  function parseDuration(duration: string): string {
-    const parts = duration.split(':');
-    if (parts.length !== 3) return duration;
-    const hours = parseInt(parts[0], 10);
-    const minutes = parseInt(parts[1], 10);
-    const seconds = parseInt(parts[2], 10);
-    let result = '';
-    if (hours > 0) result += `${hours}시간 `;
-    if (minutes > 0) result += `${minutes}분 `;
-    if (hours === 0 && seconds > 0) result += `${seconds}초`;
-    return result.trim();
-  }
+  // function parseDuration(duration: string): string {
+  //   if (!duration) return '시간 정보 없음'; // or 그냥 빈 문자열 ''
+  //   const parts = duration.split(':');
+  //   if (parts.length !== 3) return duration;
+  //   const hours = parseInt(parts[0], 10);
+  //   const minutes = parseInt(parts[1], 10);
+  //   const seconds = parseInt(parts[2], 10);
+  //   let result = '';
+  //   if (hours > 0) result += `${hours}시간 `;
+  //   if (minutes > 0) result += `${minutes}분 `;
+  //   if (hours === 0 && seconds > 0) result += `${seconds}초`;
+  //   return result.trim();
+  // }
 
   // API에서 모든 리플레이 데이터 가져오기
   const {
@@ -344,9 +345,9 @@ const AllSongsPage: React.FC = () => {
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-zinc-400 text-sm flex items-center gap-1">
                         <span className="text-zinc-500 font-medium">{song.artist}</span>
-                        <span className="text-zinc-500">|</span>
-                        <Music size={14} />
-                        {parseDuration(song.duration)}
+                        {/* <span className="text-zinc-500">|</span> */}
+                        {/* <Music size={14} />
+                        {parseDuration(song.duration)} */}
                       </span>
                     </div>
                   </div>
