@@ -38,7 +38,9 @@ public class SecurityConfig {
 				.requestMatchers(
 					"/api/auth/signup",
 					"/api/auth/login",
-					"/api/auth/refresh"
+					"/api/auth/refresh",
+					"/api/rank/top",
+					"/api/weekSong/ranking"
 				).permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/article", "/api/article/**").permitAll()  // GET 요청만 허용
 				.anyRequest().authenticated()

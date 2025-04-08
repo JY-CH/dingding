@@ -27,7 +27,7 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 		List<GetSongResponseDto> responseDto = new ArrayList<>();
 
 		for (Song song : songs) {
-			if (song.getSongId() >= 15) {
+			if (song.getSongId() >= 15 && song.getSongId() != 17) {
 				GetSongResponseDto getSongResponseDto = GetSongResponseDto.builder()
 					.songId(song.getSongId())
 					.songTitle(song.getSongTitle())

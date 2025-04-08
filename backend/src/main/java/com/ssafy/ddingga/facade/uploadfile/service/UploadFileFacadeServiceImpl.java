@@ -39,10 +39,9 @@ public class UploadFileFacadeServiceImpl implements UploadFileFacadeService {
 	}
 
 	@Override
-	public void createUploadFile(int userId, String title, MultipartFile file) throws IOException {
-		uploadFileService.createUploadFile(userId, title,
-			file);
-		// uploadFileService.createUploadFile(userId, createUploadFileRequestDto.getTitle(),
-		// 	createUploadFileRequestDto.getMultipartFile());
+	public boolean createUploadFile(int userId, String title, MultipartFile file) throws IOException {
+		UploadFile uploadFile = uploadFileService.createUploadFile(userId, title, file);
+
+		return uploadFile != null;
 	}
 }

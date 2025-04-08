@@ -10,5 +10,5 @@ import com.ssafy.ddingga.facade.uploadfile.dto.response.GetUploadFileResponseDto
 public interface UploadFileFacadeService {
 	List<GetUploadFileResponseDto> getUploadFile();
 
-	void createUploadFile(int userId, String title, MultipartFile file) throws IOException;
+	boolean createUploadFile(int userId, String title, MultipartFile file) throws IOException;
 }
