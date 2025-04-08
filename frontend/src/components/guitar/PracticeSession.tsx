@@ -9,7 +9,6 @@ import RecordingService from '../../services/recordingApi';
 import { useWebSocketStore } from '../../store/useWebSocketStore';
 import { Exercise, Performance } from '../../types/guitar';
 
-
 interface PracticeSessionProps {
   exercise: Exercise;
   onComplete: (performance: Performance) => void;
@@ -65,6 +64,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(1);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     if (recordedBlob) {
@@ -85,6 +85,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
     recordingServiceRef.current = new RecordingService({
       videoBitsPerSecond: 2500000,
       audioBitsPerSecond: 128000,
+      audio: true,
     });
 
     recordingServiceRef.current.onStateChange((state) => {
@@ -313,39 +314,38 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
       return;
     }
 
-    alert('연습 시작을 위해 화면 공유가 필요합니다. 다음 단계에서 "현재 탭"을 선택해주세요.');
+    setShowShareModal(true);
+  };
 
-    if (recordingServiceRef.current) {
-      try {
-        const success = await recordingServiceRef.current.startRecording();
-        if (!success) {
-          alert('화면 녹화를 시작할 수 없습니다. 화면 공유가 필요합니다.');
-          return;
-        }
-        console.log('화면 녹화 시작됨');
-
-        // UUID v4 형식 roomId 생성
-        const roomId = `room_${crypto.randomUUID()}`;
-        console.log('Generated roomId:', roomId);
-
-        setRecordingDuration(selectTime);
-        console.log(`선택된 녹음 시간: ${selectTime}초`);
-
-        // 웹소켓 연결
-        connect(roomId);
-        if (onRoomIdChange) {
-          onRoomIdChange(roomId);
-        }
-        setIsReady(true);
-
-        // 연습 시작 시 첫번째 녹음 시작 (1초 지연)
-        setTimeout(() => {
-          startRecordingWithDuration(selectTime);
-        }, 1000);
-      } catch (error) {
-        console.error('화면 녹화 시작 중 오류:', error);
-        alert('화면 공유를 취소했습니다. 연습을 시작하려면 다시 시도해주세요.');
+  const handleShareConfirm = async () => {
+    try {
+      // 웹소켓 연결
+      const roomId = `room_${crypto.randomUUID()}`;
+      connect(roomId);
+      if (onRoomIdChange) {
+        onRoomIdChange(roomId);
       }
+
+      // 녹화 시작
+      const success = await recordingServiceRef.current?.startRecording();
+      if (!success) {
+        // 화면 공유가 취소된 경우
+        setIsScreenRecording(false);
+        setCurrentStep(0);
+        disconnect();
+        setShowShareModal(false);
+        return;
+      }
+
+      setIsScreenRecording(true);
+      setShowShareModal(false);
+      setIsReady(true);
+    } catch (error) {
+      console.error('녹화 시작 실패:', error);
+      setIsScreenRecording(false);
+      setCurrentStep(0);
+      disconnect();
+      setShowShareModal(false);
     }
   };
 
@@ -401,16 +401,26 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                   id="selectTime"
                   value={selectTime}
                   onChange={(e) => setSelectTime(Number(e.target.value))}
-                  className="bg-white/5 text-black rounded-lg p-2 ml-2"
+                  className="bg-zinc-800 text-amber-500 rounded-lg p-2 ml-2 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                 >
-                  <option value={0} disabled>
+                  <option value={0} disabled className="bg-zinc-800 text-amber-500">
                     시간 선택
                   </option>
-                  <option value={1}>1초</option>
-                  <option value={2}>2초</option>
-                  <option value={3}>3초</option>
-                  <option value={4}>4초</option>
-                  <option value={5}>5초</option>
+                  <option value={1} className="bg-zinc-800 text-amber-500">
+                    1초
+                  </option>
+                  <option value={2} className="bg-zinc-800 text-amber-500">
+                    2초
+                  </option>
+                  <option value={3} className="bg-zinc-800 text-amber-500">
+                    3초
+                  </option>
+                  <option value={4} className="bg-zinc-800 text-amber-500">
+                    4초
+                  </option>
+                  <option value={5} className="bg-zinc-800 text-amber-500">
+                    5초
+                  </option>
                 </select>
               </div>
               <div>
@@ -648,6 +658,47 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                 취소
               </button>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 화면 공유 모달 */}
+      <AnimatePresence>
+        {showShareModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+            onClick={() => setShowShareModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-zinc-900 rounded-xl p-6 w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-bold text-white mb-4">화면 공유 필요</h3>
+              <p className="text-zinc-300 mb-6">
+                연습을 시작하기 위해서는 화면 공유가 필요합니다. 화면 공유를 통해 연습 과정을
+                녹화하고 분석할 수 있습니다.
+              </p>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowShareModal(false)}
+                  className="px-4 py-2 bg-zinc-700 text-white rounded-lg hover:bg-zinc-600 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleShareConfirm}
+                  className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                >
+                  화면 공유 시작
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

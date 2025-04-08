@@ -154,38 +154,34 @@ export class ScreenRecorder {
   // 미디어 스트림 획득
   private async getMediaStream(): Promise<MediaStream> {
     try {
-      // 화면 캡처 스트림 획득
+      // 화면 공유 스트림 요청 (오디오 비활성화)
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
-        video: this.options.videoConstraints,
-        audio: true, // 시스템 오디오 캡처 시도
+        video: {
+          ...this.options.videoConstraints,
+          displaySurface: 'browser',
+        },
+        audio: false, // 시스템 오디오 캡처 비활성화
       });
 
-      // 마이크 오디오 스트림 획득
+      // 마이크 오디오 스트림 요청
       const audioStream = await navigator.mediaDevices.getUserMedia({
-        audio: this.options.audioConstraints,
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 44100,
+          channelCount: 1,
+        },
       });
 
-      // 오디오 컨텍스트 생성 및 스트림 처리
+      // 오디오 컨텍스트 생성
       this.audioContext = new AudioContext();
 
-      // 화면 오디오 처리
-      const displayAudioTracks = displayStream.getAudioTracks();
-      if (displayAudioTracks.length > 0) {
-        const displaySource = this.audioContext.createMediaStreamSource(
-          new MediaStream([displayAudioTracks[0]]),
-        );
-        const displayGain = this.audioContext.createGain();
-        displayGain.gain.value = 0.7; // 시스템 오디오 볼륨 조정
-        displaySource.connect(displayGain);
-        displayGain.connect(this.audioContext.destination);
-      }
-
-      // 마이크 오디오 처리
+      // 마이크 오디오 처리 (출력 없이 분석만)
       const micSource = this.audioContext.createMediaStreamSource(audioStream);
       const micGain = this.audioContext.createGain();
-      micGain.gain.value = 1.0; // 마이크 볼륨 조정
+      micGain.gain.value = 0; // 출력 볼륨 0으로 설정
       micSource.connect(micGain);
-      micGain.connect(this.audioContext.destination);
 
       // 모든 오디오 트랙을 화면 스트림에 추가
       audioStream.getAudioTracks().forEach((track) => {
@@ -209,6 +205,12 @@ export class ScreenRecorder {
     try {
       this.setState('recording');
       this.stream = await this.getMediaStream();
+
+      // 화면 공유가 취소되었는지 확인
+      if (!this.stream || this.stream.getVideoTracks().length === 0) {
+        this.setState('inactive');
+        throw new Error('화면 공유가 취소되었습니다.');
+      }
 
       this.mediaRecorder = new MediaRecorder(this.stream, {
         mimeType: this.options.mimeType,
@@ -252,6 +254,7 @@ export class ScreenRecorder {
     } catch (error) {
       this.setState('inactive');
       this.handleError(error instanceof Error ? error : new Error(String(error)));
+      throw error; // 에러를 상위로 전파
     }
   }
 

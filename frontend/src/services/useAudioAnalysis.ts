@@ -165,6 +165,10 @@ export const useAudioAnalysis = ({
     if (!audioContextRef.current) {
       try {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        // 오디오 출력을 완전히 비활성화
+        audioContextRef.current.destination.channelCount = 0;
+        audioContextRef.current.destination.channelCountMode = 'explicit';
+        audioContextRef.current.destination.channelInterpretation = 'discrete';
         console.log('오디오 컨텍스트 초기화 성공:', audioContextRef.current.sampleRate);
       } catch (error) {
         console.error('오디오 컨텍스트 초기화 실패:', error);
@@ -220,7 +224,7 @@ export const useAudioAnalysis = ({
 
       console.log(`녹음 시작 (설정 시간: ${recordingDuration}초)`);
 
-      // 오디오 스트림 요청 - 고품질 설정 추가
+      // 오디오 스트림 요청 - 기본 설정
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -229,7 +233,15 @@ export const useAudioAnalysis = ({
           sampleRate: 44100, // 권장 샘플 레이트
           channelCount: 1, // 모노 채널
         },
+        video: false, // 비디오 비활성화
       });
+
+      // 오디오 출력 차단
+      const audioTracks = stream.getAudioTracks();
+      audioTracks.forEach((track) => {
+        track.enabled = false; // 트랙 비활성화
+      });
+
       streamRef.current = stream;
 
       // 브라우저 호환성 확인
