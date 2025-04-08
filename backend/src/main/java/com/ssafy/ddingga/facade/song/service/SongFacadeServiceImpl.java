@@ -72,6 +72,7 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 				count++;
 			}
 			SheetMusicResponseDto responseDto = SheetMusicResponseDto.builder()
+				.sheetImage(sheetMusic.getSheetImage())
 				.sheetOrder(sheetMusic.getSheetOrder())
 				.chord(sheetMusic.getChord())
 				.chordOrder(sheetMusic.getChordOrder())

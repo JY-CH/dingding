@@ -12,6 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class SheetMusicResponseDto {
+	private String sheetImage;
 	private Integer sheetOrder;
 	private String chord;
 	private Integer chordOrder;

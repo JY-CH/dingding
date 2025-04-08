@@ -33,7 +33,7 @@ public class SheetMusic {
 	@JoinColumn(name = "song_id", nullable = false)
 	private Song song;
 
-	// private String sheetImage;
+	private String sheetImage;
 	private Integer sheetOrder;
 	private String chord;
 	private Integer chordOrder;
