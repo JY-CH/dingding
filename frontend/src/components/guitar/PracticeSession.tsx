@@ -8,22 +8,19 @@ import useIndexedDB from '../../hooks/useIndexedDB';
 import RecordingService from '../../services/recordingApi';
 import { useWebSocketStore } from '../../store/useWebSocketStore';
 import { Exercise, Performance } from '../../types/guitar';
+import PracticeSelection from './PracticeSelection';
+import { Settings } from 'lucide-react';
 
 interface PracticeSessionProps {
   exercise: Exercise;
-  onComplete: (performance: Performance) => void;
-  onReady: (ready: boolean) => void;
+  onComplete: (performance: any) => void;
+  onRoomIdChange: (roomId: string) => void;
+  onReady: (isReady: boolean) => void;
   onStepChange: (step: number) => void;
   sampleExercise: {
-    title: string;
-    description: string;
-    steps: {
-      description: string;
-      duration: number;
-      chord?: string;
-    }[];
+    chords: string[];
+    duration: number;
   };
-  onRoomIdChange?: (roomId: string) => void;
 }
 
 const PracticeSession: React.FC<PracticeSessionProps> = ({
@@ -310,7 +307,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
   // 연습 시작 처리
   const handleStart = async () => {
     if (selectTime <= 0) {
-      alert('연습 시간을 선택해주세요!');
+      alert('녹음 시간을 선택해주세요!');
       return;
     }
 
@@ -363,304 +360,311 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
   }, [disconnect, cleanupAudio]);
 
   return (
-    <div className="bg-white/5 rounded-xl p-6">
-      <AnimatePresence mode="wait">
-        {!isReady ? (
-          <motion.div
-            key="preparation"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="text-center"
-          >
-            <h3 className="text-2xl font-bold text-white mb-4">{exercise.title}</h3>
-            <div className="bg-white/5 rounded-lg p-4 mb-6">
-              <h4 className="text-lg font-medium text-amber-500 mb-2">준비사항</h4>
-              <ul className="text-zinc-400 space-y-2">
-                {exercise.requirements.map((req, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    {req}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex flex-row items-center justify-center gap-4 ">
-              <div>
-                <label htmlFor="selectTime" className="text-white font-medium">
-                  연습 시간 선택 :
-                </label>
-                <select
-                  id="selectTime"
-                  value={selectTime}
-                  onChange={(e) => setSelectTime(Number(e.target.value))}
-                  className="bg-zinc-800 text-amber-500 rounded-lg p-2 ml-2 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                >
-                  <option value={0} disabled className="bg-zinc-800 text-amber-500">
-                    시간 선택
-                  </option>
-                  <option value={1} className="bg-zinc-800 text-amber-500">
-                    1초
-                  </option>
-                  <option value={2} className="bg-zinc-800 text-amber-500">
-                    2초
-                  </option>
-                  <option value={3} className="bg-zinc-800 text-amber-500">
-                    3초
-                  </option>
-                  <option value={4} className="bg-zinc-800 text-amber-500">
-                    4초
-                  </option>
-                  <option value={5} className="bg-zinc-800 text-amber-500">
-                    5초
-                  </option>
-                </select>
+    <div className="flex-1 overflow-auto bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 h-full">
+      <div className="bg-white/5 rounded-xl p-6">
+        <AnimatePresence mode="wait">
+          {!isReady ? (
+            <motion.div
+              key="preparation"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center"
+            >
+              <h3 className="text-2xl font-bold text-white mb-4">{exercise.title}</h3>
+              <div className="bg-white/5 rounded-lg p-4 mb-6">
+                <h4 className="text-lg font-medium text-amber-500 mb-2">준비사항</h4>
+                <ul className="text-zinc-400 space-y-2">
+                  {exercise.requirements.map((req, i) => (
+                    <li key={i} className="flex items-center gap-2">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      {req}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div>
-                <button
-                  onClick={() => {
-                    if (selectTime > 0) {
-                      handleStart();
-                    } else {
-                      alert('연습 시간을 선택해주세요!');
-                    }
-                  }}
-                  className="px-6 py-3 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors"
-                >
-                  연습 시작
-                </button>
+              <div className="flex flex-row items-center justify-center gap-4">
+                <div>
+                  <label htmlFor="selectTime" className="text-white font-medium">
+                    녹음 시간 설정:
+                  </label>
+                  <select
+                    id="selectTime"
+                    value={selectTime}
+                    onChange={(e) => setSelectTime(Number(e.target.value))}
+                    className="bg-zinc-800 text-amber-500 rounded-lg p-2 ml-2 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  >
+                    <option value={0} disabled className="bg-zinc-800 text-amber-500">
+                      녹음 시간 선택
+                    </option>
+                    <option value={1} className="bg-zinc-800 text-amber-500">
+                      1초
+                    </option>
+                    <option value={2} className="bg-zinc-800 text-amber-500">
+                      2초
+                    </option>
+                    <option value={3} className="bg-zinc-800 text-amber-500">
+                      3초
+                    </option>
+                    <option value={4} className="bg-zinc-800 text-amber-500">
+                      4초
+                    </option>
+                    <option value={5} className="bg-zinc-800 text-amber-500">
+                      5초
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <button
+                    onClick={() => {
+                      if (selectTime > 0) {
+                        handleStart();
+                      } else {
+                        alert('녹음 시간을 선택해주세요!');
+                      }
+                    }}
+                    className="px-6 py-3 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors"
+                  >
+                    연습 시작
+                  </button>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="practice"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-6"
-          >
-            {/* 진행률 표시 */}
-            <div className="relative pt-1">
-              <div className="flex mb-2 items-center justify-between">
-                <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-amber-500 bg-amber-500/20">
-                  진행률
-                </span>
-                <span className="text-xs font-semibold inline-block text-amber-500">
-                  {Math.round((currentStep / exercise.chords.length) * 100)}%
-                </span>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="practice"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              {/* 진행률 표시 */}
+              <div className="relative pt-1">
+                <div className="flex mb-2 items-center justify-between">
+                  <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-amber-500 bg-amber-500/20">
+                    진행률
+                  </span>
+                  <span className="text-xs font-semibold inline-block text-amber-500">
+                    {Math.round((currentStep / exercise.chords.length) * 100)}%
+                  </span>
+                </div>
+                <div className="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-white/5">
+                  <motion.div
+                    style={{ width: `${(currentStep / exercise.chords.length) * 100}%` }}
+                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-amber-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(currentStep / exercise.chords.length) * 100}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
               </div>
-              <div className="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-white/5">
-                <motion.div
-                  style={{ width: `${(currentStep / exercise.chords.length) * 100}%` }}
-                  className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-amber-500"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(currentStep / exercise.chords.length) * 100}%` }}
-                  transition={{ duration: 0.5 }}
-                />
-              </div>
-            </div>
 
-            {/* 화면 녹화 상태 */}
-            <div className="flex justify-between items-center bg-white/10 rounded-lg p-3 text-white mb-2">
-              <div>
-                {isScreenRecording ? (
-                  <span className="inline-flex items-center text-red-500">
-                    <span className="animate-ping h-2 w-2 rounded-full bg-red-500 mr-2"></span>
-                    화면 녹화 중... ({recordingTime})
-                  </span>
-                ) : recordingServiceRef.current?.state === 'paused' ? (
-                  <span className="text-yellow-500">화면 녹화 일시 중지됨</span>
-                ) : recordingServiceRef.current?.state === 'stopping' ? (
-                  <span className="text-blue-500">화면 녹화 종료 중...</span>
-                ) : recordingServiceRef.current?.state === 'inactive' ? (
-                  <span className="text-green-500">화면 녹화 완료</span>
-                ) : (
-                  <span>화면 녹화 대기 중</span>
-                )}
+              {/* 화면 녹화 상태 */}
+              <div className="flex justify-between items-center bg-white/10 rounded-lg p-3 text-white mb-2">
+                <div>
+                  {isScreenRecording ? (
+                    <span className="inline-flex items-center text-red-500">
+                      <span className="animate-ping h-2 w-2 rounded-full bg-red-500 mr-2"></span>
+                      화면 녹화 중... ({recordingTime})
+                    </span>
+                  ) : recordingServiceRef.current?.state === 'paused' ? (
+                    <span className="text-yellow-500">화면 녹화 일시 중지됨</span>
+                  ) : recordingServiceRef.current?.state === 'stopping' ? (
+                    <span className="text-blue-500">화면 녹화 종료 중...</span>
+                  ) : recordingServiceRef.current?.state === 'inactive' ? (
+                    <span className="text-green-500">화면 녹화 완료</span>
+                  ) : (
+                    <span>화면 녹화 대기 중</span>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* 업로드 상태 메시지 */}
-            {uploadingStatus.message && (
-              <div
-                className={`p-3 rounded-lg mb-4 ${
-                  uploadingStatus.success === true
-                    ? 'bg-green-900/50 text-green-300'
-                    : uploadingStatus.success === false
-                      ? 'bg-red-900/50 text-red-300'
-                      : 'bg-blue-900/50 text-blue-300'
-                }`}
-              >
-                {uploadingStatus.message}
-                {uploadingStatus.isUploading && (
-                  <span className="ml-2 inline-flex items-center">
-                    <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* 음성 분석 및 녹음 상태 */}
-            <div className="flex justify-between items-center bg-white/10 rounded-lg p-3 text-white">
-              <div>
-                {isRecording ? (
-                  <span className="inline-flex items-center text-red-500">
-                    <span className="animate-ping h-2 w-2 rounded-full bg-red-500 mr-2"></span>
-                    녹음 중... ({recordingDuration}초)
-                  </span>
-                ) : isAnalyzing ? (
-                  <span className="inline-flex items-center text-amber-500">
-                    <span className="animate-spin h-4 w-4 border-2 border-amber-500 border-t-transparent rounded-full mr-2"></span>
-                    분석 중...
-                  </span>
-                ) : isLoadingTemplates ? (
-                  <span className="inline-flex items-center text-blue-500">
-                    <span className="animate-pulse h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
-                    템플릿 로딩 중...
-                  </span>
-                ) : (
-                  <span>준비 완료</span>
-                )}
-              </div>
-              <div>
-                <button
-                  onClick={() => startRecordingWithDuration(recordingDuration)}
-                  disabled={isRecording || isAnalyzing}
-                  className={`px-3 py-1 rounded text-sm ${
-                    isRecording || isAnalyzing
-                      ? 'bg-gray-500 cursor-not-allowed'
-                      : 'bg-green-600 hover:bg-green-700'
+              {/* 업로드 상태 메시지 */}
+              {uploadingStatus.message && (
+                <div
+                  className={`p-3 rounded-lg mb-4 ${
+                    uploadingStatus.success === true
+                      ? 'bg-green-900/50 text-green-300'
+                      : uploadingStatus.success === false
+                        ? 'bg-red-900/50 text-red-300'
+                        : 'bg-blue-900/50 text-blue-300'
                   }`}
                 >
-                  녹음 ({recordingDuration}초)
-                </button>
-              </div>
-            </div>
-
-            {/* 점수 및 음성 분석 결과 */}
-            <div className="bg-white/5 rounded-lg p-4 text-center">
-              <h3 className="text-2xl font-bold text-amber-500">현재 일치율</h3>
-              <div className="text-4xl font-bold text-white mt-2">
-                {audioResults
-                  ? audioResults.isCorrect
-                    ? `${Math.round(audioResults.confidence * 100)}점`
-                    : '0점'
-                  : score
-                    ? `${score}점`
-                    : '0점'}
-              </div>
-              {audioResults && (
-                <div
-                  className={`mt-2 text-lg ${audioResults.isCorrect ? 'text-green-400' : 'text-red-400'}`}
-                >
-                  감지된 코드: {audioResults.chord}
-                  {audioResults.isCorrect ? ' ✓' : ` ✗ (목표: ${exercise.chords[currentStep]})`}
+                  {uploadingStatus.message}
+                  {uploadingStatus.isUploading && (
+                    <span className="ml-2 inline-flex items-center">
+                      <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
+                    </span>
+                  )}
                 </div>
               )}
-            </div>
 
-            {/* 현재 및 다음 코드 표시 */}
-            <div className="text-center">
-              <motion.div
-                key={currentStep}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                className="text-6xl font-bold text-white mb-4"
-              >
-                {exercise.chords[currentStep]}
-              </motion.div>
-              <p className="text-zinc-400">
-                다음 코드: {exercise.chords[currentStep + 1] || '마지막 코드'}
-              </p>
-            </div>
+              {/* 음성 분석 및 녹음 상태 */}
+              <div className="flex justify-between items-center bg-white/10 rounded-lg p-3 text-white">
+                <div>
+                  {isRecording ? (
+                    <span className="inline-flex items-center text-red-500">
+                      <span className="animate-ping h-2 w-2 rounded-full bg-red-500 mr-2"></span>
+                      녹음 중... ({recordingDuration}초)
+                    </span>
+                  ) : isAnalyzing ? (
+                    <span className="inline-flex items-center text-amber-500">
+                      <span className="animate-spin h-4 w-4 border-2 border-amber-500 border-t-transparent rounded-full mr-2"></span>
+                      분석 중...
+                    </span>
+                  ) : isLoadingTemplates ? (
+                    <span className="inline-flex items-center text-blue-500">
+                      <span className="animate-pulse h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
+                      템플릿 로딩 중...
+                    </span>
+                  ) : (
+                    <span>준비 완료</span>
+                  )}
+                </div>
+                <div>
+                  <button
+                    onClick={() => startRecordingWithDuration(recordingDuration)}
+                    disabled={isRecording || isAnalyzing}
+                    className={`px-3 py-1 rounded text-sm ${
+                      isRecording || isAnalyzing
+                        ? 'bg-gray-500 cursor-not-allowed'
+                        : 'bg-green-600 hover:bg-green-700'
+                    }`}
+                  >
+                    녹음 ({recordingDuration}초)
+                  </button>
+                </div>
+              </div>
 
-            {/* 컨트롤 버튼 */}
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-                disabled={currentStep === 0}
-              >
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+              {/* 점수 및 음성 분석 결과 */}
+              <div className="bg-white/5 rounded-lg p-4 text-center">
+                <h3 className="text-2xl font-bold text-amber-500">현재 일치율</h3>
+                <div className="text-4xl font-bold text-white mt-2">
+                  {audioResults
+                    ? audioResults.isCorrect
+                      ? `${Math.round(audioResults.confidence * 100)}점`
+                      : '0점'
+                    : score
+                      ? `${score}점`
+                      : '0점'}
+                </div>
+                {audioResults && (
+                  <div
+                    className={`mt-2 text-lg ${audioResults.isCorrect ? 'text-green-400' : 'text-red-400'}`}
+                  >
+                    감지된 코드: {audioResults.chord}
+                    {audioResults.isCorrect ? ' ✓' : ` ✗ (목표: ${exercise.chords[currentStep]})`}
+                  </div>
+                )}
+              </div>
+
+              {/* 현재 및 다음 코드 표시 */}
+              <div className="text-center">
+                <motion.div
+                  key={currentStep}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  className="text-6xl font-bold text-white mb-4"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
-              <button
-                onClick={handleComplete}
-                className="px-6 py-2 rounded-lg bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors"
-              >
-                {currentStep === exercise.chords.length - 1 ? '완료' : '다음'}
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    setUploadingStatus({
-                      isUploading: true,
-                      success: null,
-                      message: '연습 취소 중...',
-                    });
+                  {exercise.chords[currentStep]}
+                </motion.div>
+                <p className="text-zinc-400">
+                  다음 코드: {exercise.chords[currentStep + 1] || '마지막 코드'}
+                </p>
+              </div>
 
-                    setIsReady(false);
-                    disconnect();
-                    cleanupAudio();
+              {/* 컨트롤 버튼 */}
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+                  className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                  disabled={currentStep === 0}
+                >
+                  <svg
+                    className="w-6 h-6 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleComplete}
+                  className="px-6 py-2 rounded-lg bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors"
+                >
+                  {currentStep === exercise.chords.length - 1 ? '완료' : '다음'}
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      setUploadingStatus({
+                        isUploading: true,
+                        success: null,
+                        message: '연습 취소 중...',
+                      });
 
-                    if (
-                      recordingServiceRef.current &&
-                      recordingServiceRef.current.state !== 'inactive'
-                    ) {
-                      const blob = await recordingServiceRef.current.stopRecording();
-                      console.log('화면 녹화 중지됨, 파일 크기:', blob?.size || 0);
+                      setIsReady(false);
+                      disconnect();
+                      cleanupAudio();
+
+                      if (
+                        recordingServiceRef.current &&
+                        recordingServiceRef.current.state !== 'inactive'
+                      ) {
+                        const blob = await recordingServiceRef.current.stopRecording();
+                        console.log('화면 녹화 중지됨, 파일 크기:', blob?.size || 0);
+                      }
+
+                      setUploadingStatus({
+                        isUploading: false,
+                        success: true,
+                        message: '연습이 취소되었습니다.',
+                      });
+
+                      setTimeout(() => {
+                        setCurrentStep(0);
+                        setMessages([]);
+                        setAudioResults(null);
+                        setUploadingStatus({ isUploading: false, success: null, message: '' });
+                      }, 1500);
+                    } catch (error) {
+                      console.error('취소 처리 중 오류:', error);
+                      setUploadingStatus({
+                        isUploading: false,
+                        success: false,
+                        message: '취소 중 오류가 발생했습니다.',
+                      });
                     }
-
-                    setUploadingStatus({
-                      isUploading: false,
-                      success: true,
-                      message: '연습이 취소되었습니다.',
-                    });
-
-                    setTimeout(() => {
-                      setCurrentStep(0);
-                      setMessages([]);
-                      setAudioResults(null);
-                      setUploadingStatus({ isUploading: false, success: null, message: '' });
-                    }, 1500);
-                  } catch (error) {
-                    console.error('취소 처리 중 오류:', error);
-                    setUploadingStatus({
-                      isUploading: false,
-                      success: false,
-                      message: '취소 중 오류가 발생했습니다.',
-                    });
-                  }
-                }}
-                className="px-6 py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
-                disabled={uploadingStatus.isUploading}
-              >
-                취소
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  }}
+                  className="px-6 py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
+                  disabled={uploadingStatus.isUploading}
+                >
+                  취소
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* 화면 공유 모달 */}
       <AnimatePresence>
