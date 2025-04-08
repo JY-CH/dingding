@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { motion } from 'framer-motion';
-import { FileText, MessageSquare, ThumbsUp, UserCircle } from 'lucide-react';
+import { MessageSquare, UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { SearchCommunityPost } from '../../types/index';
