@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ssafy.ddingga.domain.auth.entity.User;
+import com.ssafy.ddingga.facade.uploadfile.dto.response.CreateUploadFileResponseDto;
 import com.ssafy.ddingga.facade.uploadfile.dto.response.GetUploadFileResponseDto;
 import com.ssafy.ddingga.facade.uploadfile.service.UploadFileFacadeService;
 import com.ssafy.ddingga.global.service.S3Service;
@@ -60,11 +61,14 @@ public class FileController {
 	}
 
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public void createUploadFile(@AuthenticationPrincipal User user,
+	public CreateUploadFileResponseDto createUploadFile(@AuthenticationPrincipal User user,
 		@RequestPart("title") @Parameter(description = "파일과 함께 받을 문자열 값 (예: 제목)") String title,
-		@RequestPart("file") @Parameter(description = "업로드할 파일 (이미지나 동영상)") MultipartFile file) {
+		@RequestPart("videoFile") @Parameter(description = "업로드할 파일 (동영상)") MultipartFile file) {
 		try {
-			uploadFileFacadeService.createUploadFile(user.getUserId(), title, file);
+			CreateUploadFileResponseDto responseDto = new CreateUploadFileResponseDto();
+			responseDto.setSuccess(uploadFileFacadeService.createUploadFile(user.getUserId(), title, file));
+
+			return responseDto;
 		} catch (IOException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 실패", e);
 		}
