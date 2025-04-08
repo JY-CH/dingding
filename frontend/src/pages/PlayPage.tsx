@@ -3,8 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GiGuitar } from 'react-icons/gi';
 import { HiOutlineVideoCamera, HiOutlineVideoCameraSlash } from 'react-icons/hi2';
-import { IoStatsChartOutline } from 'react-icons/io5';
-import { RiMusicLine, RiSettings4Line } from 'react-icons/ri';
+import { RiMusicLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
@@ -207,7 +206,7 @@ const PlayPage: React.FC = () => {
           setShowStats={setShowStats}
           showSettings={showSettings}
           setShowSettings={setShowSettings}
-          currentMode="performance"
+          currentMode="practice"
         />
       </div>
 

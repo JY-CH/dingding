@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import { ChordProgression } from '../../types/guitar';
 
 const SAMPLE_PROGRESSIONS: ChordProgression[] = [
@@ -7,14 +8,14 @@ const SAMPLE_PROGRESSIONS: ChordProgression[] = [
     name: '기본 팝 프로그레션',
     difficulty: 'beginner',
     chords: ['C', 'G', 'Am', 'F'],
-    bpm: 80
+    bpm: 80,
   },
   {
     id: '2',
     name: '재즈 2-5-1 프로그레션',
     difficulty: 'intermediate',
     chords: ['Dm7', 'G7', 'Cmaj7'],
-    bpm: 120
+    bpm: 120,
   },
   // ... 더 많은 프로그레션
 ];
@@ -24,7 +25,9 @@ interface ChordProgressionPracticeProps {
 }
 
 const ChordProgressionPractice: React.FC<ChordProgressionPracticeProps> = ({ onChordChange }) => {
-  const [selectedProgression, setSelectedProgression] = useState<ChordProgression>(SAMPLE_PROGRESSIONS[0]);
+  const [selectedProgression, setSelectedProgression] = useState<ChordProgression>(
+    SAMPLE_PROGRESSIONS[0],
+  );
   const [currentChordIndex, setCurrentChordIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -32,13 +35,16 @@ const ChordProgressionPractice: React.FC<ChordProgressionPracticeProps> = ({ onC
     let interval: NodeJS.Timeout;
 
     if (isPlaying) {
-      interval = setInterval(() => {
-        setCurrentChordIndex((prev) => {
-          const nextIndex = (prev + 1) % selectedProgression.chords.length;
-          onChordChange(selectedProgression.chords[nextIndex]);
-          return nextIndex;
-        });
-      }, (60 / selectedProgression.bpm) * 1000);
+      interval = setInterval(
+        () => {
+          setCurrentChordIndex((prev) => {
+            const nextIndex = (prev + 1) % selectedProgression.chords.length;
+            onChordChange(selectedProgression.chords[nextIndex]);
+            return nextIndex;
+          });
+        },
+        (60 / selectedProgression.bpm) * 1000,
+      );
     }
 
     return () => {
@@ -56,7 +62,7 @@ const ChordProgressionPractice: React.FC<ChordProgressionPracticeProps> = ({ onC
         <select
           value={selectedProgression.id}
           onChange={(e) => {
-            const progression = SAMPLE_PROGRESSIONS.find(p => p.id === e.target.value);
+            const progression = SAMPLE_PROGRESSIONS.find((p) => p.id === e.target.value);
             if (progression) {
               setSelectedProgression(progression);
               setCurrentChordIndex(0);
@@ -77,9 +83,7 @@ const ChordProgressionPractice: React.FC<ChordProgressionPracticeProps> = ({ onC
             <div
               key={index}
               className={`p-4 rounded-lg text-center ${
-                currentChordIndex === index
-                  ? 'bg-amber-500 text-white'
-                  : 'bg-white/5 text-zinc-400'
+                currentChordIndex === index ? 'bg-amber-500 text-white' : 'bg-white/5 text-zinc-400'
               }`}
             >
               {chord}
@@ -99,13 +103,11 @@ const ChordProgressionPractice: React.FC<ChordProgressionPracticeProps> = ({ onC
             {isPlaying ? '중지' : '시작'}
           </button>
 
-          <div className="text-sm text-zinc-400">
-            BPM: {selectedProgression.bpm}
-          </div>
+          <div className="text-sm text-zinc-400">BPM: {selectedProgression.bpm}</div>
         </div>
       </div>
     </div>
   );
 };
 
-export default ChordProgressionPractice; 
+export default ChordProgressionPractice;
