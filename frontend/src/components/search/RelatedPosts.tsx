@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { FileText, MessageSquare, ThumbsUp } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { MessageSquare, UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { SearchCommunityPost } from '../../types/index';
@@ -15,47 +16,60 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({ posts }) => {
     navigate(`/community`, { state: { articleId: postId } });
   };
   return (
-    <div className="mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <FileText className="w-5 h-5 text-amber-500" />
-        <h2 className="text-xl font-bold text-white">관련 게시글</h2>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+        className="flex items-center gap-2 mb-4"
+      >
+        <MessageSquare className="w-5 h-5 text-amber-500" />
+        <h3 className="text-lg font-bold text-white">인기 게시글</h3>
+      </motion.div>
+      <div className="bg-zinc-800 rounded-xl overflow-hidden">
         {posts.map((post) => (
-          <button onClick={() => handlePostClick(post.articleId)} key={post.articleId}>
-            <div
-              key={post.articleId}
-              className="bg-zinc-800/50 backdrop-blur-sm hover:bg-zinc-800/80 border border-white/5 hover:border-amber-500/30 rounded-xl overflow-hidden group transition-all h-full flex flex-col"
-            >
-              <div className="p-4 flex-1 flex flex-col">
-                <div className="flex flex-row gap-3 items-center mb-2">
-                  <h3 className="text-white font-semibold group-hover:text-amber-500 transition-colors items-center">
-                    <span>{post.title}</span>
-                  </h3>
-                  <div className="bg-gray-700 rounded-full px-3 py-1 text-sm text-gray-300">
-                    <span className="text-gray-500">{post.category}</span>
-                  </div>
-                </div>
-                <div className="flex justify-between text-xs text-zinc-500">
-                  <div className="flex items-center gap-1">
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    <span>{post.username}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <ThumbsUp className="w-3.5 h-3.5" />
-                    <span>{post.recommend}</span>
-                  </div>
+          <motion.div
+            key={post.articleId}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="p-4 hover:bg-zinc-700 transition-colors cursor-pointer border-b border-zinc-700 last:border-b-0"
+            role="button" // 접근성을 위한 역할 추가
+            tabIndex={0} // 키보드 접근성을 위한 tabIndex 추가
+            onClick={() => handlePostClick(post.articleId)} // 클릭 이벤트 추가
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                console.log(`Post clicked via keyboard: ${post.articleId}`);
+              }
+            }} // 키보드 이벤트 추가
+          >
+            <div className="flex items-center">
+              <div className="ml-4 flex-1 min-w-0">
+                <div className="text-sm font-medium text-white truncate">{post.title}</div>
+                <div className="flex items-center gap-2 mt-1">
+                  <UserCircle className="w-3 h-3 text-gray-400" />
+                  <span className="text-xs text-gray-400">{post.username}</span>
+                  <span className="text-xs text-gray-500">•</span>
+                  <span className="text-xs text-gray-400">
+                    {new Date(post.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
+              <div className="w-16 h-10 bg-gray-700 rounded-md flex items-center justify-center">
+                {/* 썸네일이 없을 경우 대체 UI */}
+                {post.category ? (
+                  <span className="text-xs text-gray-400 truncate max-w-full">{post.category}</span>
+                ) : (
+                  <span className="text-xs text-gray-400 truncate max-w-full">No Image</span>
+                )}
+              </div>
             </div>
-          </button>
+            <div className="mt-2 text-xs text-gray-300 line-clamp-2"></div>
+
+            <div className="ml-4 mt-2 text-xs text-amber-500">추천 수: {post.recommend || 0}</div>
+          </motion.div>
         ))}
       </div>
-      {posts.length === 0 && (
-        <div className="bg-zinc-800/50 backdrop-blur-sm border border-white/5 rounded-lg p-6 text-center">
-          <p className="text-zinc-400">관련 게시글이 없습니다.</p>
-        </div>
-      )}
     </div>
   );
 };

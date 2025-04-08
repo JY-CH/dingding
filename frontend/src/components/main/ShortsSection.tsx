@@ -1,179 +1,239 @@
 import { useState } from 'react';
 
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
-import { mockShorts } from '../../data/mockData';
+// import { mockShorts } from '../../data/mockData';
+import { _axiosAuth } from '../../services/JYapi';
+import ShortsComponents from '../main/ShortsComponents';
+
+interface Short {
+  username: string;
+  title: string;
+  fileUrl: string;
+}
+
+type ShortsResponse = Short[];
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 const ShortsSection = () => {
   const [hoveredShort, setHoveredShort] = useState<string | null>(null);
+  const [isModal, setIsModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [title, setTitle] = useState<string>('');
+  const [selectedShort, setSelectedShort] = useState<Short | null>(null); // 선택된 short 상태
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
+
+  const { data: shorts } = useQuery({
+    queryKey: ['shorts'],
+    queryFn: async () => {
+      const { data } = await _axiosAuth.get<ShortsResponse>('/files');
+      return data;
+    },
+  });
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+
+      // 파일 크기 확인
+      if (file.size > MAX_FILE_SIZE) {
+        alert('100MB 이하의 파일만 업로드할 수 있습니다.');
+        return;
+      }
+
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadVide = useMutation({
+    mutationFn: async () => {
+      const formData = new FormData();
+      if (!selectedFile) {
+        throw new Error('파일이 선택되지 않았습니다.');
+      }
+      if (!title) {
+        throw new Error('제목이 입력되지 않았습니다.');
+      }
+      console.log('업로드할 파일:', selectedFile);
+      console.log('업로드할 제목:', title);
+      formData.append('videoFile', selectedFile);
+      formData.append('title', title);
+
+      try {
+        const { data } = await _axiosAuth.post('/files/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        console.log('업로드 성공:', data);
+        return data;
+      } catch (error) {
+        console.error('업로드 실패:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      console.log('업로드 성공:');
+      setIsModal(false);
+      setSelectedFile(null);
+      setTitle('');
+    },
+  });
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    uploadVide.mutate();
+  };
+
+  const handleShortClick = (short: Short) => {
+    setSelectedShort(short); // 선택된 short 설정
+    setIsModalOpen(true); // 모달 열기
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.7 }}
-      className="mt-8"
-    >
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
-            쇼츠
-          </h2>
-          <p className="text-zinc-400 text-xs mt-1">기타리스트들의 연주 영상을 만나보세요</p>
-        </div>
-        <div className="flex gap-2">
-          <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors group">
-            <svg
-              className="w-5 h-5 text-white/60 group-hover:text-white transition-colors"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-          <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors group">
-            <svg
-              className="w-5 h-5 text-white/60 group-hover:text-white transition-colors"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-        {mockShorts.map((short, index) => (
+    <>
+      {/* 모달 창 */}
+      {isModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
+        >
           <motion.div
-            key={short.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 + index * 0.1 }}
-            className="relative group"
-            onMouseEnter={() => setHoveredShort(short.id)}
-            onMouseLeave={() => setHoveredShort(null)}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="relative bg-gradient-to-br from-zinc-800 via-zinc-700 to-zinc-900 rounded-2xl shadow-2xl p-8 w-full max-w-lg"
           >
-            <div
-              className={`
-              aspect-[9/16] rounded-xl overflow-hidden relative
-              transition-transform duration-300 ease-out transform
-              ${hoveredShort === short.id ? 'scale-[1.02]' : ''}
-            `}
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setIsModal(false)}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors"
             >
-              {/* 썸네일 이미지 */}
-              <img
-                src={short.thumbnail}
-                alt={short.title}
-                className="w-full h-full object-cover transition-transform duration-700"
-              />
+              ✕
+            </button>
 
-              {/* 오버레이 그라디언트 */}
-              <div
-                className={`
-                absolute inset-0 bg-gradient-to-t 
-                from-black/80 via-black/40 to-transparent
-                transition-opacity duration-300
-                ${hoveredShort === short.id ? 'opacity-100' : 'opacity-90'}
-              `}
-              />
+            {/* 모달 헤더 */}
+            <h2 className="text-2xl font-bold text-white mb-6">비디오 업로드</h2>
 
-              {/* 재생 버튼 */}
-              <div
-                className={`
-                absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                transition-all duration-300
-                ${hoveredShort === short.id ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}
-              `}
-              >
-                <button
-                  className="w-12 h-12 flex items-center justify-center bg-amber-500 rounded-full text-white
-                  shadow-lg transform transition-transform hover:scale-110"
-                >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* 정보 영역 */}
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <div
-                  className={`
-                  transform transition-all duration-300
-                  ${hoveredShort === short.id ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-90'}
-                `}
-                >
-                  <p className="text-white text-sm font-medium line-clamp-2 mb-1.5">
-                    {short.title}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <p className="text-amber-400 text-xs">{short.artist}</p>
-                    <span className="w-1 h-1 bg-white/30 rounded-full" />
-                    {/* <p className="text-white/60 text-xs">{short.views}k 조회</p> */}
-                  </div>
+            {/* 업로드 폼 */}
+            <form onSubmit={handleSubmit}>
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  비디오 파일 선택
+                </label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleFileChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <button
+                    type="button"
+                    className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/20"
+                  >
+                    {selectedFile ? selectedFile.name : '파일 선택'}
+                  </button>
                 </div>
               </div>
-
-              {/* 재생 시간 */}
-              <div
-                className={`
-                absolute top-2 right-2 px-2 py-1 
-                rounded-full text-xs font-medium
-                transition-all duration-300
-                ${
-                  hoveredShort === short.id
-                    ? 'bg-amber-500 text-white'
-                    : 'bg-black/60 text-white/90'
-                }
-              `}
-              >
-                {short.duration}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-zinc-300 mb-2">제목</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="block w-full text-sm text-zinc-300 bg-zinc-800 border border-zinc-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  placeholder="비디오 제목을 입력하세요"
+                />
               </div>
-
-              {/* 좋아요 버튼 */}
               <button
-                className={`
-                absolute top-2 left-2 p-2 rounded-full
-                transition-all duration-300
-                ${
-                  hoveredShort === short.id
-                    ? 'opacity-100 bg-white/10 hover:bg-white/20'
-                    : 'opacity-0'
-                }
-              `}
+                type="submit"
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/20"
               >
-                <svg
-                  className="w-4 h-4 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
+                업로드
               </button>
-            </div>
+            </form>
           </motion.div>
-        ))}
-      </div>
-    </motion.div>
+        </motion.div>
+      )}
+
+      {/* 쇼츠 섹션 */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+        className="mt-8"
+      >
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <div className="flex flex-row items-center gap-3">
+              <h2 className="text-xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
+                쇼츠
+              </h2>
+              <div className="bg-white/5 rounded-full px-3 py-1 text-xs font-medium text-white/60 flex items-center gap-2">
+                <button
+                  onClick={() => setIsModal(true)}
+                  className="text-xl font-bold bg-amber-400 from-amber-700 to-amber-700 bg-clip-text text-transparent"
+                >
+                  업로드
+                </button>
+              </div>
+            </div>
+            <p className="text-zinc-400 text-xs mt-1">기타리스트들의 연주 영상을 만나보세요</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
+          {shorts ? (
+            shorts.map((short) => (
+              <motion.div
+                key={short.fileUrl}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="relative group"
+                onMouseEnter={() => setHoveredShort(short.fileUrl)}
+                onMouseLeave={() => setHoveredShort(null)}
+                onClick={() => handleShortClick(short)}
+              >
+                <div
+                  className={`aspect-[9/16] rounded-xl overflow-hidden relative transition-transform duration-300 ease-out transform ${
+                    hoveredShort === short.fileUrl ? 'scale-[1.02]' : ''
+                  }`}
+                >
+                  <video
+                    src={short.fileUrl}
+                    controls
+                    className="w-full h-full object-cover transition-transform duration-700" // object-cover 추가
+                  />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 ${
+                      hoveredShort === short.fileUrl ? 'opacity-100' : 'opacity-90'
+                    }`}
+                  />
+                </div>
+                <span className="text-amber-500">
+                  {short.title.length > 10 ? `${short.title.slice(0, 10)}...` : short.title}
+                </span>
+              </motion.div>
+            ))
+          ) : (
+            <div className="col-span-3 md:col-span-5 flex items-center justify-center h-48 bg-zinc-800 rounded-xl">
+              <p className="text-zinc-400">쇼츠가 없습니다</p>
+            </div>
+          )}
+        </div>
+        {isModalOpen && selectedShort && (
+          <ShortsComponents
+            short={selectedShort}
+            onClose={() => setIsModalOpen(false)} // 모달 닫기 핸들러
+          />
+        )}
+      </motion.div>
+    </>
   );
 };
 
