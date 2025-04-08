@@ -2,15 +2,10 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  thumbnail: string;
-}
+import { SearchSong } from '@/types/index';
 
 interface RecentReleasesProps {
-  releases: Song[];
+  releases: SearchSong[];
 }
 
 const RecentReleases: React.FC<RecentReleasesProps> = ({ releases }) => {

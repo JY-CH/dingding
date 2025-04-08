@@ -3,17 +3,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Headphones, Clock } from 'lucide-react';
 
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  thumbnail: string;
-  plays?: string;
-  duration?: string;
-}
+import { SearchSong } from '@/types/index';
 
 interface HotSongsProps {
-  songs: Song[];
+  songs: SearchSong[];
 }
 
 const HotSongs: React.FC<HotSongsProps> = ({ songs }) => {

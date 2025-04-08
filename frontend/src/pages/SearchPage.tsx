@@ -29,6 +29,7 @@ const SearchPage: React.FC = () => {
       setQuery(searchQuery);
     }
   }, [searchQuery, query]);
+
   // 게시물 검색 쿼리
   const { data: searchCommunity = [] } = useQuery<SearchCommunityPost[], Error>({
     queryKey: ['articles', searchQuery],
