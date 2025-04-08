@@ -18,7 +18,7 @@ const HotSongs: React.FC<HotSongsProps> = ({ songs }) => {
             key={song.songId}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.1 }}
             className="flex items-center p-4 hover:bg-zinc-700 transition-colors cursor-pointer border-b border-zinc-700 last:border-b-0"
           >
             <div className="w-6 text-center text-gray-400 mr-3">{index + 1}</div>

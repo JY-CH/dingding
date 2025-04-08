@@ -20,7 +20,7 @@ const PopularPosts: React.FC<PopularPostsProps> = ({ posts }) => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
+        transition={{ delay: 0.1 }}
         className="flex items-center gap-2 mb-4"
       >
         <MessageSquare className="w-5 h-5 text-amber-500" />
@@ -32,7 +32,7 @@ const PopularPosts: React.FC<PopularPostsProps> = ({ posts }) => {
             key={post.articleId}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
+            transition={{ delay: 0.1 }}
             className="p-4 hover:bg-zinc-700 transition-colors cursor-pointer border-b border-zinc-700 last:border-b-0"
             role="button" // 접근성을 위한 역할 추가
             tabIndex={0} // 키보드 접근성을 위한 tabIndex 추가
