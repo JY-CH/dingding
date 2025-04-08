@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+
 import GameModeNavbar from '../components/common/GameModeNavbar';
+import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
 import ChordTimeline from '../components/performance/ChordTimeline';
 import Playlist from '../components/performance/Playlist';
 import RealtimeFeedback from '../components/performance/RealtimeFeedback';
-import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
-import { Song } from '../types/performance';
+import WebcamView from '../components/performance/WebcamView';
 import { Visualization } from '../types/guitar';
+import { Song } from '../types/performance';
 
 // 피드백 메시지 목록
 const feedbackMessages = [
@@ -55,7 +57,7 @@ const PerformancePage: React.FC = () => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [, setAnalyser] = useState<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  
+
   // 시각화 데이터
   const [visualization, setVisualization] = useState<Visualization>({
     type: '3d',
@@ -156,12 +158,12 @@ const PerformancePage: React.FC = () => {
 
         {/* 중앙: 실시간 피드백 */}
         <div className="w-[30%] h-full">
-          <RealtimeFeedback 
+          <RealtimeFeedback
             feedback={currentFeedback.message}
             isPositive={currentFeedback.isPositive}
           />
         </div>
-        
+
         {/* 오른쪽 영역: 음향 시각화 + 웹캠 */}
         <div className="w-[45%] h-full flex gap-4">
           {/* 음향 시각화 */}
@@ -176,7 +178,7 @@ const PerformancePage: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           {/* 웹캠 */}
           <div className="w-[60%] h-full">
             <WebcamView isWebcamOn={isWebcamOn} setIsWebcamOn={setIsWebcamOn} />
@@ -187,8 +189,8 @@ const PerformancePage: React.FC = () => {
       {/* 코드 타임라인 영역 */}
       <div className="h-[calc(60vh-0.5rem)] mb-2 p-4">
         <div className="h-full bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-white/5 shadow-lg">
-          <ChordTimeline 
-            isPlaying={isPlaying} 
+          <ChordTimeline
+            isPlaying={isPlaying}
             currentSong={currentSong}
             notes={currentSong?.notes || []}
             currentChord={null}
