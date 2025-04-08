@@ -10,6 +10,8 @@ import { useWebSocketStore } from '../../store/useWebSocketStore';
 import { Exercise, Performance } from '../../types/guitar';
 import PracticeSelection from './PracticeSelection';
 import { Settings } from 'lucide-react';
+import FretboardVisualizer from './FretboardVisualizer';
+import { GuitarString } from '../../types/guitar';
 
 interface PracticeSessionProps {
   exercise: Exercise;
@@ -62,6 +64,15 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
   const [recordingDuration, setRecordingDuration] = useState(1);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
+
+  const strings: GuitarString[] = [
+    { note: 'E', frequency: 82.41, octave: 2, isPlaying: false, intensity: 0 },
+    { note: 'B', frequency: 246.94, octave: 3, isPlaying: false, intensity: 0 },
+    { note: 'G', frequency: 196.0, octave: 3, isPlaying: false, intensity: 0 },
+    { note: 'D', frequency: 146.83, octave: 3, isPlaying: false, intensity: 0 },
+    { note: 'A', frequency: 110.0, octave: 2, isPlaying: false, intensity: 0 },
+    { note: 'E', frequency: 329.63, octave: 4, isPlaying: false, intensity: 0 },
+  ];
 
   useEffect(() => {
     if (recordedBlob) {

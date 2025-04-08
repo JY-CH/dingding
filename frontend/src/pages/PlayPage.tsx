@@ -423,7 +423,23 @@ const PlayPage: React.FC = () => {
                   </span>
                 )}
               </div>
-              <FretboardVisualizer strings={strings} frets={12} activeNotes={['E', 'A', 'D']} />
+              <FretboardVisualizer
+                strings={strings}
+                frets={12}
+                activeNotes={
+                  selectedExercise?.chords[currentStep]
+                    ? [selectedExercise.chords[currentStep]]
+                    : []
+                }
+                currentChord={
+                  selectedExercise?.chords[currentStep]
+                    ? {
+                        name: selectedExercise.chords[currentStep],
+                        fingering: [],
+                      }
+                    : undefined
+                }
+              />
             </motion.div>
 
             {/* 음향 시각화 - 위치 이동 */}
