@@ -1,5 +1,7 @@
 package com.ssafy.ddingga.global.config;
 
+import java.time.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
@@ -32,6 +35,9 @@ public class S3Config {
 		return S3Client.builder()
 			.region(Region.of(region))
 			.credentialsProvider(StaticCredentialsProvider.create(credentials))
+			.httpClientBuilder(UrlConnectionHttpClient.builder()
+				.socketTimeout(Duration.ofMinutes(5))  // 소켓 타임아웃 5분
+				.connectionTimeout(Duration.ofMinutes(1)))  // 연결 타임아웃 1분
 			.build();
 	}
 }

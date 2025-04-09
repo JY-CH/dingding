@@ -60,7 +60,7 @@ dependencies {
     implementation platform('software.amazon.awssdk:bom:2.21.1')
     implementation 'software.amazon.awssdk:s3'
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.0'
-
+    implementation 'software.amazon.awssdk:url-connection-client'   
     // LocalStack 로컬에서 aws s3 테스트 용
     implementation 'org.testcontainers:localstack:1.19.7'
     implementation 'org.testcontainers:junit-jupiter:1.19.7'
