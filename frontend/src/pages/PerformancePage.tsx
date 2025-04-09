@@ -6,10 +6,6 @@ import WebcamView from '../components/performance/WebcamView';
 import Playlist from '../components/performance/Playlist';
 import ChordTimeline from '../components/performance/ChordTimeline';
 import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
-import ChordTimeline from '../components/performance/ChordTimeline';
-import Playlist from '../components/performance/Playlist';
-import RealtimeFeedback from '../components/performance/RealtimeFeedback';
-import WebcamView from '../components/performance/WebcamView';
 import { Visualization } from '../types/guitar';
 import { Song } from '../types/performance';
 
