@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -28,7 +29,7 @@ const PracticeSelection: React.FC<PracticeSelectionProps> = ({
   const [bpm, setBpm] = useState(currentExercise?.bpm || 60);
 
   const majorChords = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-  const minorChords = ['Am', 'Bm', 'Cm', 'Dm', 'Em', 'Fm', 'Gm'];
+  // const minorChords = ['Am', 'Bm', 'Cm', 'Dm', 'Em', 'Fm', 'Gm'];
 
   const toggleChord = (chord: string) => {
     setSelectedChords((prev) =>
@@ -110,7 +111,7 @@ const PracticeSelection: React.FC<PracticeSelectionProps> = ({
                     ))}
                   </div>
                 </div>
-                <div>
+                {/* <div>
                   <h4 className="text-sm font-medium text-zinc-400 mb-2">마이너 코드</h4>
                   <div className="grid grid-cols-4 gap-2">
                     {minorChords.map((chord) => (
@@ -127,7 +128,7 @@ const PracticeSelection: React.FC<PracticeSelectionProps> = ({
                       </button>
                     ))}
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
