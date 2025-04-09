@@ -36,6 +36,6 @@ public class SheetMusic {
 	private String sheetImage;
 	private Integer sheetOrder;
 	private String chord;
-	private Integer chordOrder;
+	// private Integer chordOrder;
 	private Float chordTiming;
 }

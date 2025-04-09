@@ -75,7 +75,7 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 				.sheetImage(sheetMusic.getSheetImage())
 				.sheetOrder(sheetMusic.getSheetOrder())
 				.chord(sheetMusic.getChord())
-				.chordOrder(sheetMusic.getChordOrder())
+				// .chordOrder(sheetMusic.getChordOrder())
 				.chordTiming(sheetMusic.getChordTiming())
 				.build();
 

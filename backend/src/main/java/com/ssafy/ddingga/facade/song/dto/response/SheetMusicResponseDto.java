@@ -15,6 +15,6 @@ public class SheetMusicResponseDto {
 	private String sheetImage;
 	private Integer sheetOrder;
 	private String chord;
-	private Integer chordOrder;
+	// private Integer chordOrder;
 	private Float chordTiming;
 }
