@@ -1,101 +1,97 @@
 import React from 'react';
-
-import { motion, AnimatePresence } from 'framer-motion';
-
 import { GuitarString } from '../../types/guitar';
 
 interface FretboardVisualizerProps {
   strings: GuitarString[];
   frets: number;
-  activeNotes: string[];
+  activeNotes?: string[];
+  currentChord?: {
+    name: string;
+    fingering: number[];
+  };
 }
 
 const FretboardVisualizer: React.FC<FretboardVisualizerProps> = ({
   strings,
-  frets = 12,
-  activeNotes,
+  activeNotes = [],
+  currentChord,
 }) => {
-  const stringSpacing = 30;
-  const fretSpacing = 60;
+  const chordFingerings: Record<string, number[]> = {
+    A: [-1, 0, 2, 2, 2, 0],
+    B: [-1, 2, 4, 4, 4, 2],
+    C: [-1, 3, 2, 0, 1, 0],
+    D: [-1, -1, 0, 2, 3, 2],
+    E: [0, 2, 2, 1, 0, 0],
+    F: [1, 1, 2, 3, 3, 1],
+    G: [3, 2, 0, 0, 0, 3],
+  };
+
+  const getFingering = (stringIndex: number) => {
+    if (!currentChord?.name) return null;
+    const fingering = chordFingerings[currentChord.name];
+    return fingering ? fingering[stringIndex] : null;
+  };
+
+  const visibleFrets = 5;
 
   return (
-    <div className="relative w-full overflow-x-auto">
-      <svg
-        width={fretSpacing * (frets + 1)}
-        height={stringSpacing * (strings.length + 1)}
-        className="bg-gradient-to-r from-amber-900/20 to-amber-800/20 rounded-lg"
-      >
-        {/* 프렛 */}
-        {Array.from({ length: frets + 1 }).map((_, i) => (
-          <line
-            key={`fret-${i}`}
-            x1={i * fretSpacing}
-            y1={stringSpacing}
-            x2={i * fretSpacing}
-            y2={strings.length * stringSpacing}
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth={i === 0 ? 4 : 2}
-          />
-        ))}
+    <div className="relative w-full bg-zinc-800 rounded-lg p-3">
+      {currentChord && (
+        <div className="absolute top-1 left-1 bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded text-xs font-medium">
+          {currentChord.name}
+        </div>
+      )}
 
-        {/* 줄 */}
-        {strings.map((string, i) => (
-          <React.Fragment key={`string-${i}`}>
-            <line
-              x1={0}
-              y1={(i + 1) * stringSpacing}
-              x2={frets * fretSpacing}
-              y2={(i + 1) * stringSpacing}
-              stroke={string.isPlaying ? '#f59e0b' : 'rgba(255,255,255,0.4)'}
-              strokeWidth={6 - i}
-            />
-
-            {/* 진동 애니메이션 */}
-            {string.isPlaying && (
-              <motion.path
-                d={`M 0 ${(i + 1) * stringSpacing} Q ${fretSpacing / 2} ${
-                  (i + 1) * stringSpacing + Math.sin(Date.now() / 100) * 10
-                } ${fretSpacing} ${(i + 1) * stringSpacing}`}
-                stroke="#f59e0b"
-                strokeWidth={6 - i}
-                fill="none"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              />
-            )}
-          </React.Fragment>
-        ))}
-
-        {/* 프렛 마커 */}
-        {[3, 5, 7, 9, 12].map((fret) => (
-          <circle
-            key={`marker-${fret}`}
-            cx={fret * fretSpacing - fretSpacing / 2}
-            cy={(strings.length * stringSpacing) / 2}
-            r={4}
-            fill="rgba(255,255,255,0.3)"
-          />
-        ))}
-
-        {/* 활성화된 노트 */}
-        <AnimatePresence>
-          {activeNotes.map((note, i) => (
-            <motion.circle
-              key={`note-${i}`}
-              cx={i * fretSpacing + fretSpacing / 2}
-              cy={strings.findIndex((s) => s.note === note) * stringSpacing + stringSpacing}
-              r={12}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-              fill="#f59e0b"
-              className="drop-shadow-lg"
-            />
+      <div className="w-full">
+        <div className="flex ml-6 mb-3">
+          {Array.from({ length: visibleFrets + 1 }).map((_, index) => (
+            <div key={`fret-number-${index}`} className="w-10 text-center text-zinc-400 text-xs">
+              {index}
+            </div>
           ))}
-        </AnimatePresence>
-      </svg>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {strings.map((string, stringIndex) => (
+            <div
+              key={`${string.note}-${string.octave}-${stringIndex}`}
+              className="flex items-center"
+            >
+              <div className="w-6 text-zinc-400 text-xs font-medium text-center">{string.note}</div>
+              <div className="flex-1 relative">
+                <div className="h-0.5 bg-zinc-400" />
+                <div className="flex absolute top-0 left-0 w-full">
+                  {Array.from({ length: visibleFrets + 1 }).map((_, fretIndex) => {
+                    const fingering = getFingering(stringIndex);
+                    const isActive = activeNotes.includes(string.note);
+                    const isFingered = fingering === fretIndex;
+                    const isMuted = fingering === -1;
+
+                    return (
+                      <div
+                        key={fretIndex}
+                        className={`w-10 h-0.5 relative ${isActive ? 'bg-amber-500/20' : ''}`}
+                      >
+                        <div className="absolute top-0 left-0 w-px h-full bg-zinc-500" />
+                        {isFingered && (
+                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                            {fretIndex + 1}
+                          </div>
+                        )}
+                        {isMuted && (
+                          <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 text-red-400 text-sm font-bold">
+                            X
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

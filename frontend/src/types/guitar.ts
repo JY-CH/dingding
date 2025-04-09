@@ -80,13 +80,19 @@ export interface Exercise {
   id: string;
   title: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
-  type: 'chord' | 'scale' | 'rhythm' | 'song';
+  type: 'chord' | 'scale' | 'song';
   bpm: number;
   duration: number;
+  repeatCount: number;
   description: string;
   requirements: string[];
   chords: string[];
   thumbnail: string;
+  steps: {
+    description: string;
+    duration: number;
+    chord?: string;
+  }[];
 }
 
 export interface PracticeSession {

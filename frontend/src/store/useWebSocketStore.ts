@@ -11,6 +11,9 @@ interface WebSocketState {
     role?: 'user' | 'assistant';
     score?: number;
     image?: string;
+    chord?: string;
+    confidence?: number;
+    isCorrect?: boolean;
   }>;
   connect: (roomId: string) => void;
   disconnect: () => void;

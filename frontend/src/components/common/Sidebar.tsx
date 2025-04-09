@@ -23,6 +23,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
   const location = useLocation();
   const [trueUser, setTrueUser] = useState<string | null>(sessionStorage.getItem('accessToken'));
 
+  // 현재 경로에 따라 activeItem 설정
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const activeIndex = menuItems.findIndex((item) => item.path === currentPath);
+    setActiveItem(activeIndex !== -1 ? activeIndex : null);
+  }, [location.pathname]);
+
   // console.log(trueUser);
   const isPlayPage = location.pathname === '/play';
   const menuItems = [
@@ -97,6 +104,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
                 <a href="/">
                   <img src="/ding.svg" alt="Ding Ding Logo" className="w-8 h-8 ml-2" />
                 </a>
+              </div>
+              <div
+                className={`
+                overflow-hidden transition-all duration-300
+                ${isExpanded ? 'w-40 opacity-100' : 'w-0 opacity-0'}
+              `}
+              >
+                <span className="ml-10 text-2xl font-medium whitespace-nowrap text-amber-500">
+                  Ding Ding
+                </span>
               </div>
             </div>
           ) : (
@@ -185,7 +202,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
                 </svg>
               </div>
 
-              <div className="overflow-hidden transition-all duration-300 w-40 ml-2 opacity-100">
+              <div
+                className={`
+                overflow-hidden transition-all duration-300
+                ${isExpanded ? 'w-40 opacity-100' : 'w-0 opacity-0'}
+              `}
+              >
                 <span className="text-sm font-medium whitespace-nowrap">로그아웃</span>
               </div>
             </button>

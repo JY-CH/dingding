@@ -203,42 +203,38 @@ const VideoStreamingPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white overflow-y-auto custom-scrollbar pb-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-b p-8 from-zinc-900 via-zinc-900 to-black text-white overflow-y-auto custom-scrollbar pb-20">
+      <div className="max-w-7xl mx-auto">
         {/* 헤더 및 뒤로가기 버튼 */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center">
-            <button
-              onClick={() => navigate(-1)}
-              className="mr-4 p-2 bg-zinc-800/50 rounded-full hover:bg-zinc-700 transition-colors"
-              aria-label="뒤로 가기"
-            >
-              <ArrowLeft size={20} className="text-amber-500" />
-            </button>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold">{song.title}</h1>
-              <p className="text-zinc-400 flex items-center gap-1 mt-1">
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    song.artist === '연습 모드'
-                      ? 'bg-green-500/20 text-green-400'
-                      : 'bg-blue-500/20 text-blue-400'
-                  }`}
-                >
-                  {song.artist}
+        <div className="flex items-center mb-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="mr-4 p-2 bg-zinc-800/50 rounded-full hover:bg-zinc-700 transition-colors"
+          >
+            <ArrowLeft size={20} className="text-amber-500" />
+          </button>
+          <div>
+            <h1 className="text-3xl font-bold">{song.title}</h1>
+            <p className="text-zinc-400 mt-1">
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  song.artist === '연습 모드'
+                    ? 'bg-green-500/20 text-green-400'
+                    : 'bg-blue-500/20 text-blue-400'
+                }`}
+              >
+                {song.artist}
+              </span>
+              {song.score && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400 ml-2">
+                  점수: {song.score}
                 </span>
-                {song.score && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400 ml-2">
-                    점수: {song.score}
-                  </span>
-                )}
-              </p>
-            </div>
+              )}
+            </p>
           </div>
           <button
             onClick={() => setIsDeleting(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-red-600/80 hover:bg-red-600 rounded-lg transition-colors"
-            aria-label="다시보기 삭제"
+            className="ml-auto flex items-center gap-2 px-3 py-2 bg-red-600/80 hover:bg-red-600 rounded-lg transition-colors"
           >
             <Trash2 size={16} />
             <span className="hidden sm:inline">삭제</span>
@@ -251,7 +247,7 @@ const VideoStreamingPage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="bg-zinc-800/80 backdrop-blur-sm rounded-xl border border-white/5 overflow-hidden shadow-xl">
+          <div className="bg-zinc-800/70 backdrop-blur-sm rounded-xl border border-white/5 overflow-hidden shadow-xl">
             {/* 비디오 컨테이너 */}
             <div className="relative aspect-video">
               <video
@@ -302,7 +298,6 @@ const VideoStreamingPage: React.FC = () => {
                   <button
                     onClick={togglePlay}
                     className="focus:outline-none text-white hover:text-amber-500 transition-colors"
-                    aria-label={isPlaying ? '일시정지' : '재생'}
                   >
                     {isPlaying ? (
                       <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -320,7 +315,6 @@ const VideoStreamingPage: React.FC = () => {
                     <button
                       onClick={toggleMute}
                       className="focus:outline-none text-white hover:text-amber-500 transition-colors"
-                      aria-label={isMuted ? '음소거 해제' : '음소거'}
                     >
                       {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
                     </button>
@@ -340,7 +334,6 @@ const VideoStreamingPage: React.FC = () => {
                   <button
                     onClick={handleDownload}
                     className="flex items-center gap-1 text-xs bg-zinc-700 hover:bg-zinc-600 py-1 px-3 rounded-full transition-colors"
-                    aria-label="비디오 다운로드"
                   >
                     <Download size={14} />
                     <span>다운로드</span>
