@@ -349,7 +349,7 @@ export class ScreenRecorder {
   }
 
   // 리소스 정리
-  private cleanup(): void {
+  cleanup(): void {
     // 오디오 컨텍스트 정리
     if (this.audioContext && this.audioContext.state !== 'closed') {
       this.audioContext.close().catch(console.error);

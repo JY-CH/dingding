@@ -172,6 +172,14 @@ class RecordingService {
   onError(callback: (error: Error) => void): void {
     this.recorder.onError(callback);
   }
+
+  /**
+   * 리소스 정리
+   */
+  cleanup(): void {
+    this.recorder.cleanup();
+    this.recordedBlob = null;
+  }
 }
 
 export default RecordingService;
