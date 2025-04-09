@@ -8,7 +8,7 @@ class WebSocketService {
   private onErrorHandler: ((error: Event) => void) | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private reconnectTimeout = 3000;
+  // private reconnectTimeout = 3000;
   private currentRoomId: string | null = null;
 
   connect(roomId: string) {
@@ -19,7 +19,16 @@ class WebSocketService {
     const token = sessionStorage.getItem('accessToken');
     if (!token) {
       console.error('No authentication token available in session storage');
+      if (this.onErrorHandler) {
+        this.onErrorHandler(new Event('no_token'));
+      }
       return;
+    }
+
+    // 기존 연결이 있다면 정리
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
 
     const url = `${WS_URL}?room_id=${roomId}&token=${token}`;
@@ -74,6 +83,9 @@ class WebSocketService {
   private handleReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('Max reconnection attempts reached');
+      if (this.onErrorHandler) {
+        this.onErrorHandler(new Event('max_reconnect_attempts'));
+      }
       return;
     }
 
@@ -87,9 +99,13 @@ class WebSocketService {
       `Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`,
     );
 
+    // 지수 백오프 적용
+    const backoffTime = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+    console.log(`Waiting ${backoffTime}ms before reconnecting...`);
+
     setTimeout(() => {
       this.connect(this.currentRoomId!);
-    }, this.reconnectTimeout);
+    }, backoffTime);
   }
 
   sendMessage(message: any) {
@@ -112,21 +128,21 @@ class WebSocketService {
 
     try {
       const messageStr = JSON.stringify(message);
-      console.log('웹소켓으로 메시지 전송 시도:', {
-        type: message.type,
-        dataLength: message.data?.length,
-        chord: message.chord,
-        room_id: message.room_id,
-        timestamp: new Date().toISOString(),
-      });
+      // console.log('웹소켓으로 메시지 전송 시도:', {
+      //   type: message.type,
+      //   dataLength: message.data?.length,
+      //   chord: message.chord,
+      //   room_id: message.room_id,
+      //   timestamp: new Date().toISOString(),
+      // });
 
       // 메시지 전송
       this.ws.send(messageStr);
 
-      console.log('웹소켓 메시지 전송 성공:', {
-        type: message.type,
-        timestamp: new Date().toISOString(),
-      });
+      // console.log('웹소켓 메시지 전송 성공:', {
+      //   type: message.type,
+      //   timestamp: new Date().toISOString(),
+      // });
     } catch (error) {
       console.error('메시지 전송 중 오류 발생:', error);
     }
