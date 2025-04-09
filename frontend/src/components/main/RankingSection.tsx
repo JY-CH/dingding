@@ -4,13 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { fetchRankings } from '@/services/api';
 
-import { Song } from '../../types';
+import { Song } from '../../types/performance';
 
 interface RankUser {
   username: string;
-  playTime: number;
+  playTime: string | number;
   totalTry: number;
   avgScore?: number;
+  score?: number;
+  rank?: number;
 }
 
 interface RankingSectionProps {
@@ -32,7 +34,7 @@ const RankingSection: React.FC<RankingSectionProps> = ({
   const [rankingType, setRankingType] = useState<'music' | 'user'>('music');
   const [activeTab, setActiveTab] = useState<TabType>('daily');
   const [userTab, setUserTab] = useState<UserTabType>('playtime');
-  const [hoveredTrack, setHoveredTrack] = useState<string | null>(null);
+  const [hoveredTrack, setHoveredTrack] = useState<number | null>(null);
   const [hoveredUser, setHoveredUser] = useState<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [rankings, setRankings] = useState<RankUser[]>([]);
@@ -65,20 +67,41 @@ const RankingSection: React.FC<RankingSectionProps> = ({
         setIsLoading(true);
         setError(null);
         const data = await fetchRankings();
+        
+        // 데이터 검증 및 형식 변환
+        let processedData: RankUser[] = [];
 
         // 선택된 탭에 따라 데이터 설정
         switch (userTab) {
           case 'playtime':
-            setRankings(data.playTimeTop10);
+            processedData = data.playTimeTop10.map((user: any) => ({
+              ...user,
+              playTime: user.playTime || "00:00:00",
+              totalTry: typeof user.totalTry === 'number' ? user.totalTry : 0,
+              avgScore: user.score || 0
+            }));
             break;
           case 'totaltry':
-            setRankings(data.totalTryTop10);
+            processedData = data.totalTryTop10.map((user: any) => ({
+              ...user,
+              playTime: user.playTime || "00:00:00",
+              totalTry: typeof user.totalTry === 'number' ? user.totalTry : 0,
+              avgScore: user.score || 0
+            }));
             break;
           case 'avgscore':
-            setRankings(data.scoreTop10);
+            processedData = data.scoreTop10.map((user: any) => ({
+              ...user,
+              playTime: user.playTime || "00:00:00",
+              totalTry: typeof user.totalTry === 'number' ? user.totalTry : 0,
+              avgScore: user.score || 0
+            }));
             break;
         }
+        
+        setRankings(processedData);
       } catch (err) {
+        console.error('랭킹 조회 오류:', err);
         setError(err instanceof Error ? err.message : '랭킹을 불러오는데 실패했습니다.');
       } finally {
         setIsLoading(false);
@@ -96,6 +119,28 @@ const RankingSection: React.FC<RankingSectionProps> = ({
 
     if (error) {
       return <div className="text-center py-4 text-red-400">{error}</div>;
+    }
+
+    if (!rankings || rankings.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <svg 
+            className="w-12 h-12 mx-auto text-zinc-600 mb-4" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={1.5} 
+              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" 
+            />
+          </svg>
+          <p className="text-zinc-400 text-sm">랭킹 정보가 없습니다.</p>
+          <p className="text-zinc-500 text-xs mt-1">첫 연주를 시작해보세요!</p>
+        </div>
+      );
     }
 
     return (
@@ -148,22 +193,20 @@ const RankingSection: React.FC<RankingSectionProps> = ({
 
               <div className="flex-1 min-w-0">
                 <h4 className="font-medium text-white text-sm truncate">{user.username}</h4>
-                <p className="text-xs text-amber-400/80 truncate">
-                  {userTab === 'playtime' &&
-                    `${Math.floor(user.playTime / 60)}시간 ${user.playTime % 60}분`}
-                  {userTab === 'totaltry' && `${user.totalTry}회 도전`}
-                  {userTab === 'avgscore' &&
-                    typeof user.avgScore === 'number' &&
-                    `평균 ${user.avgScore.toFixed(1)}점`}
-                </p>
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="text-xs text-zinc-400">
-                  {userTab === 'playtime' && `${user.totalTry}회`}
-                  {userTab === 'totaltry' && `${Math.floor(user.playTime / 60)}시간`}
-                  {userTab === 'avgscore' && `${user.totalTry}회`}
-                </span>
+                <p className="text-xs text-amber-400/80 truncate">
+                  {userTab === 'playtime' && (
+                    formatPlayTime(user.playTime)
+                  )}
+                  {userTab === 'totaltry' && (
+                    `${user.totalTry || 0}회`
+                  )}
+                  {userTab === 'avgscore' && (
+                    `${(user.avgScore || 0).toFixed(1)}점`
+                  )}
+                </p>
                 <div
                   className={`
                     p-2 rounded-full transition-all duration-300
@@ -198,6 +241,27 @@ const RankingSection: React.FC<RankingSectionProps> = ({
         ))}
       </div>
     );
+  };
+
+  // 카테고리별 다른 데이터 포맷 함수 추가
+  const formatPlayTime = (minutes: string | number) => {
+    if (typeof minutes === 'string') {
+      // "00:05:00" 형식 처리
+      const parts = minutes.split(':');
+      if (parts.length === 3) {
+        const hours = parseInt(parts[0]);
+        const mins = parseInt(parts[1]);
+        return `${hours}시간 ${mins}분`;
+      }
+      return '0시간 0분';
+    } else if (typeof minutes === 'number') {
+      // 분 단위로 된 숫자 처리 (기존 로직)
+      if (isNaN(minutes)) return '0시간 0분';
+      const hours = Math.floor(minutes / 60);
+      const mins = Math.floor(minutes % 60);
+      return `${hours}시간 ${mins}분`;
+    }
+    return '0시간 0분';
   };
 
   return (
@@ -319,7 +383,7 @@ const RankingSection: React.FC<RankingSectionProps> = ({
               <div className="space-y-2">
                 {getTracks().map((track, index) => (
                   <motion.div
-                    key={`${activeTab}-${track.id}-${index}`}
+                    key={`${track.id}-${index}`}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{
@@ -328,40 +392,38 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                       ease: 'easeOut',
                     }}
                     className="relative group"
-                    onMouseEnter={() => setHoveredTrack(track.id)}
+                    onMouseEnter={() => setHoveredTrack(index)}
                     onMouseLeave={() => setHoveredTrack(null)}
                   >
                     <div
                       className={`
                         flex items-center gap-3 p-3 rounded-lg transition-all duration-300
-                        ${hoveredTrack === track.id ? 'bg-white/10 transform scale-[1.02]' : 'hover:bg-white/5'}
+                        ${hoveredTrack === index ? 'bg-white/10 transform scale-[1.02]' : 'hover:bg-white/5'}
                       `}
+                      onClick={() => onPlayTrack(track)}
                     >
                       <div className="w-6 text-center">
                         <span
                           className={`
-                          text-sm font-bold transition-colors duration-300
-                          ${hoveredTrack === track.id ? 'text-amber-500' : 'text-zinc-600'}
-                        `}
+                            text-sm font-bold transition-colors duration-300
+                            ${hoveredTrack === index ? 'text-amber-500' : 'text-zinc-600'}
+                          `}
                         >
                           {(index + 1).toString().padStart(2, '0')}
                         </span>
                       </div>
 
                       <div className="relative w-10 h-10 rounded-md overflow-hidden">
+                        <img
+                          src={track.thumbnail}
+                          alt={track.title}
+                          className="w-full h-full object-cover"
+                        />
                         <div
                           className={`
-                          absolute inset-0 bg-gradient-to-br from-amber-500/20 to-purple-500/20
-                          transition-opacity duration-300
-                          ${hoveredTrack === track.id ? 'opacity-100' : 'opacity-0'}
-                        `}
-                        />
-                        <img
-                          src={track.cover}
-                          alt={track.title}
-                          className={`
-                            w-full h-full object-cover transition-transform duration-500
-                            ${hoveredTrack === track.id ? 'scale-110' : 'scale-100'}
+                            absolute inset-0 bg-gradient-to-br from-amber-500/20 to-purple-500/20
+                            transition-opacity duration-300
+                            ${hoveredTrack === index ? 'opacity-100' : 'opacity-0'}
                           `}
                         />
                       </div>
@@ -372,22 +434,15 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className="text-xs text-zinc-400">
-                          {Math.floor(track.plays / 1000)}k
-                        </span>
-                        <button
-                          onClick={() => onPlayTrack(track)}
+                        <span className="text-xs text-zinc-400">{track.duration}</span>
+                        <div
                           className={`
                             p-2 rounded-full transition-all duration-300
-                            ${
-                              hoveredTrack === track.id
-                                ? 'bg-amber-500 text-white'
-                                : 'bg-white/5 text-zinc-400'
-                            }
+                            ${hoveredTrack === index ? 'bg-amber-500' : 'bg-white/5'}
                           `}
                         >
                           <svg
-                            className="w-4 h-4"
+                            className={`w-4 h-4 ${hoveredTrack === index ? 'text-white' : 'text-zinc-400'}`}
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -399,14 +454,14 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                               d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
                             />
                           </svg>
-                        </button>
+                        </div>
                       </div>
 
                       <div
                         className={`
                         absolute inset-0 bg-gradient-to-r from-amber-500/5 to-purple-500/5 rounded-lg
                         transition-opacity duration-300 pointer-events-none
-                        ${hoveredTrack === track.id ? 'opacity-100' : 'opacity-0'}
+                        ${hoveredTrack === index ? 'opacity-100' : 'opacity-0'}
                       `}
                       />
                     </div>

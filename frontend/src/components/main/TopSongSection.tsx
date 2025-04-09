@@ -1,15 +1,48 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
 
 import { mockTopSongs } from '../../data/mockData';
-import { Song } from '../../types';
+import { Song } from '../../types/performance';
 
 interface TopSongSectionProps {
   onPlaySong: (song: Song) => void;
 }
 
 const TopSongSection: React.FC<TopSongSectionProps> = ({ onPlaySong }) => {
+  const [currentPage, setCurrentPage] = useState(0);
+  const totalPages = 3;
+
+  const pageContent = [
+    {
+      title: "주목할 최신곡",
+      description: "지금 가장 주목받는 신곡을 만나보세요",
+      songs: mockTopSongs.slice(0, 6)
+    },
+    {
+      title: "봄 노래 추천",
+      description: "따스한 봄날에 어울리는 음악을 들려드립니다",
+      songs: mockTopSongs.slice(6, 12)
+    },
+    {
+      title: "즐거운 음악",
+      description: "기분 좋은 하루를 만들어줄 밝은 음악들",
+      songs: mockTopSongs.slice(12, 18)
+    }
+  ];
+
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => (prev > 0 ? prev - 1 : totalPages - 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => (prev < totalPages - 1 ? prev + 1 : 0));
+  };
+
+  const getCurrentPageItems = () => {
+    return pageContent[currentPage]?.songs || [];
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -17,26 +50,81 @@ const TopSongSection: React.FC<TopSongSectionProps> = ({ onPlaySong }) => {
       transition={{ delay: 0.5 }}
       className="h-[680px]"
     >
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
-          최신 발매
-        </h2>
-        <p className="text-zinc-400 text-sm mt-2">Dingding이 추천하는 새로운 앨범을 만나보세요</p>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <motion.h2
+            key={`title-${currentPage}`}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-3xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent"
+          >
+            {pageContent[currentPage]?.title}
+          </motion.h2>
+          <motion.p
+            key={`desc-${currentPage}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="text-zinc-400 text-sm mt-2"
+          >
+            {pageContent[currentPage]?.description}
+          </motion.p>
+        </div>
+
+        <div className="flex gap-2">
+          <button 
+            onClick={handlePrevPage}
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors group"
+          >
+            <svg
+              className="w-5 h-5 text-white/60 group-hover:text-white transition-colors"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <button 
+            onClick={handleNextPage}
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors group"
+          >
+            <svg
+              className="w-5 h-5 text-white/60 group-hover:text-white transition-colors"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M9 5l7 7-7 7" 
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 h-[570px]">
-        {mockTopSongs.slice(0, 6).map((song, index) => (
+        {getCurrentPageItems().map((song, index) => (
           <motion.div
-            key={song.id}
+            key={`${song.id}-${currentPage}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 + index * 0.1 }}
+            transition={{ delay: 0.1 + index * 0.1 }}
             className="group cursor-pointer h-[180px]"
             onClick={() => onPlaySong(song)}
           >
             <div className="h-[200px] rounded-lg overflow-hidden relative mb-1">
               <img
-                src={song.cover}
+                src={song.thumbnail}
                 alt={song.title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
@@ -56,6 +144,21 @@ const TopSongSection: React.FC<TopSongSectionProps> = ({ onPlaySong }) => {
             <h3 className="font-medium text-white text-sm truncate">{song.title}</h3>
             <p className="text-amber-400 text-xs truncate">{song.artist}</p>
           </motion.div>
+        ))}
+      </div>
+
+      {/* 페이지 인디케이터 */}
+      <div className="flex justify-center gap-2 mt-4">
+        {[...Array(totalPages)].map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentPage(index)}
+            className={`w-2 h-2 rounded-full transition-all ${
+              currentPage === index 
+                ? 'bg-amber-500 w-4' 
+                : 'bg-white/20 hover:bg-white/40'
+            }`}
+          />
         ))}
       </div>
     </motion.div>

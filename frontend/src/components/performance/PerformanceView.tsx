@@ -250,11 +250,12 @@ const PerformanceView: React.FC = () => {
       {/* 하단 영역 - ChordTimeline */}
       <div className="relative h-1/2 bg-black">
         <div className="absolute inset-0">
-          <ChordTimeline 
+          <ChordTimeline
             isPlaying={isPlaying}
             currentSong={currentSong}
             notes={notes}
             currentChord={currentChord}
+            onPlayingChange={setIsPlaying}
           />
           {hitEffects.map(effect => (
             <HitEffect

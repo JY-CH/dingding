@@ -14,10 +14,8 @@ import TopArtistSection from '../components/main/TopArtistSection';
 import TopSongSection from '../components/main/TopSongSection';
 import { mockDailyTracks, mockWeeklyTracks, mockMonthlyTracks } from '../data/mockData';
 import { logout } from '../services/api';
-import { Song } from '../types';
 
 const MainPage = () => {
-  const [, setCurrentSong] = useState<Song | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -42,8 +40,8 @@ const MainPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handlePlaySong = (song: Song) => {
-    setCurrentSong(song);
+  const handlePlaySong = () => {
+    // This function is no longer used in the new version
   };
 
   const handleLogout = async () => {
@@ -54,6 +52,10 @@ const MainPage = () => {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  const handleUpdatePlaylist = () => {
+    // This function is no longer used in the new version
   };
 
   return (
@@ -358,7 +360,7 @@ const MainPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <ExploreSection />
+            <ExploreSection onUpdatePlaylist={handleUpdatePlaylist} />
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             <div className="col-span-2">

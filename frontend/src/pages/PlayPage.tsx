@@ -1,22 +1,24 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { GiGuitar } from 'react-icons/gi';
 import { HiOutlineVideoCamera, HiOutlineVideoCameraSlash } from 'react-icons/hi2';
-import { IoStatsChartOutline } from 'react-icons/io5';
-import { RiMusicLine, RiSettings4Line } from 'react-icons/ri';
+import { RiMusicLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
+import { Settings } from 'lucide-react';
 
+import GameModeNavbar from '../components/common/GameModeNavbar';
 import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
 import FretboardVisualizer from '../components/guitar/FretboardVisualizer';
 import PracticeSession from '../components/guitar/PracticeSession';
+import PracticeSelection from '../components/guitar/PracticeSelection';
 import { useWebSocketStore } from '../store/useWebSocketStore';
-import { GuitarString, Visualization } from '../types/guitar';
+import { GuitarString, Visualization, Exercise } from '../types/guitar';
 
 const PlayPage: React.FC = () => {
   const navigate = useNavigate();
-  const { sendMessage, isConnected } = useWebSocketStore();
+  const { sendMessage, isConnected, messages } = useWebSocketStore();
   const [selectedMode, setSelectedMode] = useState<'practice' | 'performance'>('practice');
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
@@ -25,6 +27,14 @@ const PlayPage: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [showPracticeModal, setShowPracticeModal] = useState(false);
+  const [defaultExercise, setDefaultExercise] = useState({
+    chords: ['C', 'G', 'F'],
+    duration: 30,
+    repeatCount: 3,
+    bpm: 60,
+  });
 
   // 기타 줄 상태
   const [strings] = useState<GuitarString[]>([
@@ -39,65 +49,53 @@ const PlayPage: React.FC = () => {
   // AudioContext 관련 state들
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [, setAnalyser] = useState<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | null>(null); // null 초기값 추가
+  const animationFrameRef = useRef<number | null>(null);
 
   // 시각화 데이터
   const [visualization, setVisualization] = useState<Visualization>({
     type: '3d',
-    data: new Array(128).fill(0),
+    data: new Array(256).fill(0),
     peak: 1,
   });
 
-  // 예시 연습 세션
-  const sampleExercise = useMemo(
-    () => ({
-      id: '1',
-      title: '기본 코드 연습',
-      difficulty: 'beginner' as const,
-      type: 'chord' as const,
-      bpm: 60,
-      duration: 120,
-      description: '기본적인 코드 연습을 위한 연습곡입니다.',
-      requirements: ['기타', '피크'],
-      chords: ['C', 'G', 'Am', 'F'],
-      thumbnail: 'https://example.com/thumbnail.jpg',
-      steps: [
-        {
-          description: 'C 코드 연습',
-          duration: 30,
-          chord: 'C'
-        },
-        {
-          description: 'G 코드 연습',
-          duration: 30,
-          chord: 'G'
-        },
-        {
-          description: 'Am 코드 연습',
-          duration: 30,
-          chord: 'Am'
-        },
-        {
-          description: 'F 코드 연습',
-          duration: 30,
-          chord: 'F'
-        }
-      ]
-    }),
-    [],
-  );
+  const handleExerciseSelect = (
+    chords: string[],
+    duration: number,
+    repeatCount: number,
+    bpm: number,
+  ) => {
+    setDefaultExercise({ chords, duration, repeatCount, bpm });
+    setSelectedExercise({
+      id: crypto.randomUUID(),
+      title: '연습 세션',
+      difficulty: 'beginner',
+      type: 'chord',
+      bpm,
+      duration,
+      repeatCount,
+      description: '선택한 코드를 연습합니다.',
+      requirements: ['기타', '마이크'],
+      chords,
+      thumbnail: '',
+      steps: chords.map((chord) => ({
+        description: `${chord} 코드 연습`,
+        duration: duration / chords.length,
+        chord,
+      })),
+    });
+  };
 
   const webcamRef = useRef<Webcam>(null);
 
   useEffect(() => {
-    let isActive = true; // cleanup을 위한 flag
+    let isActive = true;
 
     const initAudio = async () => {
       try {
         const context = new AudioContext();
         const analyserNode = context.createAnalyser();
-        analyserNode.fftSize = 64;
-        analyserNode.smoothingTimeConstant = 0.8;
+        analyserNode.fftSize = 256;
+        analyserNode.smoothingTimeConstant = 0.3;
 
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const source = context.createMediaStreamSource(stream);
@@ -108,16 +106,19 @@ const PlayPage: React.FC = () => {
           setAnalyser(analyserNode);
 
           const updateVisualization = () => {
-            if (!isActive) return;
+            if (!isActive || !analyserNode) return;
 
             const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
             analyserNode.getByteFrequencyData(dataArray);
 
-            setVisualization((prev) => ({
-              ...prev,
-              data: Array.from(dataArray).map((value) => (value / 255) * 0.7),
-              peak: Math.max(...dataArray) / 255 || 1,
-            }));
+            setVisualization((prev) => {
+              const newData = Array.from(dataArray).map((value) => (value / 255) * 0.8);
+              return {
+                ...prev,
+                data: newData,
+                peak: Math.max(...dataArray) / 255 || 1,
+              };
+            });
 
             animationFrameRef.current = requestAnimationFrame(updateVisualization);
           };
@@ -131,7 +132,6 @@ const PlayPage: React.FC = () => {
 
     initAudio();
 
-    // 클린업
     return () => {
       isActive = false;
       if (animationFrameRef.current) {
@@ -139,7 +139,7 @@ const PlayPage: React.FC = () => {
       }
       audioContext?.close();
     };
-  }, []); // 빈 의존성 배열 유지
+  }, []);
 
   // 새로운 상태들 추가
   const [settings, setSettings] = useState({
@@ -157,7 +157,7 @@ const PlayPage: React.FC = () => {
     const captureAndSendImage = async () => {
       try {
         const webcam = webcamRef.current;
-        if (!webcam || !isConnected || !sampleExercise || !currentRoomId) {
+        if (!webcam || !isConnected || !selectedExercise || !currentRoomId) {
           return;
         }
 
@@ -169,7 +169,7 @@ const PlayPage: React.FC = () => {
         sendMessage({
           type: 'image',
           data: imageData,
-          chord: sampleExercise.chords[currentStep],
+          chord: selectedExercise.chords[currentStep],
           room_id: currentRoomId,
         });
       } catch (error) {
@@ -186,7 +186,7 @@ const PlayPage: React.FC = () => {
         clearInterval(intervalId);
       }
     };
-  }, [isReady, isConnected, currentStep, sendMessage, sampleExercise, currentRoomId]);
+  }, [isReady, isConnected, currentStep, sendMessage, selectedExercise, currentRoomId]);
 
   const handleComplete = (performance: any) => {
     console.log('Practice completed:', performance);
@@ -196,54 +196,19 @@ const PlayPage: React.FC = () => {
   const handleRoomIdChange = (roomId: string) => {
     setCurrentRoomId(roomId);
   };
-  
+
   return (
     <div className="flex-1 overflow-auto bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 h-full">
-      {/* 상단 네비게이션 바 */}
-      <nav className="bg-black/30 backdrop-blur-sm border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <GiGuitar className="w-6 h-6 text-amber-500" />
-            <h1 className="text-xl font-bold text-white">ThingThing Guitar</h1>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-700 hover:text-white transition-colors">
-              <GiGuitar className="w-5 h-5" />
-              연습 모드
-            </button>
-            <button
-              onClick={() => navigate('/performance')}
-              className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
-            >
-              <RiMusicLine className="w-5 h-5" />
-              연주 모드
-            </button>
-            <button
-              onClick={() => setShowStats(!showStats)}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
-            >
-              <IoStatsChartOutline className="w-5 h-5 text-zinc-400 group-hover:text-amber-500" />
-            </button>
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 ㅋㅌtransition-colors group"
-            >
-              <RiSettings4Line className="w-5 h-5 text-zinc-400 group-hover:text-amber-500" />
-            </button>
-            <div className="h-8 w-px bg-white/10" />
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
-                <span className="text-amber-500 font-medium">7</span>
-              </div>
-              <div className="text-sm">
-                <div className="text-zinc-400">연습 스트릭</div>
-                <div className="text-white font-medium">7일 연속</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* 네비바 - 4rem 고정 */}
+      <div className="h-16">
+        <GameModeNavbar
+          showStats={showStats}
+          setShowStats={setShowStats}
+          showSettings={showSettings}
+          setShowSettings={setShowSettings}
+          currentMode="practice"
+        />
+      </div>
 
       <div className="p-8">
         {/* 메인 콘텐츠 그리드 */}
@@ -287,6 +252,57 @@ const PlayPage: React.FC = () => {
                   <div className="text-sm opacity-80">실시간 연주 분석</div>
                 </div>
               </button>
+            </motion.div>
+
+            {/* 연습 설정 카드 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white/5 rounded-xl p-6"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-white">연습 설정</h3>
+                {!isReady && (
+                  <button
+                    onClick={() => setShowPracticeModal(true)}
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <Settings className="w-5 h-5 text-amber-500" />
+                  </button>
+                )}
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-400 mb-2">선택된 코드</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {(selectedExercise?.chords || defaultExercise.chords).map((chord, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded text-sm"
+                      >
+                        {chord}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-400 mb-2">연습 시간</h4>
+                  <p className="text-white">
+                    {selectedExercise?.duration || defaultExercise.duration}초
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-400 mb-2">반복 횟수</h4>
+                  <p className="text-white">
+                    {selectedExercise?.repeatCount || defaultExercise.repeatCount}회
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-400 mb-2">연습 속도</h4>
+                  <p className="text-white">{selectedExercise?.bpm || defaultExercise.bpm} BPM</p>
+                </div>
+              </div>
             </motion.div>
 
             {/* 통계 카드 */}
@@ -360,21 +376,35 @@ const PlayPage: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* 연습 세션 */}
+            {/* 연습 세션 또는 연습 선택 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className="mt-6"
             >
-              <PracticeSession
-                exercise={sampleExercise}
-                onComplete={handleComplete}
-                onRoomIdChange={handleRoomIdChange}
-                onReady={setIsReady}
-                onStepChange={setCurrentStep}
-                sampleExercise={sampleExercise}
-              />
+              {selectedExercise ? (
+                <PracticeSession
+                  exercise={selectedExercise}
+                  onComplete={handleComplete}
+                  onRoomIdChange={handleRoomIdChange}
+                  onReady={setIsReady}
+                  onStepChange={setCurrentStep}
+                  sampleExercise={{
+                    chords: selectedExercise.chords,
+                    duration: selectedExercise.duration,
+                  }}
+                />
+              ) : (
+                <div className="text-center">
+                  <PracticeSelection
+                    isOpen={true}
+                    onClose={() => {}}
+                    onExerciseSelect={handleExerciseSelect}
+                    currentExercise={defaultExercise}
+                  />
+                </div>
+              )}
             </motion.div>
           </div>
 
@@ -395,7 +425,23 @@ const PlayPage: React.FC = () => {
                   </span>
                 )}
               </div>
-              <FretboardVisualizer strings={strings} frets={12} activeNotes={['E', 'A', 'D']} />
+              <FretboardVisualizer
+                strings={strings}
+                frets={12}
+                activeNotes={
+                  selectedExercise?.chords[currentStep]
+                    ? [selectedExercise.chords[currentStep]]
+                    : []
+                }
+                currentChord={
+                  selectedExercise?.chords[currentStep]
+                    ? {
+                        name: selectedExercise.chords[currentStep],
+                        fingering: [],
+                      }
+                    : undefined
+                }
+              />
             </motion.div>
 
             {/* 음향 시각화 - 위치 이동 */}
@@ -426,7 +472,9 @@ const PlayPage: React.FC = () => {
                     exit={{ opacity: 0, x: 20 }}
                     className="p-3 rounded-lg bg-green-500/20 text-green-400"
                   >
-                    코드 진행이 정확합니다
+                    {messages.length > 0
+                      ? messages[messages.length - 1].message
+                      : '점수: 0.0점 이미지 분석: 기타 코드를 감지하지 못했습니다.'}
                   </motion.div>
                   <motion.div
                     key="feedback-2"
@@ -505,6 +553,14 @@ const PlayPage: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 연습 설정 모달 */}
+      <PracticeSelection
+        isOpen={showPracticeModal}
+        onClose={() => setShowPracticeModal(false)}
+        onExerciseSelect={handleExerciseSelect}
+        currentExercise={defaultExercise}
+      />
     </div>
   );
 };

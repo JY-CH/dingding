@@ -10,7 +10,6 @@ import DashboardPage from '../../pages/dashboard/DashboardPage';
 import VideoStreamingPage from '../../pages/dashboard/VideoStramingPage';
 import DetailPage from '../../pages/DetailPage';
 import EditPage from '../../pages/EditPage';
-import HomePage from '../../pages/HomePage';
 import LoginPage from '../../pages/LoginPage';
 import MainPage from '../../pages/MainPage';
 import NotFoundPage from '../../pages/NotFoundPage';
@@ -44,7 +43,6 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
         <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
           <Routes>
             <Route path="/" element={<MainPage />} />
-            <Route path="/home" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/search" element={<SearchPage />} />
 

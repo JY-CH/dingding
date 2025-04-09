@@ -325,3 +325,146 @@ export const fetchRankings = async (): Promise<RankResponse> => {
     throw error;
   }
 };
+
+// 주간 랭킹 응답 타입
+// ... existing code ...
+
+// 이주의 곡 랭킹 인터페이스
+interface WeekSongUserInfo {
+  username: string;
+  score: number;
+}
+
+interface WeekSongRankingResponse {
+  song: {
+    songId: number;
+    songTitle: string;
+    songImage: string;
+    songSinger: string;
+  };
+  userInfo: WeekSongUserInfo[];
+}
+
+// 이주의 곡 랭킹 조회 함수
+export const fetchWeekSongRanking = async (): Promise<WeekSongRankingResponse> => {
+  try {
+    console.log('주간 곡 랭킹 요청 URL:', `${API_URL}/weekSong/ranking`);
+    
+    const response = await fetch(`${API_URL}/weekSong/ranking`, {
+      headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // 쿠키를 포함하도록 설정
+    });
+
+    console.log('이주의 곡 랭킹 응답 상태:', response.status);
+    
+    // 500 Internal Server Error 오류 처리
+    if (response.status === 500) {
+      console.error('서버 내부 오류가 발생했습니다. (500 Internal Server Error)');
+      return {
+        song: {
+          songId: 0,
+          songTitle: "서버 오류가 발생했습니다",
+          songImage: "",
+          songSinger: "잠시 후 다시 시도해 주세요",
+        },
+        userInfo: []
+      };
+    }
+    
+    // 403 Forbidden 오류 처리
+    if (response.status === 403) {
+      console.error('접근 권한이 없습니다. (403 Forbidden)');
+      return {
+        song: {
+          songId: 0,
+          songTitle: "접근 권한이 없습니다",
+          songImage: "",
+          songSinger: "",
+        },
+        userInfo: []
+      };
+    }
+    
+    // 응답 본문 파싱
+    let data;
+    try {
+      // 빈 응답이나 JSON이 아닌 응답 처리
+      const text = await response.text();
+      data = text ? JSON.parse(text) : null;
+    } catch (parseError) {
+      console.error('JSON 파싱 오류:', parseError);
+      return {
+        song: {
+          songId: 0,
+          songTitle: "데이터를 불러올 수 없습니다",
+          songImage: "",
+          songSinger: "",
+        },
+        userInfo: []
+      };
+    }
+    
+    console.log('이주의 곡 랭킹 응답 데이터:', data);
+
+    // 에러 응답 처리
+    if (!response.ok) {
+      const errorMessage = data?.message || '이주의 곡 랭킹 정보를 불러오는데 실패했습니다.';
+      console.error('API 오류 응답:', data);
+      
+      return {
+        song: {
+          songId: 0,
+          songTitle: errorMessage,
+          songImage: "",
+          songSinger: "",
+        },
+        userInfo: []
+      };
+    }
+
+    // 빈 배열로 받았을 때 기본 빈 데이터 구조 반환
+    if (Array.isArray(data) && data.length === 0) {
+      console.log('빈 배열 응답을 받았습니다. 기본 빈 데이터 구조를 반환합니다.');
+      return {
+        song: {
+          songId: 0,
+          songTitle: "이주의 곡이 없습니다",
+          songImage: "",
+          songSinger: "",
+        },
+        userInfo: []
+      };
+    }
+
+    // 데이터 유효성 검사
+    if (!data || !data.song || !data.userInfo) {
+      console.error('API 응답 형식 오류:', data);
+      return {
+        song: {
+          songId: 0,
+          songTitle: "잘못된 데이터 형식입니다",
+          songImage: "",
+          songSinger: "",
+        },
+        userInfo: []
+      };
+    }
+
+    return data as WeekSongRankingResponse;
+  } catch (error) {
+    console.error('이주의 곡 랭킹 조회 오류:', error);
+    // 에러 발생 시 기본 데이터 반환
+    return {
+      song: {
+        songId: 0,
+        songTitle: "데이터를 불러올 수 없습니다",
+        songImage: "",
+        songSinger: "",
+      },
+      userInfo: []
+    };
+  }
+};

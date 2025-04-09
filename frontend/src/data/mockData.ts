@@ -1,56 +1,57 @@
-import { Song, Artist, Category } from '../types';
+import { Artist, Category } from '../types';
+import { Song } from '../types/performance';
 
 // 더미 음악 데이터
 export const mockSongs: Song[] = [
   {
-    id: '1',
+    id: 1,
     title: 'Blinding Lights',
     artist: 'The Weeknd',
-    album: 'After Hours',
-    cover: 'https://i.scdn.co/image/ab67616d0000b27301f1d35d045186e5c8c05a50',
-    audio: 'https://p.scdn.co/mp3-preview/3b6ca99899bde6cb316cf54408492e4c1dc25cfa',
-    duration: 203,
-    plays: 2543789
+    difficulty: 'medium',
+    duration: '3:23',
+    thumbnail: 'https://i.scdn.co/image/ab67616d0000b27301f1d35d045186e5c8c05a50',
+    notes: [],
+    bpm: 120
   },
   {
-    id: '2',
+    id: 2,
     title: 'Hype Boy',
     artist: 'NewJeans',
-    album: 'NewJeans 1st EP',
-    cover: 'https://i.scdn.co/image/ab67616d0000b2736ec634e5fa8d4b54d661baa7',
-    audio: 'https://p.scdn.co/mp3-preview/63da2a4d8aa8b75fd343b14f34c3781391a5ed75',
-    duration: 180,
-    plays: 1987654
+    difficulty: 'easy',
+    duration: '3:00',
+    thumbnail: 'https://i.scdn.co/image/ab67616d0000b2736ec634e5fa8d4b54d661baa7',
+    notes: [],
+    bpm: 110
   },
   {
-    id: '3',
+    id: 3,
     title: 'Seven (feat. Latto)',
     artist: 'Jung Kook',
-    album: 'Seven',
-    cover: 'https://i.scdn.co/image/ab67616d0000b273bf5cce5a0e1ed03a626bdd74',
-    audio: 'https://p.scdn.co/mp3-preview/f95eb3c9ad10f7023e11dd7bf5f1c56e3a1c1d5a',
-    duration: 194,
-    plays: 3254871
+    difficulty: 'hard',
+    duration: '3:14',
+    thumbnail: 'https://i.scdn.co/image/ab67616d0000b273bf5cce5a0e1ed03a626bdd74',
+    notes: [],
+    bpm: 125
   },
   {
-    id: '4',
+    id: 4,
     title: 'Cupid',
     artist: 'FIFTY FIFTY',
-    album: 'The Beginning: Cupid',
-    cover: 'https://i.scdn.co/image/ab67616d0000b273849b5b629ce9aceb822f7905',
-    audio: 'https://p.scdn.co/mp3-preview/d6176a405b15a37b2c1990033e0c7b76f5341cf1',
-    duration: 175,
-    plays: 1654236
+    difficulty: 'medium',
+    duration: '2:55',
+    thumbnail: 'https://i.scdn.co/image/ab67616d0000b273849b5b629ce9aceb822f7905',
+    notes: [],
+    bpm: 115
   },
   {
-    id: '5',
+    id: 5,
     title: 'OMG',
     artist: 'NewJeans',
-    album: 'NewJeans OMG',
-    cover: 'https://i.scdn.co/image/ab67616d0000b273d70036292d54f29e8b68ec01',
-    audio: 'https://p.scdn.co/mp3-preview/01fcba517920b800e1f2f88ff85b6857c0c5b86e',
-    duration: 188,
-    plays: 2145879
+    difficulty: 'medium',
+    duration: '3:08',
+    thumbnail: 'https://i.scdn.co/image/ab67616d0000b273d70036292d54f29e8b68ec01',
+    notes: [],
+    bpm: 118
   }
 ];
 
@@ -58,34 +59,34 @@ export const mockSongs: Song[] = [
 export const mockTopSongs: Song[] = [
   ...mockSongs,
   {
-    id: '6',
+    id: 6,
     title: 'Smoke',
     artist: 'Dynamic Duo, Choiza, Gaeko, Mirani',
-    album: 'Smoke',
-    cover: 'https://i.scdn.co/image/ab67616d0000b273c8d3b11fd5331c5c3abac16a',
-    audio: 'https://p.scdn.co/mp3-preview/1da5e978fec7dfc0a8fecc60fa74be0f5a35eddb',
-    duration: 205,
-    plays: 1452658
+    difficulty: 'hard',
+    duration: '3:25',
+    thumbnail: 'https://i.scdn.co/image/ab67616d0000b273c8d3b11fd5331c5c3abac16a',
+    notes: [],
+    bpm: 128
   },
   {
-    id: '7',
+    id: 7,
     title: 'Anti-Hero',
     artist: 'Taylor Swift',
-    album: 'Midnights',
-    cover: 'https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5',
-    audio: 'https://p.scdn.co/mp3-preview/7abadf7d5df52920b127b12f9aaeb06a9a362b5d',
-    duration: 210,
-    plays: 4523698
+    difficulty: 'medium',
+    duration: '3:30',
+    thumbnail: 'https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5',
+    notes: [],
+    bpm: 122
   },
   {
-    id: '8',
+    id: 8,
     title: 'Dangerously',
     artist: 'Charlie Puth',
-    album: 'Nine Track Mind',
-    cover: 'https://i.scdn.co/image/ab67616d0000b273633a2d775747bccfbcb17a45',
-    audio: 'https://p.scdn.co/mp3-preview/f1dfc756f2facb45c9e30ce0a9078cc876513ff4',
-    duration: 198,
-    plays: 1856974
+    difficulty: 'easy',
+    duration: '3:18',
+    thumbnail: 'https://i.scdn.co/image/ab67616d0000b273633a2d775747bccfbcb17a45',
+    notes: [],
+    bpm: 116
   }
 ];
 

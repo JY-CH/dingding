@@ -1,56 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import GameModeNavbar from '../components/common/GameModeNavbar';
 import WebcamView from '../components/performance/WebcamView';
 import Playlist from '../components/performance/Playlist';
 import ChordTimeline from '../components/performance/ChordTimeline';
-import RealtimeFeedback from '../components/performance/RealtimeFeedback';
 import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
 import { Song } from '../types/performance';
 import { Visualization } from '../types/guitar';
 
-// 피드백 메시지 목록
-const feedbackMessages = [
-  {
-    message: "좋아요! 코드 전환이 자연스러워지고 있어요. 다음 코드로 넘어갈 때 손가락을 미리 준비해보세요.",
-    isPositive: true
-  },
-  {
-    message: "스트로킹 리듬이 안정적이에요. 이번에는 업스트럼에 좀 더 힘을 실어서 해볼까요?",
-    isPositive: true
-  },
-  {
-    message: "템포가 조금 빨라졌네요. 메트로놈 소리에 집중해서 일정한 속도를 유지해보세요.",
-    isPositive: false
-  },
-  {
-    message: "바레 코드를 잡을 때 검지 손가락에 좀 더 힘을 주세요. 모든 줄이 깔끔하게 울리도록요!",
-    isPositive: false
-  },
-  {
-    message: "멋져요! 코드와 스트로킹이 조화롭게 어우러지고 있어요. 이 느낌을 유지해보세요.",
-    isPositive: true
-  },
-  {
-    message: "코드 모양이 조금 흐트러졌어요. 손가락 끝으로 프렛을 정확하게 눌러주세요.",
-    isPositive: false
-  },
-  {
-    message: "리듬감이 좋아요! 이제 스트로킹할 때 손목을 좀 더 부드럽게 움직여볼까요?",
-    isPositive: true
-  },
-  {
-    message: "코드 전환 시 브리지 음이 끊기지 않도록 해보세요. 손가락을 프렛에서 완전히 떼지 말고 슬라이드하듯이 움직여보세요.",
-    isPositive: false
-  }
-];
-
 const PerformancePage: React.FC = () => {
+  const location = useLocation();
+  const initialPlaylist = location.state?.playlist || [];
+  
   const [showStats, setShowStats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isWebcamOn, setIsWebcamOn] = useState(false);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentFeedback, setCurrentFeedback] = useState(feedbackMessages[0]);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [, setAnalyser] = useState<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -114,20 +81,6 @@ const PerformancePage: React.FC = () => {
     };
   }, []);
 
-  // 피드백 메시지 업데이트 함수
-  const updateFeedback = () => {
-    const newFeedback = feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)];
-    setCurrentFeedback(newFeedback);
-  };
-
-  // 3초마다 피드백 업데이트 (테스트용)
-  useEffect(() => {
-    if (isPlaying) {
-      const interval = setInterval(updateFeedback, 3000);
-      return () => clearInterval(interval);
-    }
-  }, [isPlaying]);
-
   const handleSongSelect = (song: Song) => {
     setCurrentSong(song);
     setIsPlaying(false);
@@ -135,7 +88,7 @@ const PerformancePage: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900">
-      {/* 네비바 - 4rem 고정 */}
+      {/* 네비바 */}
       <div className="h-16">
         <GameModeNavbar
           showStats={showStats}
@@ -148,52 +101,57 @@ const PerformancePage: React.FC = () => {
 
       {/* 상단 컴포넌트 영역 */}
       <div className="h-[calc(44vh-4rem)] flex gap-4 p-4">
-        {/* 왼쪽: 플레이리스트 */}
-        <div className="w-[25%] h-full">
-          <Playlist onSongSelect={handleSongSelect} />
-        </div>
-
-        {/* 중앙: 실시간 피드백 */}
-        <div className="w-[30%] h-full">
-          <RealtimeFeedback 
-            feedback={currentFeedback.message}
-            isPositive={currentFeedback.isPositive}
-          />
-        </div>
+        {/* 플레이리스트 */}
+        <motion.div 
+          className="w-[70%] h-full bg-black/20 rounded-xl overflow-auto"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Playlist onSongSelect={handleSongSelect} initialSongs={initialPlaylist} />
+        </motion.div>
         
         {/* 오른쪽 영역: 음향 시각화 + 웹캠 */}
-        <div className="w-[45%] h-full flex gap-4">
-          {/* 음향 시각화 */}
-          <div className="w-[40%] h-full">
-            <div className="bg-black/30 backdrop-blur-sm p-3 rounded-xl h-full flex flex-col border border-white/10 shadow-xl">
-              <h3 className="text-sm font-semibold text-white/80 mb-2 flex items-center">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>
-                음향 시각화
-              </h3>
-              <div className="flex-grow">
-                <AudioVisualizer3D visualization={visualization} />
-              </div>
-            </div>
-          </div>
+        <div className="w-[30%] h-full flex gap-4">
+          {/* 음향 시각화 (데시벨 측정기) */}
+          <motion.div 
+            className="w-[8%] h-full bg-black/20 rounded-xl overflow-hidden"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <AudioVisualizer3D visualization={visualization} />
+          </motion.div>
           
           {/* 웹캠 */}
-          <div className="w-[60%] h-full">
+          <motion.div 
+            className="w-[92%] h-full bg-black/20 rounded-xl overflow-hidden"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
             <WebcamView isWebcamOn={isWebcamOn} setIsWebcamOn={setIsWebcamOn} />
-          </div>
+          </motion.div>
         </div>
       </div>
 
       {/* 코드 타임라인 영역 */}
-      <div className="h-[calc(60vh-0.5rem)] mb-2 p-4">
-        <div className="h-full bg-gray-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-white/5 shadow-lg">
-          <ChordTimeline 
-            isPlaying={isPlaying} 
+      <motion.div 
+        className="flex-1 p-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
+        <div className="h-full bg-black/20 rounded-xl overflow-hidden">
+          <ChordTimeline
+            isPlaying={isPlaying}
             currentSong={currentSong}
-            notes={currentSong?.notes || []}
+            notes={[]}
             currentChord={null}
+            onPlayingChange={setIsPlaying}
           />
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

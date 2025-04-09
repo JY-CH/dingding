@@ -1,5 +1,21 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { fetchWeekSongRanking } from '../../services/api';
+
+interface WeekSongUserInfo {
+  username: string;
+  score: number;
+}
+
+interface WeekSongData {
+  song: {
+    songId: number;
+    songTitle: string;
+    songImage: string;
+    songSinger: string;
+  };
+  userInfo: WeekSongUserInfo[];
+}
 
 interface FeaturedItem {
   id: number;
@@ -14,19 +30,45 @@ interface FeaturedItem {
     likes: number;
     plays: number;
   };
-  rankings: {
-    position: number;
-    title: string;
-    artist: string;
-    change: number;
-    trend: 'up' | 'down' | 'same';
-    weeklyListeners: number;
-  }[];
 }
 
 const FeaturedCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [weekSongData, setWeekSongData] = useState<WeekSongData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 주간 랭킹 데이터 가져오기
+  useEffect(() => {
+    const loadWeekSongRanking = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // 인증 토큰 확인
+        const token = sessionStorage.getItem('accessToken');
+        if (!token) {
+          console.log('인증 토큰이 없습니다.');
+          setError('인증이 필요합니다.');
+          setIsLoading(false);
+          return;
+        }
+        
+        const data = await fetchWeekSongRanking();
+        console.log('랭킹 데이터 로드 성공:', data);
+        setWeekSongData(data);
+        setIsLoading(false);
+      } catch (err) {
+        console.error('이주의 곡 랭킹 로드 오류:', err);
+        // 오류가 발생해도 화면은 계속 표시
+        setError('랭킹 데이터를 불러오는데 실패했습니다.');
+        setIsLoading(false);
+      }
+    };
+
+    loadWeekSongRanking();
+  }, []);
 
   const featuredItems: FeaturedItem[] = [
     {
@@ -42,48 +84,6 @@ const FeaturedCarousel = () => {
         likes: 24680,
         plays: 158900,
       },
-      rankings: [
-        {
-          position: 1,
-          title: "Story Time",
-          artist: "Luddy Dave",
-          change: 2,
-          trend: "up",
-          weeklyListeners: 1234567
-        },
-        {
-          position: 2,
-          title: "Midnight Melodies",
-          artist: "Sarah Moon",
-          change: 1,
-          trend: "down",
-          weeklyListeners: 987654
-        },
-        {
-          position: 3,
-          title: "Guitar Dreams",
-          artist: "Alex Rivers",
-          change: 0,
-          trend: "same",
-          weeklyListeners: 876543
-        },
-        {
-          position: 4,
-          title: "Summer Nights",
-          artist: "The Waves",
-          change: 2,
-          trend: "up",
-          weeklyListeners: 765432
-        },
-        {
-          position: 5,
-          title: "Acoustic Journey",
-          artist: "Emma Stone",
-          change: 1,
-          trend: "down",
-          weeklyListeners: 654321
-        }
-      ],
     },
     {
       id: 2,
@@ -98,48 +98,6 @@ const FeaturedCarousel = () => {
         likes: 18920,
         plays: 142500,
       },
-      rankings: [
-        {
-          position: 1,
-          title: "Story Time",
-          artist: "Luddy Dave",
-          change: 2,
-          trend: "up",
-          weeklyListeners: 1234567
-        },
-        {
-          position: 2,
-          title: "Midnight Melodies",
-          artist: "Sarah Moon",
-          change: 1,
-          trend: "down",
-          weeklyListeners: 987654
-        },
-        {
-          position: 3,
-          title: "Guitar Dreams",
-          artist: "Alex Rivers",
-          change: 0,
-          trend: "same",
-          weeklyListeners: 876543
-        },
-        {
-          position: 4,
-          title: "Summer Nights",
-          artist: "The Waves",
-          change: 2,
-          trend: "up",
-          weeklyListeners: 765432
-        },
-        {
-          position: 5,
-          title: "Acoustic Journey",
-          artist: "Emma Stone",
-          change: 1,
-          trend: "down",
-          weeklyListeners: 654321
-        }
-      ],
     },
     {
       id: 3,
@@ -154,51 +112,28 @@ const FeaturedCarousel = () => {
         likes: 31240,
         plays: 203400,
       },
-      rankings: [
-        {
-          position: 1,
-          title: "Story Time",
-          artist: "Luddy Dave",
-          change: 2,
-          trend: "up",
-          weeklyListeners: 1234567
-        },
-        {
-          position: 2,
-          title: "Midnight Melodies",
-          artist: "Sarah Moon",
-          change: 1,
-          trend: "down",
-          weeklyListeners: 987654
-        },
-        {
-          position: 3,
-          title: "Guitar Dreams",
-          artist: "Alex Rivers",
-          change: 0,
-          trend: "same",
-          weeklyListeners: 876543
-        },
-        {
-          position: 4,
-          title: "Summer Nights",
-          artist: "The Waves",
-          change: 2,
-          trend: "up",
-          weeklyListeners: 765432
-        },
-        {
-          position: 5,
-          title: "Acoustic Journey",
-          artist: "Emma Stone",
-          change: 1,
-          trend: "down",
-          weeklyListeners: 654321
-        }
-      ],
     },
   ];
 
+  // 현재 보여줄 데이터가 있는지 확인 
+  const hasRankingData = weekSongData !== null && 
+                        weekSongData.song && 
+                        weekSongData.song.songId !== 0 && 
+                        weekSongData.userInfo && 
+                        weekSongData.userInfo.length > 0;
+  
+  // 곡 정보는 있지만 사용자 랭킹 데이터가 없는 경우
+  const hasSongDataOnly = weekSongData !== null && 
+                         weekSongData.song && 
+                         weekSongData.song.songId !== 0 && 
+                         (!weekSongData.userInfo || weekSongData.userInfo.length === 0);
+  
+  // 에러 상태 (서버 오류, 권한 없음 등)
+  const hasErrorState = weekSongData !== null && 
+                       weekSongData.song && 
+                       weekSongData.song.songId === 0;
+  
+  // 슬라이드 자동 변경을 위한 타이머
   useEffect(() => {
     const timer = setInterval(() => {
       handleNext();
@@ -220,6 +155,40 @@ const FeaturedCarousel = () => {
 
   return (
     <div className="relative h-[400px] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80 z-50">
+          <div className="text-white">랭킹 데이터를 불러오는 중...</div>
+        </div>
+      )}
+      
+      {!isLoading && error && (
+        <div className="absolute top-2 right-2 p-2 bg-red-600/80 text-white rounded-md z-50 text-sm">
+          {error}
+        </div>
+      )}
+      
+      {!isLoading && !error && hasErrorState && (
+        <div className="absolute top-2 right-2 p-2 bg-orange-600/80 text-white rounded-md z-50 text-sm">
+          {weekSongData?.song?.songTitle} - {weekSongData?.song?.songSinger}
+        </div>
+      )}
+      
+      {!isLoading && !error && !hasRankingData && !hasSongDataOnly && !hasErrorState && (
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80 z-50">
+          <div className="text-white p-4 bg-zinc-800 rounded-lg shadow-lg">
+            현재 이주의 곡 랭킹 데이터가 없습니다.
+          </div>
+        </div>
+      )}
+      
+      {!isLoading && !error && hasSongDataOnly && (
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80 z-50">
+          <div className="text-white p-4 bg-zinc-800 rounded-lg shadow-lg">
+            이주의 곡은 있지만 아직 랭킹 데이터가 없습니다.
+          </div>
+        </div>
+      )}
+      
       {featuredItems.map((item, index) => (
         <div
           key={item.id}
@@ -232,7 +201,16 @@ const FeaturedCarousel = () => {
         >
           <div className="absolute inset-0 flex" style={{ transition: 'none' }}>
             {/* 왼쪽 콘텐츠 영역 */}
-            <div className="w-[62%] p-8 pl-12 flex flex-col justify-center relative z-10">
+            <div className="w-[62%] p-8 pl-12 flex flex-col justify-center relative z-10"
+              style={{ 
+                backgroundImage: weekSongData && weekSongData.song ? `url(${weekSongData.song.songImage})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundBlendMode: 'overlay',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)'
+              }}
+            >
               <span
                 className={`
                 text-sm font-medium text-amber-400 mb-4
@@ -253,7 +231,7 @@ const FeaturedCarousel = () => {
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
               `}
               >
-                {item.title}
+                {weekSongData && weekSongData.song ? weekSongData.song.songTitle : item.title}
               </h2>
               <p
                 className={`
@@ -262,7 +240,7 @@ const FeaturedCarousel = () => {
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
               `}
               >
-                {item.artist}
+                {weekSongData && weekSongData.song ? weekSongData.song.songSinger : item.artist}
               </p>
               <p
                 className={`
@@ -329,14 +307,15 @@ const FeaturedCarousel = () => {
                   <div className="flex-1 flex flex-col gap-3">
                     {/* 1-3위 가로 배치 */}
                     <div className="grid grid-cols-3 gap-2">
-                      {item.rankings.slice(0, 3).map((rank, index) => (
+                      {hasRankingData && weekSongData && weekSongData.userInfo
+                        ? weekSongData.userInfo.slice(0, Math.min(3, weekSongData.userInfo.length)).map((user, rankIndex) => (
                         <motion.div
-                          key={`${currentSlide}-${index}`}
+                          key={`${currentSlide}-${rankIndex}`}
                           initial={{ opacity: 0, y: 30, scale: 0.9 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           transition={{ 
                             duration: 0.6,
-                            delay: 0.2 + index * 0.15,
+                            delay: 0.2 + rankIndex * 0.15,
                             ease: [0.23, 1, 0.32, 1]
                           }}
                           whileHover={{ 
@@ -345,9 +324,9 @@ const FeaturedCarousel = () => {
                           }}
                           className={`
                             rounded-lg p-4 h-[140px] cursor-pointer overflow-hidden relative group
-                            ${index === 0 
+                            ${rankIndex === 0 
                               ? 'bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent border border-amber-500/20' 
-                              : index === 1
+                              : rankIndex === 1
                                 ? 'bg-gradient-to-br from-zinc-300/20 via-zinc-300/10 to-transparent border border-zinc-300/20'
                                 : 'bg-gradient-to-br from-orange-800/20 via-orange-800/10 to-transparent border border-orange-800/20'
                             }
@@ -357,9 +336,9 @@ const FeaturedCarousel = () => {
                           <div className="absolute -right-8 -top-8 w-16 h-16 rotate-45">
                             <div className={`
                               w-full h-full
-                              ${index === 0 
+                              ${rankIndex === 0 
                                 ? 'bg-amber-500/30' 
-                                : index === 1
+                                : rankIndex === 1
                                   ? 'bg-zinc-300/30'
                                   : 'bg-orange-800/30'
                               }
@@ -374,20 +353,20 @@ const FeaturedCarousel = () => {
                                   animate={{ scale: 1, opacity: 1 }}
                                   transition={{
                                     duration: 0.4,
-                                    delay: 0.3 + index * 0.15,
+                                    delay: 0.3 + rankIndex * 0.15,
                                     ease: "backOut"
                                   }}
                                   className={`
                                     text-3xl font-black
-                                    ${index === 0 
+                                    ${rankIndex === 0 
                                       ? 'text-amber-500' 
-                                      : index === 1
+                                      : rankIndex === 1
                                         ? 'text-zinc-300'
                                         : 'text-orange-800'
                                     }
                                   `}
                                 >
-                                  {rank.position}
+                                  {rankIndex + 1}
                                 </motion.div>
 
                                 <motion.button
@@ -396,9 +375,9 @@ const FeaturedCarousel = () => {
                                   animate={{ opacity: 1, scale: 1 }}
                                   className={`
                                     p-2 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity
-                                    ${index === 0 
+                                    ${rankIndex === 0 
                                       ? 'bg-amber-500/80 hover:bg-amber-500' 
-                                      : index === 1
+                                      : rankIndex === 1
                                         ? 'bg-zinc-300/80 hover:bg-zinc-300'
                                         : 'bg-orange-800/80 hover:bg-orange-800'
                                     }
@@ -417,63 +396,64 @@ const FeaturedCarousel = () => {
                                   animate={{ x: 0, opacity: 1 }}
                                   transition={{
                                     duration: 0.4,
-                                    delay: 0.4 + index * 0.15,
+                                    delay: 0.4 + rankIndex * 0.15,
                                     ease: "easeOut"
                                   }}
                                 >
                                   <div className={`
                                     text-sm font-bold truncate transition-colors
-                                    ${index === 0 
+                                    ${rankIndex === 0 
                                       ? 'text-white group-hover:text-amber-400' 
-                                      : index === 1
+                                      : rankIndex === 1
                                         ? 'text-white group-hover:text-zinc-300'
                                         : 'text-white group-hover:text-orange-800'
                                     }
                                   `}>
-                                    {rank.title}
+                                    {weekSongData && weekSongData.song ? weekSongData.song.songTitle : ''}
                                   </div>
                                   <div className="text-xs text-zinc-400 truncate group-hover:text-zinc-300 transition-colors">
-                                    {rank.artist}
+                                    {user.username}
                                   </div>
                                 </motion.div>
                               </div>
                             </div>
 
-                            {/* 순위 변동 요소를 우측 하단으로 확실하게 이동 */}
+                            {/* 우측 하단 요소 */}
                             <div className="flex justify-end">
                               <motion.div 
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{
                                   duration: 0.3,
-                                  delay: 0.5 + index * 0.15
+                                  delay: 0.5 + rankIndex * 0.15
                                 }}
                                 className={`
                                   flex items-center gap-1 px-2 py-1 rounded-full text-xs
-                                  ${index === 0 
+                                  ${rankIndex === 0 
                                     ? 'bg-amber-500/10 text-amber-500' 
-                                    : index === 1
+                                    : rankIndex === 1
                                       ? 'bg-zinc-300/10 text-zinc-300'
                                       : 'bg-orange-800/10 text-orange-800'
                                   }
                                 `}
                               >
-                                {rank.trend !== 'same' && (
-                                  <>
-                                    {rank.trend === 'up' ? '↑' : '↓'}
-                                    <span>{rank.change}</span>
-                                  </>
-                                )}
+                                <span>{user.score}점</span>
                               </motion.div>
                             </div>
                           </div>
                         </motion.div>
-                      ))}
+                      ))
+                      : (
+                        <div className="col-span-3 flex items-center justify-center h-[140px] bg-zinc-800/50 rounded-lg">
+                          <p className="text-zinc-400 text-sm">랭킹 데이터가 없습니다.</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* 4-5위 세로 배치 */}
                     <div className="space-y-2">
-                      {item.rankings.slice(3).map((rank, index) => (
+                      {hasRankingData && weekSongData && weekSongData.userInfo && weekSongData.userInfo.length > 3 
+                        ? weekSongData.userInfo.slice(3, Math.min(5, weekSongData.userInfo.length)).map((user, index) => (
                         <motion.div
                           key={`${currentSlide}-${index + 3}`}
                           initial={{ opacity: 0, x: 20 }}
@@ -486,26 +466,26 @@ const FeaturedCarousel = () => {
                           className="bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors"
                         >
                           <div className="flex items-center gap-3 h-[46px]">
-                            <div className="text-xl font-bold text-white/80">{rank.position}</div>
+                            <div className="text-xl font-bold text-white/80">{index + 4}</div>
                             <div className="flex-1 min-w-0">
                               <div className="text-sm font-medium text-white truncate">
-                                {rank.title}
+                                {weekSongData && weekSongData.song ? weekSongData.song.songTitle : ''}
                               </div>
                               <div className="text-xs text-zinc-400 truncate mt-1">
-                                {rank.artist}
+                                {user.username}
                               </div>
                             </div>
-                            {rank.trend !== 'same' && (
-                              <div className={`text-xs ${
-                                rank.trend === 'up' ? 'text-green-500' : 'text-red-500'
-                              }`}>
-                                {rank.trend === 'up' ? '↑' : '↓'}
-                                {rank.change}
-                              </div>
-                            )}
+                            <div className="text-xs text-amber-500">
+                              {user.score}점
+                            </div>
                           </div>
                         </motion.div>
-                      ))}
+                      ))
+                      : hasRankingData && weekSongData && weekSongData.userInfo && weekSongData.userInfo.length <= 3 && (
+                        <div className="h-[46px] flex items-center justify-center bg-zinc-800/50 rounded-lg">
+                          <p className="text-zinc-400 text-xs">추가 랭킹 데이터가 없습니다.</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 

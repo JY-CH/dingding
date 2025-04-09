@@ -1,29 +1,36 @@
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { HiPlay, HiStop } from 'react-icons/hi2';
 
-import { HiArrowsPointingOut, HiArrowsPointingIn } from 'react-icons/hi2';
 import { Song, Note, ChordChange } from '../../types/performance';
+
+interface FeedbackMessage {
+  id: number;
+  message: string;
+  type: 'success' | 'warning' | 'error';
+}
 
 interface ChordTimelineProps {
   isPlaying: boolean;
   currentSong: Song | null;
   notes: Note[];
   currentChord: ChordChange | null;
+  onPlayingChange: (playing: boolean) => void;
 }
 
 const ChordTimeline: React.FC<ChordTimelineProps> = ({
   isPlaying,
   currentSong,
   notes = [],
-  currentChord
+  currentChord,
+  onPlayingChange
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [testNotes, setTestNotes] = useState<Note[]>([]);
   const [activeStrings, setActiveStrings] = useState<number[]>([]);
-  const [currentNotes, setCurrentNotes] = useState<Note[]>([]);
-
   const [shadowNotes, setShadowNotes] = useState<Note[]>([]);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [selectedChord, setSelectedChord] = useState<string>('C');
+  const [selectedChord, setSelectedChord] = useState('C');
+  const [feedbacks, setFeedbacks] = useState<FeedbackMessage[]>([]);
 
   const stringColors = [
     'rgba(251, 191, 36, 0.6)',   // 1번줄 - amber-400 (가장 얇은 줄)
@@ -120,19 +127,6 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
       }
     }
   `;
-
-  // 테스트용 노트 생성 함수
-  const createTestNote = (stringNumber: number) => {
-    const newNote: Note = {
-      id: Date.now() + Math.random(),
-      stringNumber,
-      position: 100, // 오른쪽에서 시작
-      timing: Date.now(),
-      isChord: false,
-      chord: '' // 빈 문자열로 초기화
-    };
-    setTestNotes(prev => [...prev, newNote]);
-  };
 
   // C코드 손모양 노트 생성 함수
   const createCChordNote = () => {
@@ -607,27 +601,21 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
             const stringNumbers = passedNotes.map(note => note.stringNumber);
             setActiveStrings(stringNumbers);
             
-            // 일정 시간 후 활성화 해제
             setTimeout(() => {
               setActiveStrings([]);
             }, 500);
           }
 
-          // 모든 코드의 노트들이 민트색 바닥 영역(25% ~ 37.5%)을 지나쳤는지 확인
           if (shadowNotes.length > 0) {
-            // 현재 표시 중인 코드 찾기
             const displayedChord = shadowNotes[0].chord;
-            
-            // 해당 코드의 모든 노트가 37.5% 위치를 지나쳤는지 확인
             const codeNotes = newNotes.filter(note => note.chord === displayedChord);
             
             if (codeNotes.length > 0) {
               const allNotesPassed = codeNotes.every(note => note.position <= 37.5);
               if (allNotesPassed) {
-                setShadowNotes([]); // 그림자 제거
+                setShadowNotes([]);
               }
             } else {
-              // 해당 코드의 노트가 모두 사라졌으면 그림자도 제거
               setShadowNotes([]);
             }
           }
@@ -640,53 +628,108 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
     }
   }, [testNotes, playbackSpeed, shadowNotes]);
 
-  // 노트가 지나갈 때 해당 줄을 활성화하는 효과
+  // 실제 연주 노트 이동 효과 제거
   useEffect(() => {
-    if (isPlaying && currentSong && notes && notes.length > 0) {
+    if (isPlaying && currentSong) {
       console.log('노트 애니메이션 시작');
-      // 노트 애니메이션 시작
       const interval = setInterval(() => {
-        setCurrentNotes(prevNotes => {
-          const newNotes = prevNotes.map(note => ({
-            ...note,
-            position: note.position - (1 * playbackSpeed)
-          })).filter(note => note.position > -10);
-
-          // 노트가 타겟 라인(25%)에 도달했는지 확인하고 해당 줄 활성화
-          const passedNotes = prevNotes.filter(note => 
-            note.position > 25 && note.position - (1 * playbackSpeed) <= 25
-          );
-          
-          if (passedNotes.length > 0) {
-            const stringNumbers = passedNotes.map(note => note.stringNumber);
-            setActiveStrings(stringNumbers);
-            
-            // 일정 시간 후 활성화 해제
-            setTimeout(() => {
-              setActiveStrings([]);
-            }, 500);
-          }
-
-          // 새로운 노트 추가
-          const newNotesToAdd = notes.filter(note => 
-            note.timing <= Date.now() && 
-            !prevNotes.find(n => n.id === note.id)
-          );
-
-          return [...newNotes, ...newNotesToAdd];
-        });
+        // 빈 로직으로 대체 (나중에 필요한 기능 추가 가능)
       }, 16);
 
       return () => clearInterval(interval);
     }
-  }, [isPlaying, currentSong, notes, playbackSpeed]);
+  }, [isPlaying, currentSong, playbackSpeed]);
+
+  // 피드백 메시지 추가 함수
+  const addFeedback = (message: string, type: 'success' | 'warning' | 'error') => {
+    const newFeedback: FeedbackMessage = {
+      id: Date.now(),
+      message,
+      type
+    };
+    
+    // 이전 피드백과 중복되지 않도록 체크
+    setFeedbacks(prev => {
+      const isDuplicate = prev.some(f => f.message === message);
+      if (isDuplicate) return prev;
+      return [...prev, newFeedback];
+    });
+
+    // 3초 후 자동으로 제거
+    setTimeout(() => {
+      setFeedbacks(prev => prev.filter(f => f.id !== newFeedback.id));
+    }, 3000);
+  };
+
+  // 테스트용 피드백 메시지들
+  const testFeedbacks = [
+    { message: "완벽한 타이밍이에요! 👏", type: "success" },
+    { message: "코드 전환이 매끄러워요!", type: "success" },
+    { message: "템포가 조금 빨라졌어요", type: "warning" },
+    { message: "코드 모양을 더 정확하게 잡아보세요", type: "warning" },
+    { message: "틀린 코드예요! 다시 한번 확인해주세요", type: "error" }
+  ];
+
+  // 피드백 메시지 렌더링 컴포넌트
+  const FeedbackNotifications = () => (
+    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
+      <div className="space-y-2 min-w-[300px] pointer-events-none">
+        <AnimatePresence initial={false}>
+          {feedbacks.map(feedback => (
+            <motion.div
+              key={feedback.id}
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{
+                duration: 0.3,
+                ease: "easeOut"
+              }}
+              style={{
+                animation: feedback.type === 'success' 
+                  ? 'successPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                  : feedback.type === 'warning'
+                    ? 'warningPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                    : 'errorPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+              }}
+              className={`
+                pointer-events-auto
+                px-4 py-3 rounded-lg
+                shadow-lg backdrop-blur-sm
+                flex items-center justify-center gap-3
+                ${feedback.type === 'success' 
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                  : feedback.type === 'warning'
+                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                    : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                }
+              `}
+            >
+              <div 
+                className={`
+                  w-2 h-2 rounded-full
+                  ${feedback.type === 'success' 
+                    ? 'bg-emerald-400' 
+                    : feedback.type === 'warning'
+                      ? 'bg-amber-400'
+                      : 'bg-rose-400'
+                  }
+                `}
+              />
+              <span className="text-sm font-medium select-none">
+                {feedback.message}
+              </span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
 
   const renderNote = (note: Note) => {
-    const isChordNote = note.isChord;
-    const isCurrentChord = currentChord && note.chordId === currentChord.id;
     const isOnTargetLine = Math.abs(note.position - 25) < 1;
 
-  return (
+    return (
       <div
         key={note.id}
         className="absolute w-10 h-10 rounded-full"
@@ -796,11 +839,6 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
         )}
       </div>
     );
-  };
-
-  // 전체화면 모드 토글 함수
-  const toggleFullscreen = () => {
-    setIsExpanded(!isExpanded);
   };
 
   const renderTimelineContent = () => (
@@ -994,7 +1032,7 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
             ))}
 
             {/* 노트 애니메이션 */}
-            {[...currentNotes, ...testNotes].map((note) => {
+            {[...testNotes].map((note) => {
               const isOnTargetLine = Math.abs(note.position - 25) < 1;
               return (
                 <div
@@ -1110,7 +1148,6 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
             notes.map(renderNote)
           ) : (
             <div className="text-white text-center mt-10">
-              노트가 없습니다. 곡을 선택해주세요.
             </div>
           )}
         </div>
@@ -1144,116 +1181,190 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
     </>
   );
 
-  if (isExpanded) {
-    return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-b from-zinc-900 to-black">
-        <div className="w-full h-screen" style={{ transform: 'translateY(-35%)' }}>
-          <button
-            onClick={toggleFullscreen}
-            className="absolute top-4 right-4 p-2 bg-zinc-800/80 hover:bg-zinc-700/80 rounded-lg z-50 text-white transition-colors"
-          >
-            <HiArrowsPointingIn className="w-5 h-5" />
-          </button>
-          {renderTimelineContent()}
-        </div>
-      </div>
-    );
-  }
+  // 연주 시작/종료 처리 함수
+  const handlePlayToggle = () => {
+    if (!currentSong) {
+      addFeedback("연주할 곡을 선택해주세요", "warning");
+      return;
+    }
+    onPlayingChange(!isPlaying);
+  };
+
+  // 연주 종료 처리 함수
+  const handleStop = () => {
+    onPlayingChange(false);
+    // 여기에 연주 종료 시 필요한 초기화 로직 추가
+  };
 
   return (
     <div className="relative w-full h-full bg-gradient-to-b from-zinc-900 to-black rounded-lg overflow-hidden">
+      <style>
+        {`
+          @keyframes successPulse {
+            0%, 100% { background-color: rgba(16, 185, 129, 0.1); }
+            50% { background-color: rgba(16, 185, 129, 0.2); }
+          }
+          @keyframes warningPulse {
+            0%, 100% { background-color: rgba(245, 158, 11, 0.1); }
+            50% { background-color: rgba(245, 158, 11, 0.2); }
+          }
+          @keyframes errorPulse {
+            0%, 100% { background-color: rgba(239, 68, 68, 0.1); }
+            50% { background-color: rgba(239, 68, 68, 0.2); }
+          }
+        `}
+      </style>
+      <FeedbackNotifications />
+      
       {/* 테스트 버튼들 */}
-      <div className="absolute top-4 left-4 flex gap-2 z-10">
-        {/* 코드 선택 드롭다운 */}
-        <div className="relative">
-          <select
-            value={selectedChord}
-            onChange={(e) => setSelectedChord(e.target.value)}
-            className="px-3 py-1 bg-zinc-800/80 hover:bg-zinc-700/80 rounded-lg text-white transition-colors appearance-none cursor-pointer"
-            style={{
-              backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'white\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 0.5rem center',
-              backgroundSize: '1.5em 1.5em',
-              paddingRight: '2.5rem'
-            }}
+      <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+        {/* 피드백 테스트 버튼들 */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => addFeedback(testFeedbacks[0].message, 'success')}
+            className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg transition-colors text-sm font-medium"
           >
-            <option value="A">A</option>
-            <option value="Am">Am</option>
-            <option value="B">B</option>
-            <option value="Bm">Bm</option>
-            <option value="C">C</option>
-            <option value="Cm">Cm</option>
-            <option value="D">D</option>
-            <option value="Dm">Dm</option>
-            <option value="E">E</option>
-            <option value="Em">Em</option>
-            <option value="F">F</option>
-            <option value="Fm">Fm</option>
-            <option value="G">G</option>
-            <option value="Gm">Gm</option>
-          </select>
+            성공
+          </button>
+          <button
+            onClick={() => addFeedback(testFeedbacks[2].message, 'warning')}
+            className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-lg transition-colors text-sm font-medium"
+          >
+            경고
+          </button>
+          <button
+            onClick={() => addFeedback(testFeedbacks[4].message, 'error')}
+            className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors text-sm font-medium"
+          >
+            에러
+          </button>
         </div>
 
-        {/* 코드 생성 버튼 */}
-        <button
-          onClick={() => {
-            switch(selectedChord) {
-              case 'C': createCChordNote(); break;
-              case 'Cm': createCmChordNote(); break;
-              case 'D': createDChordNote(); break;
-              case 'Dm': createDmChordNote(); break;
-              case 'E': createEChordNote(); break;
-              case 'Em': createEmChordNote(); break;
-              case 'F': createFChordNote(); break;
-              case 'Fm': createFmChordNote(); break;
-              case 'G': createGChordNote(); break;
-              case 'Gm': createGmChordNote(); break;
-              case 'A': createAChordNote(); break;
-              case 'Am': createAmChordNote(); break;
-              case 'B': createBChordNote(); break;
-              case 'Bm': createBmChordNote(); break;
-            }
-          }}
-          className="px-3 py-1 bg-zinc-800/80 hover:bg-zinc-700/80 rounded-lg text-white transition-colors"
-        >
-          코드 생성
-        </button>
+        {/* 기존 컨트롤들 */}
+        <div className="flex gap-2">
+          {/* 기존 드롭다운들 */}
+          <div className="relative">
+            <select
+              value={selectedChord}
+              onChange={(e) => setSelectedChord(e.target.value)}
+              className="px-3 py-1 bg-zinc-800/80 hover:bg-zinc-700/80 rounded-lg text-white transition-colors appearance-none cursor-pointer"
+              style={{
+                backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'white\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 0.5rem center',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem'
+              }}
+            >
+              <option value="A">A</option>
+              <option value="Am">Am</option>
+              <option value="B">B</option>
+              <option value="Bm">Bm</option>
+              <option value="C">C</option>
+              <option value="Cm">Cm</option>
+              <option value="D">D</option>
+              <option value="Dm">Dm</option>
+              <option value="E">E</option>
+              <option value="Em">Em</option>
+              <option value="F">F</option>
+              <option value="Fm">Fm</option>
+              <option value="G">G</option>
+              <option value="Gm">Gm</option>
+            </select>
+          </div>
 
-        {/* 배속 드롭다운 */}
-        <div className="relative">
-          <select
-            value={playbackSpeed}
-            onChange={(e) => changePlaybackSpeed(Number(e.target.value))}
-            className="px-3 py-1 bg-zinc-800/80 hover:bg-zinc-700/80 rounded-lg text-white transition-colors appearance-none cursor-pointer"
-            style={{
-              backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'white\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 0.5rem center',
-              backgroundSize: '1.5em 1.5em',
-              paddingRight: '2.5rem'
+          {/* 기존 버튼들 */}
+          <button
+            onClick={() => {
+              switch(selectedChord) {
+                case 'C': createCChordNote(); break;
+                case 'Cm': createCmChordNote(); break;
+                case 'D': createDChordNote(); break;
+                case 'Dm': createDmChordNote(); break;
+                case 'E': createEChordNote(); break;
+                case 'Em': createEmChordNote(); break;
+                case 'F': createFChordNote(); break;
+                case 'Fm': createFmChordNote(); break;
+                case 'G': createGChordNote(); break;
+                case 'Gm': createGmChordNote(); break;
+                case 'A': createAChordNote(); break;
+                case 'Am': createAmChordNote(); break;
+                case 'B': createBChordNote(); break;
+                case 'Bm': createBmChordNote(); break;
+              }
             }}
+            className="px-3 py-1 bg-zinc-800/80 hover:bg-zinc-700/80 rounded-lg text-white transition-colors"
           >
-            <option value={0.2}>0.2x</option>
-            <option value={0.4}>0.4x</option>
-            <option value={0.6}>0.6x</option>
-            <option value={0.8}>0.8x</option>
-            <option value={1.0}>1.0x</option>
-            <option value={1.2}>1.2x</option>
-            <option value={1.4}>1.4x</option>
-            <option value={1.6}>1.6x</option>
-            <option value={1.8}>1.8x</option>
-            <option value={2.0}>2.0x</option>
-          </select>
+            코드 생성
+          </button>
+
+          {/* 배속 드롭다운 */}
+          <div className="relative">
+            <select
+              value={playbackSpeed}
+              onChange={(e) => changePlaybackSpeed(Number(e.target.value))}
+              className="px-3 py-1 bg-zinc-800/80 hover:bg-zinc-700/80 rounded-lg text-white transition-colors appearance-none cursor-pointer"
+              style={{
+                backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'white\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 0.5rem center',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem'
+              }}
+            >
+              <option value={0.2}>0.2x</option>
+              <option value={0.4}>0.4x</option>
+              <option value={0.6}>0.6x</option>
+              <option value={0.8}>0.8x</option>
+              <option value={1.0}>1.0x</option>
+              <option value={1.2}>1.2x</option>
+              <option value={1.4}>1.4x</option>
+              <option value={1.6}>1.6x</option>
+              <option value={1.8}>1.8x</option>
+              <option value={2.0}>2.0x</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <button
-        onClick={toggleFullscreen}
-        className="absolute top-4 right-4 p-2 bg-zinc-800/80 hover:bg-zinc-700/80 rounded-lg z-10 text-white transition-colors"
-      >
-        <HiArrowsPointingOut className="w-5 h-5" />
-      </button>
+      {/* 시작/종료 버튼 */}
+      <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+        <motion.button
+          onClick={handlePlayToggle}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className={`
+            px-4 py-2 rounded-lg flex items-center gap-2 font-medium text-sm
+            transition-colors duration-200
+            ${isPlaying 
+              ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30' 
+              : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30'
+            }
+          `}
+        >
+          <HiPlay className={`w-4 h-4 ${isPlaying ? 'hidden' : 'block'}`} />
+          <span>{isPlaying ? '연주 중...' : '시작'}</span>
+        </motion.button>
+
+        <motion.button
+          onClick={handleStop}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          disabled={!isPlaying}
+          className={`
+            px-4 py-2 rounded-lg flex items-center gap-2 font-medium text-sm
+            transition-colors duration-200
+            ${!isPlaying
+              ? 'bg-zinc-500/10 text-zinc-400 cursor-not-allowed'
+              : 'bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 border border-rose-500/30'
+            }
+          `}
+        >
+          <HiStop className="w-4 h-4" />
+          <span>종료</span>
+        </motion.button>
+      </div>
+
       {renderTimelineContent()}
     </div>
   );
