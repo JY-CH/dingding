@@ -19,7 +19,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <Navigation />
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">ThingThing</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Ding Ding</h1>
         </div>
       </header>
       <main className="flex-grow">
@@ -27,7 +27,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </main>
       <footer className="bg-white shadow mt-auto py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500">© 2025 ThingThing App</p>
+          <p className="text-center text-gray-500">© 2025 Ding Ding App</p>
         </div>
       </footer>
       {!hidePlayerPaths.includes(location.pathname) && (

@@ -115,4 +115,9 @@ export interface SearchSong {
   songTitle: string;
   songImage: string;
   songWriter: string;
+  songSinger: string;
+  songVoiceFileUrl: string;
+  releaseDate: string;
+  category: string;
+  songDuration: string;
 }

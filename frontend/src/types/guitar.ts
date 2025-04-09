@@ -4,12 +4,19 @@ export interface GuitarChord {
   timestamp: number;
 }
 
+export interface SessionData {
+  timestamp: string;
+  message: string;
+}
+
 export interface Performance {
   totalScore: number;
   accuracy: number;
   correctChords: number;
   totalChords: number;
   duration: number;
+  sessionData?: SessionData[];
+  averageScore?: number; // 추가
 }
 
 export interface FeedbackMessage {
@@ -19,17 +26,17 @@ export interface FeedbackMessage {
 }
 
 export interface TunerData {
-  note: string;          // 음표 (E, A, D, G, B, E)
-  frequency: number;     // 주파수
-  cents: number;         // 음정 차이 (-50 ~ +50)
-  isInTune: boolean;     // 튜닝 상태
+  note: string; // 음표 (E, A, D, G, B, E)
+  frequency: number; // 주파수
+  cents: number; // 음정 차이 (-50 ~ +50)
+  isInTune: boolean; // 튜닝 상태
 }
 
 export interface MetronomeSettings {
-  bpm: number;          // 템포
+  bpm: number; // 템포
   timeSignature: {
-    beats: number;      // 박자 수
-    beatType: number;   // 박자 유형
+    beats: number; // 박자 수
+    beatType: number; // 박자 유형
   };
   isPlaying: boolean;
 }
@@ -49,10 +56,10 @@ export interface AnalysisResult {
     accuracy: number;
   };
   timing: {
-    ahead: number;      // 빠르기 (ms)
-    behind: number;     // 느리기 (ms)
+    ahead: number; // 빠르기 (ms)
+    behind: number; // 느리기 (ms)
   };
-  volume: number;       // 음량 (0-1)
+  volume: number; // 음량 (0-1)
 }
 
 export interface GuitarString {
@@ -60,7 +67,7 @@ export interface GuitarString {
   frequency: number;
   octave: number;
   isPlaying: boolean;
-  intensity: number;  // 0-1 사이의 연주 강도
+  intensity: number; // 0-1 사이의 연주 강도
 }
 
 export interface Visualization {
@@ -73,13 +80,19 @@ export interface Exercise {
   id: string;
   title: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
-  type: 'chord' | 'scale' | 'rhythm' | 'song';
+  type: 'chord' | 'scale' | 'song';
   bpm: number;
   duration: number;
+  repeatCount: number;
   description: string;
   requirements: string[];
   chords: string[];
   thumbnail: string;
+  steps: {
+    description: string;
+    duration: number;
+    chord?: string;
+  }[];
 }
 
 export interface PracticeSession {
@@ -102,4 +115,4 @@ export interface UserSettings {
   showFretboardGuide: boolean;
   webcamMirrored: boolean;
   autoRecording: boolean;
-} 
+}

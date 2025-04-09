@@ -6,8 +6,12 @@ import WebcamView from '../components/performance/WebcamView';
 import Playlist from '../components/performance/Playlist';
 import ChordTimeline from '../components/performance/ChordTimeline';
 import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
-import { Song } from '../types/performance';
+import ChordTimeline from '../components/performance/ChordTimeline';
+import Playlist from '../components/performance/Playlist';
+import RealtimeFeedback from '../components/performance/RealtimeFeedback';
+import WebcamView from '../components/performance/WebcamView';
 import { Visualization } from '../types/guitar';
+import { Song } from '../types/performance';
 
 const PerformancePage: React.FC = () => {
   const location = useLocation();
@@ -21,7 +25,7 @@ const PerformancePage: React.FC = () => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [, setAnalyser] = useState<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  
+
   // 시각화 데이터
   const [visualization, setVisualization] = useState<Visualization>({
     type: '3d',

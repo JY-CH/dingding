@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+
 import { websocketService } from '../services/websocket';
 
 interface WebSocketState {
@@ -10,6 +11,9 @@ interface WebSocketState {
     role?: 'user' | 'assistant';
     score?: number;
     image?: string;
+    chord?: string;
+    confidence?: number;
+    isCorrect?: boolean;
   }>;
   connect: (roomId: string) => void;
   disconnect: () => void;
@@ -32,22 +36,37 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
     }
 
     console.log('Connecting to WebSocket with roomId:', roomId);
-    const wsUrl = `ws://localhost:8000/ws?room_id=${roomId}&token=${token}`;
+    const wsUrl = `wss://j12d105.p.ssafy.io/ws?room_id=${roomId}&token=${token}`;
     console.log('WebSocket URL:', wsUrl);
 
     // roomId만 전달
     websocketService.connect(roomId);
-    websocketService.setOnOpenHandler(() => {
-      console.log('웹소켓 연결됨');
-      set({ isConnected: true });
-      // 웹소켓 상태 변경 이벤트 발생
+
+    websocketService.setOnErrorHandler((error) => {
+      console.error('🟡 [WebSocket 에러 발생]');
+      console.error('➡️ 에러 정보:', error);
+      set({ isConnected: false });
       window.dispatchEvent(new Event('websocketStateChange'));
     });
 
-    websocketService.setOnCloseHandler(() => {
-      console.log('웹소켓 연결 끊김');
+    websocketService.setOnOpenHandler(() => {
+      console.log('🟢 [WebSocket 연결됨]');
+      console.log('➡️ 현재 시간:', new Date().toISOString());
+      set({ isConnected: true });
+      window.dispatchEvent(new Event('websocketStateChange'));
+    });
+
+    websocketService.setOnCloseHandler((event) => {
+      console.log('🔴 [WebSocket 연결 끊김]');
+      console.log('➡️ 연결 해제 시간:', new Date().toISOString());
+      if (event) {
+        console.log('🔍 Close Event:', {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+        });
+      }
       set({ isConnected: false });
-      // 웹소켓 상태 변경 이벤트 발생
       window.dispatchEvent(new Event('websocketStateChange'));
     });
 

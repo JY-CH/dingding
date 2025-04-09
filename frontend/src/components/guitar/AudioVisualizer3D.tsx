@@ -69,4 +69,4 @@ const AudioVisualizer3D: React.FC<AudioVisualizer3DProps> = ({ visualization }) 
   );
 };
 
-export default AudioVisualizer3D; 
+export default AudioVisualizer3D;

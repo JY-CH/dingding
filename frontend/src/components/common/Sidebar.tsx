@@ -18,10 +18,17 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }) => {
   const [activeItem, setActiveItem] = useState<number | null>(null);
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [trueUser, setTrueUser] = useState<string | null>(sessionStorage.getItem('accessToken'));
+
+  // 현재 경로에 따라 activeItem 설정
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const activeIndex = menuItems.findIndex((item) => item.path === currentPath);
+    setActiveItem(activeIndex !== -1 ? activeIndex : null);
+  }, [location.pathname]);
 
   // console.log(trueUser);
   const isPlayPage = location.pathname === '/play';
@@ -93,21 +100,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
         <div className="p-4 border-b border-gray-800">
           {isAuthenticated ? (
             <div className="flex items-center h-10">
-              <div className="w-10 h-10 flex-shrink-0">
-                <img
-                  src={user?.userProfile}
-                  alt={user?.username}
-                  className="w-full h-full rounded-full object-cover bg-gradient-to-br from-amber-500/10 to-amber-600/10"
-                />
+              <div className="w-10 h-10 flex items-center justify-center">
+                <a href="/">
+                  <img src="/ding.svg" alt="Ding Ding Logo" className="w-8 h-8 ml-2" />
+                </a>
               </div>
               <div
                 className={`
                 overflow-hidden transition-all duration-300
-                ${isExpanded ? 'w-40 ml-3 opacity-100' : 'w-0 opacity-0'}
+                ${isExpanded ? 'w-40 opacity-100' : 'w-0 opacity-0'}
               `}
               >
-                <span className="text-white text-sm font-medium whitespace-nowrap">
-                  {user?.username}님
+                <span className="ml-10 text-2xl font-medium whitespace-nowrap text-amber-500">
+                  Ding Ding
                 </span>
               </div>
             </div>
@@ -197,7 +202,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle, setIsExpanded }
                 </svg>
               </div>
 
-              <div className="overflow-hidden transition-all duration-300 w-40 ml-2 opacity-100">
+              <div
+                className={`
+                overflow-hidden transition-all duration-300
+                ${isExpanded ? 'w-40 opacity-100' : 'w-0 opacity-0'}
+              `}
+              >
                 <span className="text-sm font-medium whitespace-nowrap">로그아웃</span>
               </div>
             </button>

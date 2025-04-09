@@ -16,6 +16,7 @@ import NotFoundPage from '../../pages/NotFoundPage';
 import PerformancePage from '../../pages/PerformancePage';
 import PlayPage from '../../pages/PlayPage';
 import SearchPage from '../../pages/SearchPage';
+import GuitarRhythmGame from '../audio/GuitarRhythmGame';
 import MusicPlayer from '../common/MusicPlayer';
 
 interface AppContentProps {
@@ -27,6 +28,16 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
   const isFullscreenPage = location.pathname === '/play' || location.pathname === '/performance';
   const isLoginPage = location.pathname === '/login';
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  // 샘플 악보 데이터
+  const sampleNotes = [
+    { chord: 'A', timing: 2000, duration: 2000 },
+    { chord: 'D', timing: 5000, duration: 2000 },
+    { chord: 'E', timing: 8000, duration: 2000 },
+    { chord: 'G', timing: 11000, duration: 2000 },
+    { chord: 'C', timing: 14000, duration: 2000 },
+    { chord: 'F', timing: 17000, duration: 2000 },
+    { chord: 'B', timing: 20000, duration: 2000 },
+  ];
 
   // 뮤직 플레이어를 표시할지 여부를 결정
   const shouldShowMusicPlayer = !isLoginPage && isAuthenticated;
@@ -45,6 +56,15 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
             <Route path="/" element={<MainPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route
+              path="/test"
+              element={
+                <GuitarRhythmGame
+                  notes={sampleNotes}
+                  onScoreUpdate={(score) => console.log('현재 점수:', score)}
+                />
+              }
+            />
 
             {/* 보호된 라우트들 */}
             <Route

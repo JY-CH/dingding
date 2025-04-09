@@ -1,10 +1,11 @@
-const WS_URL = 'wss://192.168.100.109:8000/api/ws';
+const WS_URL = 'wss://j12d105.p.ssafy.io/ws';
 
 class WebSocketService {
   private ws: WebSocket | null = null;
   private messageHandler: ((event: MessageEvent) => void) | null = null;
   private onOpenHandler: (() => void) | null = null;
-  private onCloseHandler: (() => void) | null = null;
+  private onCloseHandler: ((event?: CloseEvent) => void) | null = null;
+  private onErrorHandler: ((error: Event) => void) | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectTimeout = 3000;
@@ -38,22 +39,29 @@ class WebSocketService {
     if (!this.ws) return;
 
     this.ws.onopen = () => {
-      console.log('WebSocket connected successfully');
+      console.log('WebSocket 연결 성공');
       if (this.onOpenHandler) {
         this.onOpenHandler();
       }
     };
 
-    this.ws.onclose = () => {
-      console.log('WebSocket connection closed');
-      if (this.onCloseHandler) {
-        this.onCloseHandler();
-      }
-      this.handleReconnect();
-    };
-
     this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.error('WebSocket 에러 발생:', error);
+      if (this.onErrorHandler) {
+        this.onErrorHandler(error);
+      }
+    };
+    const token = sessionStorage.getItem('accessToken');
+    this.ws.onclose = (event) => {
+      console.log('현재 토큰:', token);
+      console.log('WebSocket 연결 종료:', {
+        code: event.code,
+        reason: event.reason,
+        wasClean: event.wasClean,
+      });
+      if (this.onCloseHandler) {
+        this.onCloseHandler(event);
+      }
     };
 
     this.ws.onmessage = (event) => {
@@ -132,8 +140,12 @@ class WebSocketService {
     this.onOpenHandler = handler;
   }
 
-  setOnCloseHandler(handler: () => void) {
+  setOnCloseHandler(handler: (event?: CloseEvent) => void) {
     this.onCloseHandler = handler;
+  }
+
+  setOnErrorHandler(handler: (error: Event) => void) {
+    this.onErrorHandler = handler;
   }
 
   disconnect() {
