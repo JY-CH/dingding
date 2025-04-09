@@ -1,8 +1,14 @@
 import { useState } from 'react';
-
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { Song } from '../../types/performance';
 
-const ExploreSection = () => {
+interface ExploreSectionProps {
+  onUpdatePlaylist: (songs: Song[]) => void;
+}
+
+const ExploreSection: React.FC<ExploreSectionProps> = ({ onUpdatePlaylist }) => {
+  const navigate = useNavigate();
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
   const categories = [
@@ -51,6 +57,35 @@ const ExploreSection = () => {
       activeUsers: 980,
     },
   ];
+
+  const handleCategoryClick = (category: string) => {
+    // TODO: API 연동 시 실제 카테고리별 곡 목록을 가져오는 로직으로 변경
+    const mockSongs: Song[] = [
+      {
+        id: 1,
+        title: `${category} Song 1`,
+        artist: "Artist 1",
+        difficulty: "easy",
+        duration: "3:00",
+        thumbnail: "/path/to/cover1.jpg",
+        notes: [],
+        bpm: 120
+      },
+      {
+        id: 2,
+        title: `${category} Song 2`,
+        artist: "Artist 2",
+        difficulty: "medium",
+        duration: "3:30",
+        thumbnail: "/path/to/cover2.jpg",
+        notes: [],
+        bpm: 130
+      }
+    ];
+
+    onUpdatePlaylist(mockSongs);
+    navigate('/performance');
+  };
 
   return (
     <motion.div
@@ -145,7 +180,10 @@ const ExploreSection = () => {
                   ${hoveredCategory === category.name ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}
                 `}
                 >
-                  <button className="px-6 py-3 rounded-full bg-white/90 backdrop-blur-sm text-gray-900 font-bold shadow-xl hover:bg-white transition-colors">
+                  <button 
+                    onClick={() => handleCategoryClick(category.name)}
+                    className="px-6 py-3 rounded-full bg-white/90 backdrop-blur-sm text-gray-900 font-bold shadow-xl hover:bg-white transition-colors"
+                  >
                     시작하기
                   </button>
                 </div>
