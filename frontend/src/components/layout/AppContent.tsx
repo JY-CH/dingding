@@ -29,7 +29,7 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
   const location = useLocation();
   const { isAuthenticated } = useAuthStore();
   const isFullscreenPage = ['/login', '/signup', '/play', '/performance'].includes(location.pathname);
-  const shouldShowMusicPlayer = !isFullscreenPage;
+  // const shouldShowMusicPlayer = !isFullscreenPage;
   const [currentSong, setCurrentSong] = useState<any>(null);
 
   // 샘플 악보 데이터

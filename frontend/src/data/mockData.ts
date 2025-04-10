@@ -1,5 +1,6 @@
 import { Artist, Category } from '../types';
 import { Song } from '../types/performance';
+import { RecommendSong } from '@/types/recommendation';
 
 // 더미 음악 데이터
 export const mockSongs: Song[] = [
@@ -163,24 +164,111 @@ export const mockTopSongs: Song[] = [
 ];
 
 // 일별 인기곡
-export const mockDailyTracks: Song[] = mockSongs.slice(0, 5);
+export const mockDailyTracks: RecommendSong[] = [
+  {
+    recommendSongId: 1,
+    song: {
+      songId: 1,
+      songTitle: "Wonderwall",
+      songSinger: "Oasis",
+      songImage: "/src/assets/oasis.jpg",
+      songVoiceFileUrl: "/assets/songs/wonderwall.mp3",
+      songDuration: "4:18",
+      songWriter: "Oasis",
+      releaseDate: "1995-10-30",
+      category: "Rock"
+    },
+    severity: "EASY",
+    category: "Rock"
+  },
+  {
+    recommendSongId: 2,
+    song: {
+      songId: 2,
+      songTitle: "Perfect",
+      songSinger: "Ed Sheeran",
+      songImage: "/src/assets/에드시런.jpg",
+      songVoiceFileUrl: "/assets/songs/perfect.mp3",
+      songDuration: "4:23",
+      songWriter: "Ed Sheeran",
+      releaseDate: "2017-11-24",
+      category: "Pop"
+    },
+    severity: "MEDIUM",
+    category: "Pop"
+  }
+];
 
 // 주간 인기곡
-export const mockWeeklyTracks: Song[] = [
-  mockSongs[2],
-  mockSongs[0],
-  mockSongs[4],
-  mockSongs[1],
-  mockSongs[3]
+export const mockWeeklyTracks: RecommendSong[] = [
+  {
+    recommendSongId: 3,
+    song: {
+      songId: 3,
+      songTitle: "Sugar",
+      songSinger: "Maroon 5",
+      songImage: "/assets/maroon5.jpg",
+      songVoiceFileUrl: "/assets/songs/sugar.mp3",
+      songDuration: "3:55",
+      songWriter: "Maroon 5",
+      releaseDate: "2015-01-13",
+      category: "Pop"
+    },
+    severity: "MEDIUM",
+    category: "Pop"
+  },
+  {
+    recommendSongId: 4,
+    song: {
+      songId: 4,
+      songTitle: "봄날",
+      songSinger: "방탄소년단",
+      songImage: "/assets/bts.jpg",
+      songVoiceFileUrl: "/assets/songs/spring_day.mp3",
+      songDuration: "4:36",
+      songWriter: "방탄소년단",
+      releaseDate: "2017-02-13",
+      category: "K-Pop"
+    },
+    severity: "HARD",
+    category: "K-Pop"
+  }
 ];
 
 // 월간 인기곡
-export const mockMonthlyTracks: Song[] = [
-  mockSongs[3],
-  mockSongs[1],
-  mockSongs[2],
-  mockSongs[4],
-  mockSongs[0]
+export const mockMonthlyTracks: RecommendSong[] = [
+  {
+    recommendSongId: 5,
+    song: {
+      songId: 5,
+      songTitle: "Crooked",
+      songSinger: "G-DRAGON",
+      songImage: "/src/assets/GD_profile.jpg",
+      songVoiceFileUrl: "/assets/songs/crooked.mp3",
+      songDuration: "3:44",
+      songWriter: "G-DRAGON",
+      releaseDate: "2013-09-13",
+      category: "K-Pop"
+    },
+    severity: "HARD",
+    category: "K-Pop"
+  },
+  {
+    recommendSongId: 6,
+    song: {
+      songId: 6,
+      songTitle: "Blue Hour",
+      songSinger: "투모로우바이투게더",
+      songImage: "/src/assets/투모로우바이투게더.jpg",
+      songVoiceFileUrl: "/assets/songs/blue_hour.mp3",
+      songDuration: "3:27",
+      songWriter: "투모로우바이투게더",
+      releaseDate: "2020-10-26",
+      category: "K-Pop"
+    },
+    severity: "MEDIUM",
+    category: "K-Pop"
+  }
 ];
 
 // 인기 아티스트

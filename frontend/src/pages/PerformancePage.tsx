@@ -11,8 +11,8 @@ import { Visualization } from '../types/guitar';
 import { Song, ChordChange, SongDetailResponse } from '../types/performance';
 
 const PerformancePage: React.FC = () => {
-  const [showStats, setShowStats] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  // const [showStats, setShowStats] = useState(false);
+  // const [showSettings, setShowSettings] = useState(false);
   const [isWebcamOn, setIsWebcamOn] = useState(false);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [currentChord, setCurrentChord] = useState<ChordChange | null>(null);
@@ -151,10 +151,6 @@ const PerformancePage: React.FC = () => {
       {/* 네비바 */}
       <div className="h-16">
         <GameModeNavbar
-          showStats={showStats}
-          setShowStats={setShowStats}
-          showSettings={showSettings}
-          setShowSettings={setShowSettings}
           currentMode="performance"
         />
       </div>

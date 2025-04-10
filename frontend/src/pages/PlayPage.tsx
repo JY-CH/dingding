@@ -16,7 +16,7 @@ import { Exercise, GuitarString, Visualization } from '../types/guitar';
 const PlayPage: React.FC = () => {
   const { sendMessage, isConnected, messages } = useWebSocketStore();
   const [showSettings, setShowSettings] = useState(false);
-  const [showStats, setShowStats] = useState(false);
+  // const [showStats, setShowStats] = useState(false);
   const [currentChord] = useState<string | null>(null);
   const [, setPracticeStreak] = useState(0);
   const [isReady, setIsReady] = useState(false);
@@ -201,10 +201,10 @@ const PlayPage: React.FC = () => {
       {/* 네비바 - 4rem 고정 */}
       <div className="h-16">
         <GameModeNavbar
-          showStats={showStats}
-          setShowStats={setShowStats}
-          showSettings={showSettings}
-          setShowSettings={setShowSettings}
+          // showStats={showStats}
+          // setShowStats={setShowStats}
+          // showSettings={showSettings}
+          // setShowSettings={setShowSettings}
           currentMode="practice"
         />
       </div>

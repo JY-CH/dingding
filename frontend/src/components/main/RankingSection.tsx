@@ -46,10 +46,10 @@ type TabType = 'month' | 'week' | 'day';
 type UserTabType = 'playtime' | 'avgscore' | 'totaltry';
 
 const RankingSection: React.FC<RankingSectionProps> = ({
-  dailyTracks,
-  weeklyTracks,
-  monthlyTracks,
-  onPlayTrack,
+  // dailyTracks,
+  // weeklyTracks,
+  // monthlyTracks,
+  // onPlayTrack,
   onPlaySong,
 }) => {
   const [rankingType, setRankingType] = useState<'music' | 'user'>('music');
@@ -63,11 +63,11 @@ const RankingSection: React.FC<RankingSectionProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   // API 데이터가 없을 때 fallback으로 사용할 값들
-  const fallbackData = {
-    month: monthlyTracks,
-    week: weeklyTracks,
-    day: dailyTracks
-  };
+  // const fallbackData = {
+  //   month: monthlyTracks,
+  //   week: weeklyTracks,
+  //   day: dailyTracks
+  // };
 
   const { data: monthlyRanking = [] } = useQuery<RecommendSong[]>({
     queryKey: ['monthlyRanking'],

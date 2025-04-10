@@ -8,7 +8,7 @@ interface MusicPlayerProps {
   isExpanded: boolean;
 }
 
-const MusicPlayer: React.FC<MusicPlayerProps> = ({ songs, initialSongIndex = 0, isExpanded }) => {
+const MusicPlayer: React.FC<MusicPlayerProps> = ({ songs,  isExpanded }) => {
   const [currentSongIndex, setCurrentSongIndex] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
