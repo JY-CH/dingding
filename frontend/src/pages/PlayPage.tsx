@@ -2,10 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Settings } from 'lucide-react';
-import { GiGuitar } from 'react-icons/gi';
 import { HiOutlineVideoCamera, HiOutlineVideoCameraSlash } from 'react-icons/hi2';
-import { RiMusicLine } from 'react-icons/ri';
-import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
 import GameModeNavbar from '../components/common/GameModeNavbar';
@@ -17,9 +14,7 @@ import { useWebSocketStore } from '../store/useWebSocketStore';
 import { Exercise, GuitarString, Visualization } from '../types/guitar';
 
 const PlayPage: React.FC = () => {
-  const navigate = useNavigate();
   const { sendMessage, isConnected, messages } = useWebSocketStore();
-  const [selectedMode, setSelectedMode] = useState<'practice' | 'performance'>('practice');
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [currentChord] = useState<string | null>(null);
@@ -219,43 +214,15 @@ const PlayPage: React.FC = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6">
           {/* 왼쪽 사이드바 */}
           <div className="col-span-3 space-y-6">
-            {/* 모드 선택 카드 */}
+            {/* 음향 시각화 - 위치 이동 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white/5 rounded-xl overflow-hidden"
+              transition={{ delay: 0.35 }}
+              className="bg-white/5 rounded-xl p-6"
             >
-              <button
-                onClick={() => setSelectedMode('practice')}
-                className={`w-full p-4 flex items-center gap-3 transition-all ${
-                  selectedMode === 'practice'
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
-                    : 'hover:bg-white/5 text-zinc-400'
-                }`}
-              >
-                <GiGuitar className="w-5 h-5" />
-                <div className="text-left">
-                  <div className="font-medium">연습 모드</div>
-                  <div className="text-sm opacity-80">단계별 연습과 피드백</div>
-                </div>
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedMode('performance');
-                  navigate('/performance');
-                }}
-                className={`w-full p-4 flex items-center gap-3 transition-all ${
-                  selectedMode === 'performance'
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
-                    : 'hover:bg-white/5 text-zinc-400'
-                }`}
-              >
-                <RiMusicLine className="w-5 h-5" />
-                <div className="text-left">
-                  <div className="font-medium">연주 모드</div>
-                  <div className="text-sm opacity-80">실시간 연주 분석</div>
-                </div>
-              </button>
+              <h3 className="text-lg font-semibold text-white mb-4">음향 시각화</h3>
+              <AudioVisualizer3D visualization={visualization} />
             </motion.div>
 
             {/* 연습 설정 카드 */}
@@ -309,23 +276,45 @@ const PlayPage: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* 통계 카드 */}
+            {/* 현재 코드 카드 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.25 }}
               className="bg-white/5 rounded-xl p-6"
             >
-              <h3 className="text-lg font-semibold text-white mb-4">연습 통계</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/5 rounded-lg p-3">
-                  <div className="text-zinc-400 text-sm">총 연습 시간</div>
-                  <div className="text-2xl font-bold text-white">42.5h</div>
+              <h3 className="text-lg font-semibold text-white mb-4">현재 코드</h3>
+              {/* 진행률 표시 */}
+              <div className="relative pt-1">
+                <div className="flex mb-2 items-center justify-between">
+                  <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-amber-500 bg-amber-500/20">
+                    진행률
+                  </span>
+                  <span className="text-xs font-semibold inline-block text-amber-500">
+                    {Math.round(
+                      (currentStep /
+                        (selectedExercise?.chords.length || defaultExercise.chords.length)) *
+                        100,
+                    )}
+                    %
+                  </span>
                 </div>
-                <div className="bg-white/5 rounded-lg p-3">
-                  <div className="text-zinc-400 text-sm">평균 정확도</div>
-                  <div className="text-2xl font-bold text-green-500">85%</div>
+                <div className="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-white/5">
+                  <motion.div
+                    style={{
+                      width: `${(currentStep / (selectedExercise?.chords.length || defaultExercise.chords.length)) * 100}%`,
+                    }}
+                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-amber-500"
+                    initial={{ width: 0 }}
+                    animate={{
+                      width: `${(currentStep / (selectedExercise?.chords.length || defaultExercise.chords.length)) * 100}%`,
+                    }}
+                    transition={{ duration: 0.5 }}
+                  />
                 </div>
+              </div>
+              <div className="text-4xl font-bold text-amber-500 text-center">
+                {selectedExercise?.chords[currentStep] || defaultExercise.chords[currentStep]}
               </div>
             </motion.div>
           </div>
@@ -431,22 +420,10 @@ const PlayPage: React.FC = () => {
                   selectedExercise?.chords[currentStep]
                     ? {
                         name: selectedExercise.chords[currentStep],
-                        // fingering: [],
                       }
                     : undefined
                 }
               />
-            </motion.div>
-
-            {/* 음향 시각화 - 위치 이동 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
-              className="bg-white/5 rounded-xl p-6"
-            >
-              <h3 className="text-lg font-semibold text-white mb-4">음향 시각화</h3>
-              <AudioVisualizer3D visualization={visualization} />
             </motion.div>
 
             {/* 실시간 피드백 */}
@@ -483,8 +460,8 @@ const PlayPage: React.FC = () => {
                           messages[messages.length - 1].message.match(/점수:\s*([\d.]+)점/);
                         const score = match ? parseFloat(match[1]) : 0;
 
-                        if (score >= 70) return '잘하고 있어요! 👍';
-                        else if (score >= 40) return '조금 더 자세를 신경 써보세요!';
+                        if (score >= 60) return '잘하고 있어요! 👍';
+                        else if (score >= 30) return '조금 더 자세를 신경 써보세요!';
                         else return '혹시 다른 코드를 잡고 있는 건 아닐까요? 🤔';
                       })()}
                   </motion.div>
