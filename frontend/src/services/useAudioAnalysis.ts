@@ -131,32 +131,11 @@ export const useAudioAnalysis = ({
   }, [isSuccess, templateData, confidenceThreshold, recordingDuration]);
 
   // 백엔드 API 호출 뮤테이션
-  const { mutate: analyzeAudio, isPending: isAnalyzing } = useMutation({
+  const { mutateAsync: analyzeAudioAsync, isPending: isAnalyzing } = useMutation({
     mutationFn: guitarChordApi.analyzeAudio,
-    onSuccess: (data) => {
-      console.log('백엔드 분석 결과:', data);
-      if (onResult) {
-        onResult({
-          chord: data.chord,
-          confidence: data.confidence,
-          source: 'backend',
-          isCorrect: targetChord ? data.chord === targetChord : undefined,
-        });
-      }
-      setError(null);
-    },
     onError: (error) => {
       console.error('백엔드 분석 오류:', error);
       setError(`백엔드 분석 오류: ${(error as Error).message}`);
-
-      // 백엔드 오류 발생 시 프론트엔드 결과라도 전달
-      if (localResult && onResult) {
-        onResult({
-          ...localResult,
-          source: 'frontend',
-          isCorrect: targetChord ? localResult.chord === targetChord : undefined,
-        });
-      }
     },
   });
 
@@ -271,7 +250,6 @@ export const useAudioAnalysis = ({
       // 녹음 완료 처리
       mediaRecorder.onstop = async () => {
         try {
-          // 이미 처리 중이면 중복 실행 방지
           if (chunksRef.current.length === 0) {
             console.log('이미 처리된 녹음입니다.');
             return;
@@ -303,39 +281,54 @@ export const useAudioAnalysis = ({
             numberOfChannels: audioBuffer.numberOfChannels,
           });
 
-          // WAV로 변환 - 고품질 설정
+          // WAV로 변환
           const wavBlob = await encodeWAV(audioBuffer, 48000);
           console.log('WAV 변환 완료:', {
             size: wavBlob.size,
             type: wavBlob.type,
           });
 
-          // 템플릿 매칭
+          // 템플릿 매칭과 백엔드 분석을 동시에 수행
           if (templateMatcherRef.current) {
-            console.log('템플릿 매칭 분석 시작...');
-            const result = await templateMatcherRef.current.processAudio(audioBuffer);
-            console.log('템플릿 매칭 결과:', result);
+            console.log('템플릿 매칭 및 백엔드 분석 동시 수행 시작...');
+            const [frontendResult, backendResult] = await Promise.all([
+              templateMatcherRef.current.processAudio(audioBuffer),
+              analyzeAudioAsync(wavBlob),
+            ]);
+            console.log('템플릿 매칭 결과:', frontendResult);
+            console.log('백엔드 분석 결과:', backendResult);
 
-            setLocalResult(result);
-
+            // targetChord가 설정되어 있고, 템플릿 결과가 틀리면 백엔드 결과로 대체
+            let finalResult = frontendResult;
+            let usedSource: 'frontend' | 'backend' = 'frontend';
+            if (targetChord && frontendResult.chord !== targetChord) {
+              finalResult = backendResult;
+              usedSource = 'backend';
+            }
+            setLocalResult(finalResult);
             if (onResult) {
               onResult({
-                ...result,
-                source: 'frontend',
-                isCorrect: targetChord ? result.chord === targetChord : undefined,
+                ...finalResult,
+                source: usedSource,
+                isCorrect: targetChord ? finalResult.chord === targetChord : undefined,
+              });
+            }
+          } else {
+            // templateMatcherRef가 없으면 백엔드 분석만 진행
+            console.log('템플릿 매처 미사용 - 백엔드 분석만 수행');
+            const backendResult = await analyzeAudioAsync(wavBlob);
+            setLocalResult(backendResult);
+            if (onResult) {
+              onResult({
+                ...backendResult,
+                source: 'backend',
+                isCorrect: targetChord ? backendResult.chord === targetChord : undefined,
               });
             }
           }
 
           // WAV 파일 저장
           setAudioBlob(wavBlob);
-
-          // 백엔드 분석 요청
-          /*
-          console.log('WAV 형식으로 백엔드 분석 요청...');
-          analyzeAudio(wavBlob);
-          */
-
         } catch (error) {
           console.error('오디오 처리 오류:', error);
           setError(`오디오 처리 오류: ${(error as Error).message}`);
@@ -363,12 +356,11 @@ export const useAudioAnalysis = ({
         }
         recordingTimerRef.current = null;
       }, duration * 1000);
-
     } catch (error) {
       console.error('오디오 녹음 오류:', error);
       setError(`마이크 접근 또는 녹음 시작 실패: ${(error as Error).message}`);
     }
-  }, [isRecording, recordingDuration, stopRecording, initAudioContext, onResult, targetChord, analyzeAudio]);
+  }, [isRecording, recordingDuration, stopRecording, initAudioContext, onResult, targetChord]);
 
   // 자원 정리
   const cleanup = useCallback(() => {

@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { fetchRankings } from '@/services/api';
+import { fetchMonthlyRanking, fetchWeeklyRanking, fetchDailyRanking } from '../../services/api';
 
 import { Song } from '../../types/performance';
 
@@ -16,13 +17,14 @@ interface RankUser {
 }
 
 interface RankingSectionProps {
-  dailyTracks: Song[];
-  weeklyTracks: Song[];
-  monthlyTracks: Song[];
+  dailyTracks: any[];
+  weeklyTracks: any[];
+  monthlyTracks: any[];
   onPlayTrack: (track: Song) => void;
+  onPlaySong: (song: any) => void;
 }
 
-type TabType = 'daily' | 'weekly' | 'monthly';
+type TabType = 'month' | 'week' | 'day';
 type UserTabType = 'playtime' | 'avgscore' | 'totaltry';
 
 const RankingSection: React.FC<RankingSectionProps> = ({
@@ -30,9 +32,10 @@ const RankingSection: React.FC<RankingSectionProps> = ({
   weeklyTracks,
   monthlyTracks,
   onPlayTrack,
+  onPlaySong,
 }) => {
   const [rankingType, setRankingType] = useState<'music' | 'user'>('music');
-  const [activeTab, setActiveTab] = useState<TabType>('daily');
+  const [activeTab, setActiveTab] = useState<TabType>('month');
   const [userTab, setUserTab] = useState<UserTabType>('playtime');
   const [hoveredTrack, setHoveredTrack] = useState<number | null>(null);
   const [hoveredUser, setHoveredUser] = useState<number | null>(null);
@@ -41,16 +44,27 @@ const RankingSection: React.FC<RankingSectionProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getTracks = () => {
-    switch (activeTab) {
-      case 'daily':
-        return dailyTracks;
-      case 'weekly':
-        return weeklyTracks;
-      case 'monthly':
-        return monthlyTracks;
-    }
+  // API 데이터가 없을 때 fallback으로 사용할 값들
+  const fallbackData = {
+    month: monthlyTracks,
+    week: weeklyTracks,
+    day: dailyTracks
   };
+
+  const { data: monthlyRanking = [] } = useQuery({
+    queryKey: ['monthlyRanking'],
+    queryFn: fetchMonthlyRanking,
+  });
+
+  const { data: weeklyRanking = [] } = useQuery({
+    queryKey: ['weeklyRanking'],
+    queryFn: fetchWeeklyRanking,
+  });
+
+  const { data: dailyRanking = [] } = useQuery({
+    queryKey: ['dailyRanking'],
+    queryFn: fetchDailyRanking,
+  });
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -264,13 +278,37 @@ const RankingSection: React.FC<RankingSectionProps> = ({
     return '0시간 0분';
   };
 
+  const getCurrentRanking = () => {
+    // 먼저 API 데이터 사용 시도
+    const apiData = {
+      month: monthlyRanking,
+      week: weeklyRanking,
+      day: dailyRanking
+    };
+
+    // API 데이터가 없으면 props로 받은 데이터 사용
+    const result = apiData[activeTab].length > 0 
+      ? apiData[activeTab] 
+      : fallbackData[activeTab];
+    
+    return result;
+  };
+
+  const handlePlayMusic = (song: any) => {
+    // 필요에 따라 onPlayTrack 또는 onPlaySong 사용 
+    if (onPlaySong) {
+      onPlaySong(song);
+    } else if (onPlayTrack) {
+      onPlayTrack(song);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.9 }}
+      transition={{ delay: 0.5 }}
       className="bg-white/5 backdrop-blur-md rounded-xl p-6 shadow-lg"
-      style={{ transition: 'none' }}
     >
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -315,9 +353,9 @@ const RankingSection: React.FC<RankingSectionProps> = ({
           style={{
             left:
               rankingType === 'music'
-                ? activeTab === 'daily'
+                ? activeTab === 'day'
                   ? '0%'
-                  : activeTab === 'weekly'
+                  : activeTab === 'week'
                     ? '33.33%'
                     : '66.66%'
                 : userTab === 'playtime'
@@ -331,17 +369,17 @@ const RankingSection: React.FC<RankingSectionProps> = ({
 
         {rankingType === 'music'
           ? [
-              { id: 'daily', label: 'Today' },
-              { id: 'weekly', label: 'This Week' },
-              { id: 'monthly', label: 'This Month' },
+              { id: 'day', label: 'Today' },
+              { id: 'week', label: 'This Week' },
+              { id: 'month', label: 'This Month' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
                 className={`
-                pb-3 px-4 text-sm font-medium transition-all duration-300 flex-1
-                ${activeTab === tab.id ? 'text-amber-500' : 'text-zinc-400 hover:text-white'}
-              `}
+                  pb-3 px-4 text-sm font-medium transition-all duration-300 flex-1
+                  ${activeTab === tab.id ? 'text-amber-500' : 'text-zinc-400 hover:text-white'}
+                `}
               >
                 {tab.label}
               </button>
@@ -355,9 +393,9 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                 key={tab.id}
                 onClick={() => setUserTab(tab.id as UserTabType)}
                 className={`
-                pb-3 px-2 text-sm font-medium transition-all duration-300 flex-1
-                ${userTab === tab.id ? 'text-amber-500' : 'text-zinc-400 hover:text-white'}
-              `}
+                  pb-3 px-2 text-sm font-medium transition-all duration-300 flex-1
+                  ${userTab === tab.id ? 'text-amber-500' : 'text-zinc-400 hover:text-white'}
+                `}
               >
                 <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
                   <span className="text-xs">{tab.icon}</span>
@@ -381,9 +419,9 @@ const RankingSection: React.FC<RankingSectionProps> = ({
           >
             {rankingType === 'music' ? (
               <div className="space-y-2">
-                {getTracks().map((track, index) => (
+                {getCurrentRanking().map((song, index) => (
                   <motion.div
-                    key={`${track.id}-${index}`}
+                    key={`${song.songId}-${index}`}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{
@@ -400,7 +438,7 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                         flex items-center gap-3 p-3 rounded-lg transition-all duration-300
                         ${hoveredTrack === index ? 'bg-white/10 transform scale-[1.02]' : 'hover:bg-white/5'}
                       `}
-                      onClick={() => onPlayTrack(track)}
+                      onClick={() => handlePlayMusic(song)}
                     >
                       <div className="w-6 text-center">
                         <span
@@ -415,9 +453,13 @@ const RankingSection: React.FC<RankingSectionProps> = ({
 
                       <div className="relative w-10 h-10 rounded-md overflow-hidden">
                         <img
-                          src={track.thumbnail}
-                          alt={track.title}
-                          className="w-full h-full object-cover"
+                          src={song.songImage}
+                          alt={song.songTitle}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/default-song-image.png';
+                          }}
                         />
                         <div
                           className={`
@@ -429,12 +471,11 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-white text-sm truncate">{track.title}</h4>
-                        <p className="text-xs text-amber-400/80 truncate">{track.artist}</p>
+                        <h4 className="font-medium text-white text-sm truncate">{song.songTitle}</h4>
+                        <p className="text-xs text-amber-400/80 truncate">{song.songSinger}</p>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className="text-xs text-zinc-400">{track.duration}</span>
                         <div
                           className={`
                             p-2 rounded-full transition-all duration-300
@@ -459,10 +500,10 @@ const RankingSection: React.FC<RankingSectionProps> = ({
 
                       <div
                         className={`
-                        absolute inset-0 bg-gradient-to-r from-amber-500/5 to-purple-500/5 rounded-lg
-                        transition-opacity duration-300 pointer-events-none
-                        ${hoveredTrack === index ? 'opacity-100' : 'opacity-0'}
-                      `}
+                          absolute inset-0 bg-gradient-to-r from-amber-500/5 to-purple-500/5 rounded-lg
+                          transition-opacity duration-300 pointer-events-none
+                          ${hoveredTrack === index ? 'opacity-100' : 'opacity-0'}
+                        `}
                       />
                     </div>
                   </motion.div>

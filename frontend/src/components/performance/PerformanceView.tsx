@@ -90,7 +90,7 @@ const PerformanceView: React.FC = () => {
         setPressedStrings(prev => [...prev, stringNumber]);
         
         const currentTime = Date.now() - startTimeRef.current;
-        const hitWindow = HIT_WINDOWS[currentSong.difficulty];
+        const hitWindow = currentSong?.difficulty ? HIT_WINDOWS[currentSong.difficulty] : HIT_WINDOWS['medium'];
         
         // 코드 변경 확인
         const chord = findChordChange(notes, currentTime, hitWindow);
@@ -232,7 +232,7 @@ const PerformanceView: React.FC = () => {
         {/* 왼쪽 영역 (플레이리스트) */}
         <div className="w-1/3 p-4">
           <div className="h-full bg-gray-800/50 rounded-lg overflow-hidden">
-            <Playlist onSongSelect={handleSongSelect} />
+            <Playlist onSongSelect={handleSongSelect} initialSongs={[]} />
           </div>
         </div>
         
@@ -256,6 +256,9 @@ const PerformanceView: React.FC = () => {
             notes={notes}
             currentChord={currentChord}
             onPlayingChange={setIsPlaying}
+            onChordChange={setCurrentChord}
+            songDetail={null}
+            onSheetIndexChange={() => {}}
           />
           {hitEffects.map(effect => (
             <HitEffect
