@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import { Song } from '../../types/performance';
 
@@ -15,22 +15,124 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ songs, initialSongIndex = 0 }
   const [volume, setVolume] = useState(80);
   const [currentTime, setCurrentTime] = useState(0);
   const [showVolume, setShowVolume] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const previousSongsRef = useRef<Song[]>(songs);
 
   // songs 배열이 비어있는 경우를 처리
   if (!songs || songs.length === 0) {
-    return null; // 또는 로딩/에러 상태를 표시
+    return null;
   }
 
   const currentSong = songs[currentSongIndex];
 
+  // songs 배열이 변경되었는지 확인
   useEffect(() => {
-    setIsPlaying(false);
-    setProgress(0);
-    setCurrentTime(0);
+    if (JSON.stringify(previousSongsRef.current) !== JSON.stringify(songs)) {
+      previousSongsRef.current = songs;
+      // 새로운 곡이 선택되었을 때
+      if (songs.length === 1) {
+        setCurrentSongIndex(0);
+        setIsPlaying(true); // 자동 재생
+        setCurrentTime(0);
+        setProgress(0);
+        if (audioRef.current) {
+          audioRef.current.load();
+          audioRef.current.play().catch((err) => {
+            console.log('Playback failed:', err);
+            setIsPlaying(false);
+          });
+        }
+      }
+    }
+  }, [songs]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume / 100;
+    }
+  }, [volume]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => {
+      if (audio) {
+        const progress = (audio.currentTime / audio.duration) * 100;
+        setProgress(progress);
+        setCurrentTime(audio.currentTime);
+      }
+    };
+
+    const handleLoadedMetadata = () => {
+      if (audio) {
+        setCurrentTime(0);
+        setProgress(0);
+      }
+    };
+
+    const handlePlay = () => {
+      setIsPlaying(true);
+    };
+
+    const handlePause = () => {
+      setIsPlaying(false);
+    };
+
+    const handleCanPlay = () => {
+      if (isPlaying) {
+        audio.play().catch((err) => {
+          console.log('Playback failed:', err);
+          setIsPlaying(false);
+        });
+      }
+    };
+
+    const handleEnded = () => {
+      handleNext();
+    };
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('ended', handleEnded);
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.load();
+      setIsPlaying(true); // 곡이 변경될 때 자동 재생
+      setCurrentTime(0);
+      setProgress(0);
+      audioRef.current.play().catch((err) => {
+        console.log('Playback failed:', err);
+        setIsPlaying(false);
+      });
+    }
   }, [currentSongIndex]);
 
   const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch((err) => {
+          console.log('Playback failed:', err);
+          setIsPlaying(false);
+        });
+      }
+    }
   };
 
   const handlePrevious = () => {
@@ -63,18 +165,23 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ songs, initialSongIndex = 0 }
     `}>
       {/* Album Cover & Song Info */}
       <div className="flex items-center gap-4 min-w-[288px] w-72">
-        <div className="relative w-14 h-14 flex-shrink-0">
+        <div className="relative w-14 h-14 flex-shrink-0 group">
           <img
             src={currentSong.thumbnail}
             alt={currentSong.title}
-            className="w-full h-full object-cover rounded shadow-lg"
+            className="w-full h-full object-cover rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105"
+            style={{
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+              filter: 'drop-shadow(0 4px 3px rgba(0, 0, 0, 0.2))'
+            }}
           />
-          {isPlaying && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded opacity-0 hover:opacity-100 transition-opacity">
-              <button
-                onClick={handlePlayPause}
-                className="w-8 h-8 flex items-center justify-center bg-amber-500 rounded-full text-white hover:bg-amber-600 transition-colors"
-              >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <button
+              onClick={handlePlayPause}
+              className="w-8 h-8 flex items-center justify-center bg-amber-500 rounded-full text-white hover:bg-amber-600 transition-colors"
+            >
+              {isPlaying ? (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
@@ -83,9 +190,18 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ songs, initialSongIndex = 0 }
                     d="M10 9v6m4-6v6M9 9h1m4 0h1"
                   />
                 </svg>
-              </button>
-            </div>
-          )}
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                  />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
         <div>
           <h3 className="text-white font-medium text-sm">{currentSong.title}</h3>
@@ -192,6 +308,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ songs, initialSongIndex = 0 }
           />
         )}
       </div>
+
+      <audio
+        ref={audioRef}
+        src={currentSong.songVoiceFileUrl}
+      />
     </div>
   );
 };

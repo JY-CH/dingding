@@ -1,3 +1,6 @@
+import { RecommendSong } from '../types/performance';
+import { SongDetailResponse } from '../types/performance';
+
 const API_URL = import.meta.env.VITE_BASE_URL;
 
 interface LoginRequest {
@@ -466,5 +469,354 @@ export const fetchWeekSongRanking = async (): Promise<WeekSongRankingResponse> =
       },
       userInfo: []
     };
+  }
+};
+
+// 주목할 최신곡 응답 인터페이스
+interface NewSongResponse {
+  songId: number;
+  songTitle: string;
+  songImage: string;
+  songSinger: string;
+  songVoiceFileUrl: string;
+  releaseDate: string;
+  category: string;
+  songDuration: string;
+}
+
+// 주목할 최신곡 가져오기
+export const fetchNewSongs = async (): Promise<SongResponse[]> => {
+  try {
+    const response = await fetch(`${API_URL}/song`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+      },
+    });
+
+    // 에러 응답 처리
+    if (!response.ok) {
+      switch (response.status) {
+        case 400:
+          throw new Error('필수 정보가 누락되었습니다.');
+        case 404:
+          throw new Error('존재하지 않는 곡입니다.');
+        case 500:
+          throw new Error('서버 내부 오류가 발생했습니다.');
+        default:
+          throw new Error('곡 목록을 불러오는데 실패했습니다.');
+      }
+    }
+
+    const data = await response.json();
+    // NEW SONG 카테고리 필터링
+    const newSongs = Array.isArray(data) 
+      ? data.filter(song => song.category === "NEW SONG").slice(0, 6)
+      : [];
+    console.log('주목할 최신곡:', newSongs);
+    return newSongs;
+  } catch (error) {
+    console.error('주목할 최신곡 조회 오류:', error);
+    return [];
+  }
+};
+
+// 봄 노래 추천 가져오기
+export const fetchSpringRecommendations = async (): Promise<SongResponse[]> => {
+  try {
+    const response = await fetch(`${API_URL}/song`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+      },
+    });
+
+    // 에러 응답 처리
+    if (!response.ok) {
+      switch (response.status) {
+        case 400:
+          throw new Error('필수 정보가 누락되었습니다.');
+        case 404:
+          throw new Error('존재하지 않는 곡입니다.');
+        case 500:
+          throw new Error('서버 내부 오류가 발생했습니다.');
+        default:
+          throw new Error('곡 목록을 불러오는데 실패했습니다.');
+      }
+    }
+
+    const data = await response.json();
+    // SPRING 카테고리 필터링
+    const springSongs = Array.isArray(data) 
+      ? data.filter(song => song.category === "SPRING").slice(0, 6)
+      : [];
+    console.log('봄 노래 추천:', springSongs);
+    return springSongs;
+  } catch (error) {
+    console.error('봄 노래 추천 조회 오류:', error);
+    return [];
+  }
+};
+
+// 즐거운 음악 추천 가져오기
+export const fetchCheerfulSongs = async (): Promise<SongResponse[]> => {
+  try {
+    const response = await fetch(`${API_URL}/song`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+      },
+    });
+
+    // 에러 응답 처리
+    if (!response.ok) {
+      switch (response.status) {
+        case 400:
+          throw new Error('필수 정보가 누락되었습니다.');
+        case 404:
+          throw new Error('존재하지 않는 곡입니다.');
+        case 500:
+          throw new Error('서버 내부 오류가 발생했습니다.');
+        default:
+          throw new Error('곡 목록을 불러오는데 실패했습니다.');
+      }
+    }
+
+    const data = await response.json();
+    // 즐거운 음악 필터링 후 6곡만 반환
+    return data.filter((song: SongResponse) => 
+      song.category?.toLowerCase().includes('즐거운') || 
+      song.songTitle?.toLowerCase().includes('즐거운')
+    ).slice(0, 6);
+  } catch (error) {
+    console.error('즐거운 음악 조회 오류:', error);
+    return [];
+  }
+};
+
+// 전체 곡 목록 응답 인터페이스
+interface SongResponse {
+  songId: number;
+  songTitle: string;
+  songImage: string;
+  songWriter: string;
+  songSinger: string;
+  songVoiceFileUrl: string;
+  releaseDate: string;
+  category: string;
+  songDuration: string;
+}
+
+// 전체 곡 목록 가져오기
+export const fetchAllSongs = async () => {
+  try {
+    const response = await fetch(`${API_URL}/song`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
+      }
+    });
+
+    // 에러 응답 처리
+    if (!response.ok) {
+      switch (response.status) {
+        case 400:
+          throw new Error('필수 정보가 누락되었습니다.');
+        case 401:
+          throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+        case 404:
+          throw new Error('존재하지 않는 곡입니다.');
+        case 500:
+          throw new Error('서버 내부 오류가 발생했습니다.');
+        default:
+          throw new Error('곡 목록을 불러오는데 실패했습니다.');
+      }
+    }
+
+    const data = await response.json();
+    
+    // 응답 데이터 유효성 검사
+    if (!data || !Array.isArray(data)) {
+      console.error('Invalid API response:', data);
+      return [];
+    }
+
+    return data;
+  } catch (error) {
+    console.error('전체 곡 목록 조회 오류:', error);
+    // 에러를 상위로 전파하여 컴포넌트에서 처리하도록 함
+    throw error;
+  }
+};
+
+export const fetchRecommendSongs = async (): Promise<RecommendSong[]> => {
+  try {
+    const response = await fetch(`${API_URL}/recommendSong`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('추천 곡을 가져오는데 실패했습니다.');
+    }
+
+    const data = await response.json();
+    console.log('추천 곡 응답:', data);
+    return data;
+  } catch (error) {
+    console.error('추천 곡 가져오기 실패:', error);
+    throw error;
+  }
+};
+
+// 랭킹 타입 정의
+interface RankingSong {
+  songId: number;
+  songTitle: string;
+  songImage: string;
+  songSinger: string;
+  playCount: number;
+  category: string;
+}
+
+// 월간 랭킹 가져오기
+export const fetchMonthlyRanking = async (): Promise<RankingSong[]> => {
+  try {
+    const response = await fetch(`${API_URL}/recommendSong`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('월간 랭킹을 가져오는데 실패했습니다.');
+    }
+
+    const data = await response.json();
+    console.log('월간 랭킹 API 응답:', data);
+    
+    const filteredData = data
+      .filter((song: RecommendSong) => song.category === 'THIS MONTH')
+      .map((song: RecommendSong) => ({
+        songId: song.song.songId,
+        songTitle: song.song.songTitle,
+        songImage: song.song.songImage,
+        songSinger: song.song.songSinger,
+        playCount: song.recommendSongId,
+        category: song.category
+      }));
+    
+    console.log('필터링된 월간 랭킹:', filteredData);
+    return filteredData;
+  } catch (error) {
+    console.error('월간 랭킹 가져오기 실패:', error);
+    throw error;
+  }
+};
+
+// 주간 랭킹 가져오기
+export const fetchWeeklyRanking = async (): Promise<RankingSong[]> => {
+  try {
+    const response = await fetch(`${API_URL}/recommendSong`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('주간 랭킹을 가져오는데 실패했습니다.');
+    }
+
+    const data = await response.json();
+    console.log('주간 랭킹 API 응답:', data);
+    
+    const filteredData = data
+      .filter((song: RecommendSong) => song.category === 'THIS WEEK')
+      .map((song: RecommendSong) => ({
+        songId: song.song.songId,
+        songTitle: song.song.songTitle,
+        songImage: song.song.songImage,
+        songSinger: song.song.songSinger,
+        playCount: song.recommendSongId,
+        category: song.category
+      }));
+    
+    console.log('필터링된 주간 랭킹:', filteredData);
+    return filteredData;
+  } catch (error) {
+    console.error('주간 랭킹 가져오기 실패:', error);
+    throw error;
+  }
+};
+
+// 일간 랭킹 가져오기
+export const fetchDailyRanking = async (): Promise<RankingSong[]> => {
+  try {
+    const response = await fetch(`${API_URL}/recommendSong`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('일간 랭킹을 가져오는데 실패했습니다.');
+    }
+
+    const data = await response.json();
+    console.log('일간 랭킹 API 응답:', data);
+    
+    const filteredData = data
+      .filter((song: RecommendSong) => song.category === 'THIS DAY')
+      .map((song: RecommendSong) => ({
+        songId: song.song.songId,
+        songTitle: song.song.songTitle,
+        songImage: song.song.songImage,
+        songSinger: song.song.songSinger,
+        playCount: song.recommendSongId,
+        category: song.category
+      }));
+    
+    console.log('필터링된 일간 랭킹:', filteredData);
+    return filteredData;
+  } catch (error) {
+    console.error('일간 랭킹 가져오기 실패:', error);
+    throw error;
+  }
+};
+
+// 곡 상세 정보 가져오기
+export const fetchSongDetail = async (songId: number): Promise<SongDetailResponse> => {
+  try {
+    const response = await fetch(`${API_URL}/song/${songId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
+      }
+    });
+
+    // 에러 응답 처리
+    if (!response.ok) {
+      switch (response.status) {
+        case 400:
+          throw new Error('필수 정보가 누락되었습니다.');
+        case 404:
+          throw new Error('존재하지 않는 곡입니다.');
+        case 500:
+          throw new Error('서버 내부 오류가 발생했습니다.');
+        default:
+          throw new Error('곡 정보를 불러오는데 실패했습니다.');
+      }
+    }
+
+    const data = await response.json();
+    return data as SongDetailResponse;
+  } catch (error) {
+    console.error('곡 상세 정보 조회 오류:', error);
+    throw error;
   }
 };

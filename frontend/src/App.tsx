@@ -7,9 +7,13 @@ import { useLocation } from 'react-router-dom';
 
 import Sidebar from './components/common/Sidebar';
 import AppContent from './components/layout/AppContent';
+import { createDemoNotifications, startRandomNotifications, stopRandomNotifications } from './utils/demoNotifications';
 
 // QueryClient 생성
 const queryClient = new QueryClient();
+
+// 개발 환경인지 확인
+const isDevelopment = import.meta.env.DEV;
 
 function App() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -29,6 +33,23 @@ function App() {
       setIsExpanded(false);
     }
   }, [isFullscreenPage]);
+
+  // 개발 환경에서 데모 알림 초기화
+  useEffect(() => {
+    if (isDevelopment) {
+      // 초기 데모 알림 생성
+      createDemoNotifications();
+      
+      // 5분마다 랜덤 알림 생성 (개발 중 테스트를 위해 30초로 설정)
+      const intervalSeconds = 30;
+      const intervalId = startRandomNotifications(intervalSeconds / 60);
+      
+      // 컴포넌트 언마운트 시 정리
+      return () => {
+        stopRandomNotifications(intervalId);
+      };
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

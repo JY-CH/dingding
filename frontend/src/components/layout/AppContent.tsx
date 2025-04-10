@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
 
 import { CommunityPage } from '@/pages/CommunityPage';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -25,9 +26,11 @@ interface AppContentProps {
 
 const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
   const location = useLocation();
-  const isFullscreenPage = location.pathname === '/play' || location.pathname === '/performance';
-  const isLoginPage = location.pathname === '/login';
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { isAuthenticated } = useAuthStore();
+  const isFullscreenPage = ['/login', '/signup'].includes(location.pathname);
+  const shouldShowMusicPlayer = !isFullscreenPage;
+  const [currentSong, setCurrentSong] = useState<any>(null);
+
   // 샘플 악보 데이터
   const sampleNotes = [
     { chord: 'A', timing: 2000, duration: 2000 },
@@ -38,9 +41,6 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
     { chord: 'F', timing: 17000, duration: 2000 },
     { chord: 'B', timing: 20000, duration: 2000 },
   ];
-
-  // 뮤직 플레이어를 표시할지 여부를 결정
-  const shouldShowMusicPlayer = !isLoginPage && isAuthenticated;
 
   return (
     <main
@@ -53,7 +53,7 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
       <div className="flex-1 relative">
         <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
           <Routes>
-            <Route path="/" element={<MainPage />} />
+            <Route path="/" element={<MainPage onPlaySong={setCurrentSong} />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route
@@ -103,7 +103,10 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
         }}
       >
         <div className="min-w-[976px] w-full">
-          <MusicPlayer songs={mockSongs} isExpanded={isExpanded} />
+          <MusicPlayer 
+            songs={currentSong ? [currentSong] : mockSongs} 
+            isExpanded={isExpanded} 
+          />
         </div>
       </div>
     </main>

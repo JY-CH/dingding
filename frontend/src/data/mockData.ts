@@ -11,7 +11,8 @@ export const mockSongs: Song[] = [
     duration: '3:23',
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b27301f1d35d045186e5c8c05a50',
     notes: [],
-    bpm: 120
+    bpm: 120,
+    audio: 'https://example.com/audio1.mp3'
   },
   {
     id: 2,
@@ -21,7 +22,8 @@ export const mockSongs: Song[] = [
     duration: '3:00',
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b2736ec634e5fa8d4b54d661baa7',
     notes: [],
-    bpm: 110
+    bpm: 110,
+    audio: 'https://example.com/audio2.mp3'
   },
   {
     id: 3,
@@ -31,7 +33,8 @@ export const mockSongs: Song[] = [
     duration: '3:14',
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b273bf5cce5a0e1ed03a626bdd74',
     notes: [],
-    bpm: 125
+    bpm: 125,
+    audio: 'https://example.com/audio3.mp3'
   },
   {
     id: 4,
@@ -41,7 +44,8 @@ export const mockSongs: Song[] = [
     duration: '2:55',
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b273849b5b629ce9aceb822f7905',
     notes: [],
-    bpm: 115
+    bpm: 115,
+    audio: 'https://example.com/audio4.mp3'
   },
   {
     id: 5,
@@ -51,7 +55,8 @@ export const mockSongs: Song[] = [
     duration: '3:08',
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b273d70036292d54f29e8b68ec01',
     notes: [],
-    bpm: 118
+    bpm: 118,
+    audio: 'https://example.com/audio5.mp3'
   }
 ];
 

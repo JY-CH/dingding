@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAuthStore } from '@/store/useAuthStore';
 
+import NotificationCenter from '../components/notifications/NotificationCenter';
 import ExploreSection from '../components/main/ExploreSection';
 import FeaturedCarousel from '../components/main/FeaturedCarousel';
 // import MusicPlayer from '../components/main/MusicPlayer';
@@ -15,7 +16,11 @@ import TopSongSection from '../components/main/TopSongSection';
 import { mockDailyTracks, mockWeeklyTracks, mockMonthlyTracks } from '../data/mockData';
 import { logout } from '../services/api';
 
-const MainPage = () => {
+interface MainPageProps {
+  onPlaySong: (song: any) => void;
+}
+
+const MainPage: React.FC<MainPageProps> = ({ onPlaySong }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -24,6 +29,7 @@ const MainPage = () => {
   const [isAllNotificationsModalOpen, setIsAllNotificationsModalOpen] = useState(false);
   const { isAuthenticated, user, clearAuth } = useAuthStore();
   const [query, setQuery] = useState<string>('');
+  const [currentSong, setCurrentSong] = useState<any>(null);
 
   // 프로필 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -40,8 +46,9 @@ const MainPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handlePlaySong = () => {
-    // This function is no longer used in the new version
+  const handlePlaySong = (song: any) => {
+    setCurrentSong(song);
+    onPlaySong(song);
   };
 
   const handleLogout = async () => {
@@ -102,136 +109,10 @@ const MainPage = () => {
                   />
                 </svg>
               </div>
-              <div className="relative" ref={notificationRef}>
-                <button
-                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 
-                    flex items-center justify-center hover:bg-white/10 
-                    transition-all duration-300 group"
-                >
-                  <svg
-                    className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                  </svg>
-                  <span
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 
-                    rounded-full text-xs font-medium text-white 
-                    flex items-center justify-center
-                    animate-bounce shadow-lg shadow-amber-500/20"
-                  >
-                    3
-                  </span>
-                </button>
-                {isNotificationOpen && (
-                  <div className="absolute right-0 mt-2 w-80 rounded-xl bg-zinc-800/90 backdrop-blur-sm border border-white/10 shadow-xl z-50">
-                    <div className="p-3 border-b border-white/10 flex justify-between items-center">
-                      <h3 className="text-sm font-medium text-white">알림</h3>
-                      <button className="text-xs text-amber-500 hover:text-amber-400 transition-colors">
-                        모두 읽음 표시
-                      </button>
-                    </div>
-                    <div className="max-h-[400px] overflow-y-auto">
-                      <div className="p-3 border-b border-white/5">
-                        <p className="text-xs text-zinc-400 mb-2">오늘</p>
-                        <div className="space-y-3">
-                          <div className="flex items-start gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors">
-                            <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                              <svg
-                                className="w-4 h-4 text-amber-500"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                                />
-                              </svg>
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm text-white">새로운 연습 곡이 추가되었습니다</p>
-                              <p className="text-xs text-zinc-400 mt-0.5">2시간 전</p>
-                            </div>
-                            <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                          </div>
-                          <div className="flex items-start gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors">
-                            <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                              <svg
-                                className="w-4 h-4 text-green-500"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm text-white">새로운 개인 기록을 달성했습니다!</p>
-                              <p className="text-xs text-zinc-400 mt-0.5">5시간 전</p>
-                            </div>
-                            <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-3">
-                        <p className="text-xs text-zinc-400 mb-2">이전</p>
-                        <div className="space-y-3">
-                          <div className="flex items-start gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors opacity-60">
-                            <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                              <svg
-                                className="w-4 h-4 text-blue-500"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
-                                />
-                              </svg>
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm text-white">
-                                주간 연습 리포트가 준비되었습니다
-                              </p>
-                              <p className="text-xs text-zinc-400 mt-0.5">어제</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-3 border-t border-white/10">
-                      <button
-                        onClick={() => {
-                          setIsAllNotificationsModalOpen(true);
-                          setIsNotificationOpen(false);
-                        }}
-                        className="w-full text-center text-sm text-amber-500 hover:text-amber-400 transition-colors"
-                      >
-                        모든 알림 보기
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              
+              {/* 알림 센터 컴포넌트로 교체 */}
+              <NotificationCenter />
+
               <div className="relative" ref={profileRef}>
                 {isAuthenticated ? (
                   <button

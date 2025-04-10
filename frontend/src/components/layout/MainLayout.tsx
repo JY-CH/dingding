@@ -12,7 +12,7 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
-  const hidePlayerPaths = ['/login', '/signup'];
+  const hidePlayerPaths = ['/login', '/signup', '/play', '/performance'];
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col overflow-hidden">

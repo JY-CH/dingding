@@ -17,7 +17,7 @@ interface PracticeSessionProps {
   onStepChange: (step: number) => void;
   sampleExercise: {
     chords: string[];
-    duration: number;
+      duration: number;
   };
 }
 
@@ -389,13 +389,13 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
 
   const handleShareConfirm = async () => {
     try {
-      // 웹소켓 연결
+    // 웹소켓 연결
       const roomId = `room_${crypto.randomUUID()}`;
-      connect(roomId);
-      if (onRoomIdChange) {
-        onRoomIdChange(roomId);
-      }
-
+    connect(roomId);
+    if (onRoomIdChange) {
+      onRoomIdChange(roomId);
+    }
+    
       // 녹화 시작
       const success = await recordingServiceRef.current?.startRecording();
       if (!success) {
@@ -409,7 +409,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
 
       setIsScreenRecording(true);
       setShowShareModal(false);
-      setIsReady(true);
+    setIsReady(true);
     } catch (error) {
       console.error('녹화 시작 실패:', error);
       setIsScreenRecording(false);
@@ -434,40 +434,40 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
 
   return (
     <div className="flex-1 overflow-auto bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 h-full">
-      <div className="bg-white/5 rounded-xl p-6">
-        <AnimatePresence mode="wait">
-          {!isReady ? (
-            <motion.div
-              key="preparation"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="text-center"
-            >
-              <h3 className="text-2xl font-bold text-white mb-4">{exercise.title}</h3>
-              <div className="bg-white/5 rounded-lg p-4 mb-6">
-                <h4 className="text-lg font-medium text-amber-500 mb-2">준비사항</h4>
-                <ul className="text-zinc-400 space-y-2">
-                  {exercise.requirements.map((req, i) => (
-                    <li key={i} className="flex items-center gap-2">
+    <div className="bg-white/5 rounded-xl p-6">
+      <AnimatePresence mode="wait">
+        {!isReady ? (
+          <motion.div
+            key="preparation"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="text-center"
+          >
+            <h3 className="text-2xl font-bold text-white mb-4">{exercise.title}</h3>
+            <div className="bg-white/5 rounded-lg p-4 mb-6">
+              <h4 className="text-lg font-medium text-amber-500 mb-2">준비사항</h4>
+              <ul className="text-zinc-400 space-y-2">
+                {exercise.requirements.map((req, i) => (
+                  <li key={i} className="flex items-center gap-2">
                       <svg
                         className="w-4 h-4"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      {req}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    {req}
+                  </li>
+                ))}
+              </ul>
+            </div>
               <div className="flex flex-row items-center justify-center gap-4">
                 <div>
                   <label htmlFor="selectTime" className="text-white font-medium">
@@ -500,7 +500,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                   </select>
                 </div>
                 <div>
-                  <button
+            <button
                     onClick={() => {
                       if (selectTime > 0) {
                         handleStart();
@@ -509,40 +509,40 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                       }
                     }}
                     className="px-6 py-3 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors"
-                  >
-                    연습 시작
-                  </button>
+            >
+              연습 시작
+            </button>
                 </div>
               </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="practice"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-6"
-            >
+          </motion.div>
+        ) : (
+          <motion.div
+            key="practice"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6"
+          >
               {/* 진행률 표시 */}
-              <div className="relative pt-1">
-                <div className="flex mb-2 items-center justify-between">
+            <div className="relative pt-1">
+              <div className="flex mb-2 items-center justify-between">
                   <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-amber-500 bg-amber-500/20">
                     진행률
                   </span>
                   <span className="text-xs font-semibold inline-block text-amber-500">
                     {Math.round((currentStep / exercise.chords.length) * 100)}%
                   </span>
-                </div>
-                <div className="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-white/5">
-                  <motion.div
-                    style={{ width: `${(currentStep / exercise.chords.length) * 100}%` }}
-                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-amber-500"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(currentStep / exercise.chords.length) * 100}%` }}
-                    transition={{ duration: 0.5 }}
-                  />
-                </div>
               </div>
+              <div className="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-white/5">
+                <motion.div
+                  style={{ width: `${(currentStep / exercise.chords.length) * 100}%` }}
+                  className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-amber-500"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(currentStep / exercise.chords.length) * 100}%` }}
+                  transition={{ duration: 0.5 }}
+                />
+              </div>
+            </div>
 
               {/* 화면 녹화 상태 */}
               <div className="flex justify-between items-center bg-white/10 rounded-lg p-3 text-white mb-2">
@@ -609,9 +609,9 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                 </div>
 
                 {/* 영상 분석 결과 */}
-                <div className="bg-white/5 rounded-lg p-4 text-center">
+            <div className="bg-white/5 rounded-lg p-4 text-center">
                   <h3 className="text-2xl font-bold text-amber-500">영상 분석</h3>
-                  <div className="text-4xl font-bold text-white mt-2">
+              <div className="text-4xl font-bold text-white mt-2">
                     {videoResults
                       ? videoResults.isCorrect
                         ? `${Math.round(videoResults.confidence * 100)}점`
@@ -665,47 +665,47 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                   >
                     녹음 ({recordingDuration}초)
                   </button>
-                </div>
               </div>
+            </div>
 
               {/* 현재 및 다음 코드 표시 */}
-              <div className="text-center">
-                <motion.div
-                  key={currentStep}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  className="text-6xl font-bold text-white mb-4"
-                >
-                  {exercise.chords[currentStep]}
-                </motion.div>
-                <p className="text-zinc-400">
-                  다음 코드: {exercise.chords[currentStep + 1] || '마지막 코드'}
-                </p>
-              </div>
+            <div className="text-center">
+              <motion.div
+                key={currentStep}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                className="text-6xl font-bold text-white mb-4"
+              >
+                {exercise.chords[currentStep]}
+              </motion.div>
+              <p className="text-zinc-400">
+                다음 코드: {exercise.chords[currentStep + 1] || '마지막 코드'}
+              </p>
+            </div>
 
-              {/* 컨트롤 버튼 */}
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-                  className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-                  disabled={currentStep === 0}
+            {/* 컨트롤 버튼 */}
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                disabled={currentStep === 0}
+              >
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <svg
-                    className="w-6 h-6 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
-                <button
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+              <button
                   onClick={handleComplete}
                   className="px-6 py-2 rounded-lg bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors"
                 >
@@ -938,7 +938,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
             </div>
           </div>
         </div>
-      )}
+        )}
     </div>
   );
 };
