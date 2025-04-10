@@ -12,12 +12,15 @@ import torch
 from ultralytics import YOLO
 import os
 import re
+import time
 
 
 class AIHandler:
     def __init__(self):
         self.conversation_history = {}
         self.recognizer = sr.Recognizer()
+        self.scores = {}  # room_id별 점수 저장
+        self.last_send_time = {}  # room_id별 마지막 전송 시간
 
         # 클래스 이름 매핑
         self.class_names = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
@@ -38,6 +41,8 @@ class AIHandler:
         # 대화 기록 초기화
         if room_id not in self.conversation_history:
             self.conversation_history[room_id] = []
+            self.scores[room_id] = []
+            self.last_send_time[room_id] = 0
 
         # 사용자 메시지 저장
         self.conversation_history[room_id].append(
@@ -46,19 +51,46 @@ class AIHandler:
         # 이미지와 오디오 처리
         score = 0
         feedback = ""
+        current_time = time.time()
 
         if image_data:
             print("\n--- 이미지 처리 시작 ---")
             image_score, image_feedback = self.process_image(image_data)
-            score = image_score  # score를 직접 대입 (누적하지 않음)
+            score = image_score
             feedback += f"이미지 분석: {image_feedback}\n"
             print(f"이미지 점수: {image_score}")
             print(f"이미지 피드백: {image_feedback}")
 
+            # 점수 저장
+            self.scores[room_id].append({
+                "score": score,
+                "feedback": feedback,
+                "time": current_time
+            })
+
+            # 5초마다 최고 점수 전송
+            if current_time - self.last_send_time[room_id] >= 5:
+                if self.scores[room_id]:
+                    # 최고 점수 찾기
+                    max_score_data = max(
+                        self.scores[room_id], key=lambda x: x["score"])
+                    print(f"최고 점수: {max_score_data['score']}")
+
+                    # 점수 초기화
+                    self.scores[room_id] = []
+                    self.last_send_time[room_id] = current_time
+
+                    return {
+                        "type": "ai_response",
+                        "message": f"점수: {max_score_data['score']:.1f}점\n{max_score_data['feedback']}",
+                        "score": max_score_data["score"],
+                        "feedback": max_score_data["feedback"]
+                    }
+
         if audio_data:
             print("\n--- 오디오 처리 시작 ---")
             audio_score, audio_feedback = self.process_audio(audio_data)
-            score = audio_score  # score를 직접 대입 (누적하지 않음)
+            score = audio_score
             feedback += f"음성 분석: {audio_feedback}\n"
             print(f"오디오 점수: {audio_score}")
             print(f"오디오 피드백: {audio_feedback}")

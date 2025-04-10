@@ -1,0 +1,43 @@
+t=2025-04-06T21:11:48+0900 lvl=info msg="no configuration paths supplied"
+t=2025-04-06T21:11:48+0900 lvl=warn msg="ngrok config file found at both XDG and legacy locations, using XDG location" xdg_path=C:\\Users\\SSAFY\\AppData\\Local/ngrok/ngrok.yml legacy_path=C:\\Users\\SSAFY\\.ngrok2\\ngrok.yml
+t=2025-04-06T21:11:48+0900 lvl=info msg="using configuration at default config path" path=C:\\Users\\SSAFY\\AppData\\Local/ngrok/ngrok.yml
+t=2025-04-06T21:11:48+0900 lvl=info msg="open config file" path=C:\\Users\\SSAFY\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2025-04-06T21:11:48+0900 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2025-04-06T21:11:48+0900 lvl=info msg="client session established" obj=tunnels.session
+t=2025-04-06T21:11:48+0900 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2025-04-06T21:11:48+0900 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:8000 url=https://a592-116-36-40-48.ngrok-free.app
+t=2025-04-06T21:12:25+0900 lvl=info msg="no configuration paths supplied"
+t=2025-04-06T21:12:25+0900 lvl=warn msg="ngrok config file found at both XDG and legacy locations, using XDG location" xdg_path=C:\\Users\\SSAFY\\AppData\\Local/ngrok/ngrok.yml legacy_path=C:\\Users\\SSAFY\\.ngrok2\\ngrok.yml
+t=2025-04-06T21:12:25+0900 lvl=info msg="using configuration at default config path" path=C:\\Users\\SSAFY\\AppData\\Local/ngrok/ngrok.yml
+t=2025-04-06T21:12:25+0900 lvl=info msg="open config file" path=C:\\Users\\SSAFY\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2025-04-06T21:12:25+0900 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2025-04-06T21:12:25+0900 lvl=info msg="client session established" obj=tunnels.session
+t=2025-04-06T21:12:25+0900 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2025-04-06T21:12:25+0900 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:8000 url=https://48a5-116-36-40-48.ngrok-free.app
+t=2025-04-06T21:13:42+0900 lvl=info msg=start pg=/ id=1783698cffa63cc5
+t=2025-04-06T21:13:42+0900 lvl=info msg=end pg=/ id=1783698cffa63cc5 status=302 dur=0s
+t=2025-04-06T21:13:42+0900 lvl=info msg=start pg=/inspect/http id=e2919743ee0bb521
+t=2025-04-06T21:13:42+0900 lvl=info msg=end pg=/inspect/http id=e2919743ee0bb521 status=200 dur=504.4µs
+t=2025-04-06T21:13:42+0900 lvl=info msg=start pg=/static/css/app.398abcb27117c32bb620.css id=76c66795619d0242
+t=2025-04-06T21:13:42+0900 lvl=info msg=start pg=/static/js/vendor.02ea9c2c30e3eb7577f7.js id=b2f5b1dd3cba1c9a
+t=2025-04-06T21:13:42+0900 lvl=info msg=start pg=/static/js/rpx.a567d5ef05d77e54e82b.js id=94689fb8776cb356
+t=2025-04-06T21:13:42+0900 lvl=info msg=start pg=/static/js/app.9d62734a6d31881c5f2b.js id=1365b8be3cbe56ed
+t=2025-04-06T21:13:42+0900 lvl=info msg=end pg=/static/js/rpx.a567d5ef05d77e54e82b.js id=94689fb8776cb356 status=200 dur=114.967ms
+t=2025-04-06T21:13:42+0900 lvl=info msg=end pg=/static/js/app.9d62734a6d31881c5f2b.js id=1365b8be3cbe56ed status=200 dur=114.967ms
+t=2025-04-06T21:13:42+0900 lvl=info msg=end pg=/static/css/app.398abcb27117c32bb620.css id=76c66795619d0242 status=200 dur=122.2866ms
+t=2025-04-06T21:13:42+0900 lvl=info msg=end pg=/static/js/vendor.02ea9c2c30e3eb7577f7.js id=b2f5b1dd3cba1c9a status=200 dur=135.3278ms
+t=2025-04-06T21:13:42+0900 lvl=info msg=start pg=/grpc/agent.Web/Preloaded id=a7b0f228a280b9a6
+t=2025-04-06T21:13:42+0900 lvl=info msg=start pg=/grpc/agent.Web/State id=2e8a667e2f613abf
+t=2025-04-06T21:13:42+0900 lvl=info msg=end pg=/grpc/agent.Web/Preloaded id=a7b0f228a280b9a6 status=200 dur=1.6306ms
+t=2025-04-06T21:13:43+0900 lvl=info msg=start pg=/static/favicon.ico id=f2fc3580b63983c5
+t=2025-04-06T21:13:43+0900 lvl=info msg=end pg=/static/favicon.ico id=f2fc3580b63983c5 status=200 dur=0s
+t=2025-04-06T21:19:15+0900 lvl=info msg=start pg=/api/tunnels id=4a07f7e912336b4d
+t=2025-04-06T21:19:15+0900 lvl=info msg=end pg=/api/tunnels id=4a07f7e912336b4d status=200 dur=508.9µs
+t=2025-04-06T21:41:41+0900 lvl=info msg="join connections" obj=join id=f95067a3c6de l=127.0.0.1:8000 r=13.125.215.80:35476
+t=2025-04-06T21:41:42+0900 lvl=info msg=start pg=/static/assets/glyphicons-halflings-regular.woff2 id=0cc45d03af86df82
+t=2025-04-06T21:41:42+0900 lvl=info msg=end pg=/static/assets/glyphicons-halflings-regular.woff2 id=0cc45d03af86df82 status=404 dur=0s
+t=2025-04-06T21:41:42+0900 lvl=info msg=start pg=/static/assets/glyphicons-halflings-regular.woff id=67cc9d78c6ca5f64
+t=2025-04-06T21:41:42+0900 lvl=info msg=end pg=/static/assets/glyphicons-halflings-regular.woff id=67cc9d78c6ca5f64 status=404 dur=0s
+t=2025-04-06T21:41:42+0900 lvl=info msg=start pg=/static/assets/glyphicons-halflings-regular.ttf id=618be7c8fe844913
+t=2025-04-06T21:41:42+0900 lvl=info msg=end pg=/static/assets/glyphicons-halflings-regular.ttf id=618be7c8fe844913 status=404 dur=0s
+t=2025-04-06T21:42:11+0900 lvl=info msg="join connections" obj=join id=a830982e957c l=127.0.0.1:8000 r=13.125.215.80:58032

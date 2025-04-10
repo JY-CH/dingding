@@ -50,7 +50,6 @@ logger = logging.getLogger(__name__)
 class AIWebSocketHandler(WebSocketHandler):
     def __init__(self, manager: WebSocketManager):
         super().__init__(manager)
-        self.last_analysis_time = {}  # room_id별 마지막 분석 시간 저장
 
     async def handle_message(self, websocket: WebSocket, room_id: str, message):
         try:
@@ -71,43 +70,31 @@ class AIWebSocketHandler(WebSocketHandler):
             logger.info(f"메시지 데이터 키: {data.keys()}")
 
             if data.get('type') == 'image':
-                current_time = time.time()
-                last_time = self.last_analysis_time.get(message_room_id, 0)
-                time_diff = current_time - last_time
+                try:
+                    logger.info("=== AI 처리 시작 ===")
+                    # AI 핸들러를 통해 이미지 처리
+                    ai_response = await ai_handler.process_message(
+                        message_room_id,
+                        "이미지 분석",
+                        data['data']
+                    )
+                    logger.info("AI 처리 완료")
 
-                logger.info(f"시간 간격: {time_diff:.2f}초")
-                logger.info(
-                    f"이미지 데이터 길이: {len(data['data']) if 'data' in data else 'No image'}")
-                logger.info(f"현재 코드: {data.get('chord')}")
-
-                if time_diff >= 2:  # 200ms 간격으로 수정
-                    try:
-                        logger.info("=== AI 처리 시작 ===")
-                        # AI 핸들러를 통해 이미지 처리
-                        ai_response = await ai_handler.process_message(
-                            message_room_id,
-                            "이미지 분석",
-                            data['data']
-                        )
-                        logger.info("AI 처리 완료")
-
-                        # 점수 전송
+                    # 응답이 있는 경우에만 전송 (5초마다 최고 점수가 반환됨)
+                    if ai_response:
                         logger.info("=== 응답 전송 시작 ===")
                         await websocket.send_json(ai_response)
                         logger.info(f"응답 전송 완료: {ai_response}")
-
-                        # 분석 시간 업데이트
-                        self.last_analysis_time[message_room_id] = current_time
-                    except Exception as e:
-                        logger.error(f"=== 이미지 처리 중 오류 발생 ===")
-                        logger.error(f"오류 메시지: {str(e)}")
-                        logger.error(f"오류 타입: {type(e)}")
-                        import traceback
-                        logger.error(f"스택 트레이스: {traceback.format_exc()}")
-                        await websocket.send_json({
-                            "type": "error",
-                            "message": f"이미지 처리 중 오류 발생: {str(e)}"
-                        })
+                except Exception as e:
+                    logger.error(f"=== 이미지 처리 중 오류 발생 ===")
+                    logger.error(f"오류 메시지: {str(e)}")
+                    logger.error(f"오류 타입: {type(e)}")
+                    import traceback
+                    logger.error(f"스택 트레이스: {traceback.format_exc()}")
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": f"이미지 처리 중 오류 발생: {str(e)}"
+                    })
             else:
                 logger.info("=== 기타 메시지 처리 ===")
                 await super().handle_message(websocket, message_room_id, message)
