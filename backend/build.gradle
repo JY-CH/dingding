@@ -1,0 +1,73 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.3'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.ssafy'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // mysql 설정
+    // mysql 버전 x, connector/j 버전임
+    implementation 'com.mysql:mysql-connector-j:8.2.0'
+    // swagger 설정
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+
+    // JWT 의존성
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // Hibernate Commons Annotations
+    implementation 'org.hibernate.common:hibernate-commons-annotations:6.0.6.Final'
+
+    // websocket 의존성 추가
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
+
+    // redis 의존성 추가
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+//	implementation 'org.springframework.data:spring-data-redis:2.6.0'
+
+    // Amazon S3
+    implementation platform('software.amazon.awssdk:bom:2.21.1')
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.0'
+    implementation 'software.amazon.awssdk:url-connection-client'   
+    // LocalStack 로컬에서 aws s3 테스트 용
+    implementation 'org.testcontainers:localstack:1.19.7'
+    implementation 'org.testcontainers:junit-jupiter:1.19.7'
+    testImplementation 'org.testcontainers:localstack:1.19.7'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
