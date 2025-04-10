@@ -1,8 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiPlay, HiStop } from 'react-icons/hi2';
 
 import { Song, Note, ChordChange, SongDetailResponse } from '../../types/performance';
+import { 
+  createChordNoteWithTiming, 
+  createChordNoteWithoutShadow,
+  createChordNoteWithTimingWithoutShadow,
+  chordData 
+} from './chords/ChordUtils';
 
 interface FeedbackMessage {
   id: number;
@@ -21,11 +27,59 @@ interface ChordTimelineProps {
   onSheetIndexChange: (index: number) => void;
 }
 
+// 그림자 노트 컴포넌트
+const ShadowNote = memo(({ note, getStringPosition }: { note: Note, getStringPosition: (index: number) => number }) => {
+  return (
+    <div
+      key={`shadow-${note.id}`}
+      className="absolute w-10 h-10 rounded-full"
+      style={{
+        top: `${getStringPosition(note.stringNumber - 1)}%`,
+        left: `${note.position}%`,
+        transform: 'translate(-50%, -50%)',
+        background: 'radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 0.9) 0%, rgba(251, 191, 36, 0.7) 20%, rgba(251, 191, 36, 0.5) 40%, rgba(251, 191, 36, 0.3) 60%, transparent 100%)',
+        boxShadow: '0 0 15px rgba(251, 191, 36, 0.8), 0 0 30px rgba(251, 191, 36, 0.6), inset 0 0 15px rgba(251, 191, 36, 0.8), 0 10px 20px rgba(0, 0, 0, 0.5)',
+        animation: 'shadowFade 0.5s ease-in-out',
+        transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
+        zIndex: 1,
+        filter: 'brightness(1.2)',
+        willChange: 'transform, opacity',
+        pointerEvents: 'none'
+      }}
+    >
+      {note.fret && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="relative">
+            <div className="text-white text-3xl font-black" style={{ 
+              fontFamily: "'Orbitron', sans-serif",
+              fontWeight: '500',
+              textShadow: '0 0 10px rgba(255,255,255,0.5)'
+            }}>
+              {note.fret}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+// 그림자 노트 컬렉션 컴포넌트
+const ShadowNotes = memo(({ notes, getStringPosition }: { notes: Note[], getStringPosition: (index: number) => number }) => {
+  return (
+    <>
+      {notes.length > 0 && notes.map((note) => (
+        <ShadowNote key={`shadow-${note.id}`} note={note} getStringPosition={getStringPosition} />
+      ))}
+    </>
+  );
+});
+
 const ChordTimeline: React.FC<ChordTimelineProps> = ({
   isPlaying,
   currentSong,
   notes = [],
-  currentChord,
+  currentChord: _,
   onPlayingChange,
   onChordChange,
   songDetail,
@@ -36,11 +90,13 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   const [shadowNotes, setShadowNotes] = useState<Note[]>([]);
   const [_currentSheetIndex, setCurrentSheetIndex] = useState<number>(0);
   const [_gameStartTime, setGameStartTime] = useState<number | null>(null);
-  const [__, setCurrentTime] = useState<number>(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [, setCurrentTime] = useState<number>(0);
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
+  // const [instrumentVolume, setInstrumentVolume] = useState<number>(0.5);
   const [selectedChord, setSelectedChord] = useState('C');
   const [feedbacks, setFeedbacks] = useState<FeedbackMessage[]>([]);
   const requestRef = useRef<number | null>(null);
+  const shadowNotesRef = useRef<Note[]>([]);
 
   const stringColors = [
     'rgba(251, 191, 36, 0.6)',   // 1번줄 - amber-400 (가장 얇은 줄)
@@ -140,439 +196,72 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
 
   // C코드 손모양 노트 생성 함수
   const createCChordNote = () => {
-    const cChordNotes = [
-      { stringNumber: 2, position: 100, offset: 5, fret: 3 },    // 2번 줄 (1번 프렛)
-      { stringNumber: 3, position: 100, offset: 0, fret: 2 },    // 4번 줄 (2번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 1 }    // 5번 줄 (3번 프렛)
-    ];
-
-    const newNotes = cChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'C',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 C코드 손모양 유지)
-    setShadowNotes(cChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'C',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('C', setTestNotes);
   };
 
   // A코드 손모양 노트 생성 함수
   const createAChordNote = () => {
-    const aChordNotes = [
-      { stringNumber: 3, position: 100, offset: -5, fret: 2 },    // 2번 줄 (2번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 2 },    // 3번 줄 (2번 프렛)
-      { stringNumber: 5, position: 100, offset: 5, fret: 2 }    // 4번 줄 (2번 프렛)
-    ];
-
-    const newNotes = aChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'A',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 A코드 손모양 유지)
-    setShadowNotes(aChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'A',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('A', setTestNotes);
   };
 
   // Am 코드 손모양 노트 생성 함수
   const createAmChordNote = () => {
-    const amChordNotes = [
-      { stringNumber: 4, position: 100, offset: 5, fret: 1 },    // 2번 줄 (1번 프렛)
-      { stringNumber: 3, position: 100, offset: 0, fret: 2 },    // 3번 줄 (2번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 2 }    // 4번 줄 (2번 프렛)
-    ];
-
-    const newNotes = amChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Am',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 Am코드 손모양 유지)
-    setShadowNotes(amChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Am',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('Am', setTestNotes);
   };
 
   // B 코드 손모양 노트 생성 함수
   const createBChordNote = () => {
-    const bChordNotes = [
-      { stringNumber: 1, position: 100, offset: -5, fret: 2 },    // 1번 줄 (2번 프렛)
-      { stringNumber: 2, position: 100, offset: 0, fret: 4 },    // 2번 줄 (4번 프렛)
-      { stringNumber: 3, position: 100, offset: 5, fret: 4 },    // 3번 줄 (4번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 4 }     // 4번 줄 (4번 프렛)
-    ];
-
-    const newNotes = bChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'B',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 B코드 손모양 유지)
-    setShadowNotes(bChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'B',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('B', setTestNotes);
   };
 
   // Bm 코드 손모양 노트 생성 함수
   const createBmChordNote = () => {
-    const bmChordNotes = [
-      { stringNumber: 1, position: 100, offset: -5, fret: 2 },    // 1번 줄 (2번 프렛)
-      { stringNumber: 2, position: 100, offset: 0, fret: 3 },    // 2번 줄 (3번 프렛)
-      { stringNumber: 3, position: 100, offset: 5, fret: 4 },    // 3번 줄 (4번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 4 }     // 4번 줄 (4번 프렛)
-    ];
-
-    const newNotes = bmChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Bm',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 Bm코드 손모양 유지)
-    setShadowNotes(bmChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Bm',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('Bm', setTestNotes);
   };
 
   // Cm 코드 손모양 노트 생성 함수
   const createCmChordNote = () => {
-    const cmChordNotes = [
-      { stringNumber: 2, position: 100, offset: 5, fret: 3 },    // 2번 줄 (3번 프렛)
-      { stringNumber: 3, position: 100, offset: 0, fret: 1 },    // 3번 줄 (1번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 3 }    // 5번 줄 (3번 프렛)
-    ];
-
-    const newNotes = cmChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Cm',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 Cm코드 손모양 유지)
-    setShadowNotes(cmChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Cm',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('Cm', setTestNotes);
   };
 
   // D 코드 손모양 노트 생성 함수
   const createDChordNote = () => {
-    const dChordNotes = [
-      { stringNumber: 4, position: 100, offset: -5, fret: 2 },    // 1번 줄 (2번 프렛)
-      { stringNumber: 6, position: 100, offset: 0, fret: 3 },    // 2번 줄 (3번 프렛)
-      { stringNumber: 5, position: 100, offset: 5, fret: 2 }     // 3번 줄 (2번 프렛)
-    ];
-
-    const newNotes = dChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'D',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 D코드 손모양 유지)
-    setShadowNotes(dChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'D',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('D', setTestNotes);
   };
 
   // Dm 코드 손모양 노트 생성 함수
   const createDmChordNote = () => {
-    const dmChordNotes = [
-      { stringNumber: 1, position: 100, offset: -5, fret: 1 },    // 1번 줄 (1번 프렛)
-      { stringNumber: 2, position: 100, offset: 0, fret: 3 },    // 2번 줄 (3번 프렛)
-      { stringNumber: 3, position: 100, offset: 5, fret: 2 }     // 3번 줄 (2번 프렛)
-    ];
-
-    const newNotes = dmChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Dm',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 Dm코드 손모양 유지)
-    setShadowNotes(dmChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Dm',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('Dm', setTestNotes);
   };
 
   // E 코드 손모양 노트 생성 함수
   const createEChordNote = () => {
-    const eChordNotes = [
-      { stringNumber: 3, position: 100, offset: 5, fret: 1 },    // 3번 줄 (1번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 2 },    // 4번 줄 (2번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 2 }    // 5번 줄 (2번 프렛)
-    ];
-
-    const newNotes = eChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'E',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 E코드 손모양 유지)
-    setShadowNotes(eChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'E',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('E', setTestNotes);
   };
 
   // Em 코드 손모양 노트 생성 함수
   const createEmChordNote = () => {
-    const emChordNotes = [
-      { stringNumber: 4, position: 100, offset: 0, fret: 2 },    // 4번 줄 (2번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 2 }    // 5번 줄 (2번 프렛)
-    ];
-
-    const newNotes = emChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Em',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 Em코드 손모양 유지)
-    setShadowNotes(emChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Em',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('Em', setTestNotes);
   };
 
   // F 코드 손모양 노트 생성 함수
   const createFChordNote = () => {
-    const fChordNotes = [
-      { stringNumber: 1, position: 100, offset: -5, fret: 1 },    // 1번 줄 (1번 프렛)
-      { stringNumber: 2, position: 100, offset: 0, fret: 1 },    // 2번 줄 (1번 프렛)
-      { stringNumber: 3, position: 100, offset: 5, fret: 2 },    // 3번 줄 (2번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 3 }     // 4번 줄 (3번 프렛)
-    ];
-
-    const newNotes = fChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'F',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 F코드 손모양 유지)
-    setShadowNotes(fChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'F',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('F', setTestNotes);
   };
 
   // Fm 코드 손모양 노트 생성 함수
   const createFmChordNote = () => {
-    const fmChordNotes = [
-      { stringNumber: 1, position: 100, offset: -5, fret: 1 },    // 1번 줄 (1번 프렛)
-      { stringNumber: 2, position: 100, offset: 0, fret: 1 },    // 2번 줄 (1번 프렛)
-      { stringNumber: 3, position: 100, offset: 5, fret: 1 },    // 3번 줄 (1번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 3 }     // 4번 줄 (3번 프렛)
-    ];
-
-    const newNotes = fmChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Fm',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 Fm코드 손모양 유지)
-    setShadowNotes(fmChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Fm',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('Fm', setTestNotes);
   };
 
   // G 코드 손모양 노트 생성 함수
   const createGChordNote = () => {
-    const gChordNotes = [
-      { stringNumber: 2, position: 100, offset: -5, fret: 3 },    // 1번 줄 (3번 프렛)
-      { stringNumber: 1, position: 100, offset: 0, fret: 2 },    // 5번 줄 (2번 프렛)
-      { stringNumber: 6, position: 100, offset: 5, fret: 3 }     // 6번 줄 (3번 프렛)
-    ];
-
-    const newNotes = gChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'G',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 G코드 손모양 유지)
-    setShadowNotes(gChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'G',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('G', setTestNotes);
   };
 
   // Gm 코드 손모양 노트 생성 함수
   const createGmChordNote = () => {
-    const gmChordNotes = [
-      { stringNumber: 1, position: 100, offset: -5, fret: 3 },    // 1번 줄 (3번 프렛)
-      { stringNumber: 2, position: 100, offset: 0, fret: 3 },    // 2번 줄 (3번 프렛)
-      { stringNumber: 5, position: 100, offset: 5, fret: 3 }     // 5번 줄 (3번 프렛)
-    ];
-
-    const newNotes = gmChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Gm',
-      fret: note.fret
-    }));
-
-    // 노트 생성과 동시에 그림자도 생성 (민트색 세로선 사이 중앙에 Gm코드 손모양 유지)
-    setShadowNotes(gmChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset, // 민트색 세로선 사이 중앙에서 offset 적용
-      timing: Date.now(),
-      isChord: true,
-      chord: 'Gm',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithoutShadow('Gm', setTestNotes);
   };
 
   // 배속 변경 함수
@@ -612,30 +301,115 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
     }
   }, [testNotes, playbackSpeed]);
 
+  // shadowNotes 상태가 변경될 때마다 ref 업데이트
+  useEffect(() => {
+    shadowNotesRef.current = shadowNotes;
+  }, [shadowNotes]);
+
   // 그림자 노트 효과 처리
   useEffect(() => {
-    if (shadowNotes.length > 0 && testNotes.length > 0) {
-      const interval = setInterval(() => {
-        setShadowNotes(prevShadowNotes => {
-          if (prevShadowNotes.length === 0) return prevShadowNotes;
-          
-          const currentChord = prevShadowNotes[0].chord;
-          const relatedNotes = testNotes.filter(note => note.chord === currentChord);
-          
-          // 관련된 모든 노트가 통과했는지 확인
-          const allNotesPassed = relatedNotes.every(note => note.position <= 25);
-          
-          if (allNotesPassed || relatedNotes.length === 0) {
-            return []; // 그림자 노트 제거
-          }
-          
-          return prevShadowNotes;
-        });
-      }, 500);
-      
-      return () => clearInterval(interval);
+    if (testNotes.length === 0) {
+      setShadowNotes([]);
+      return;
     }
-  }, [shadowNotes, testNotes]);
+
+    // 민트색 세로선 위치
+    const PASSED_POSITION = 20;
+
+    // 그림자 노트 생성 함수
+    const updateShadowNotes = () => {
+      // 코드별로 노트 그룹화
+      const chordGroups: { [key: string]: Note[] } = {};
+      testNotes.forEach(note => {
+        if (!note.chord) return;
+        if (!chordGroups[note.chord]) {
+          chordGroups[note.chord] = [];
+        }
+        chordGroups[note.chord].push(note);
+      });
+
+      // 코드별 위치 정보 계산
+      const chordPositions: Array<{ chord: string, min: number, max: number }> = [];
+      Object.entries(chordGroups).forEach(([chord, notes]) => {
+        const positions = notes.map(note => note.position);
+        if (positions.length > 0) {
+          chordPositions.push({
+            chord,
+            min: Math.min(...positions),
+            max: Math.max(...positions)
+          });
+        }
+      });
+
+      // 위치 기준 정렬 (오른쪽에서 왼쪽으로)
+      chordPositions.sort((a, b) => b.min - a.min);
+
+      // 화면에 보이는 코드만 필터링
+      const visibleChords = chordPositions.filter(c => c.min > -10);
+      
+      if (visibleChords.length === 0) {
+        setShadowNotes([]);
+        return;
+      }
+
+      // 기준 ID (1초마다 변경)
+      const baseId = Math.floor(Date.now() / 1000) * 1000;
+
+      // 첫 번째 코드가 민트색 세로선을 완전히 지나갔는지 확인
+      const firstChord = visibleChords[0];
+      const isPastMintLine = firstChord.max <= PASSED_POSITION;
+
+      // 코드가 완전히 지나가고 다음 코드가 있는 경우
+      if (isPastMintLine && visibleChords.length > 1) {
+        // 다음 코드의 그림자 노트 생성
+        const nextChord = visibleChords[1].chord;
+        const nextChordData = chordData[nextChord];
+
+        if (nextChordData) {
+          const shadowNotes = nextChordData.map((note, index) => ({
+            id: baseId + index,
+            stringNumber: note.stringNumber,
+            position: 30 + (note.offset * 0.7),
+            timing: Date.now(),
+            isChord: true,
+            chord: nextChord,
+            fret: note.fret
+          }));
+
+          setShadowNotes(shadowNotes);
+        }
+      } else {
+        // 현재 코드 그림자 노트 생성
+        const currentChord = firstChord.chord;
+        const currentChordData = chordData[currentChord];
+
+        if (currentChordData) {
+          const shadowNotes = currentChordData.map((note, index) => ({
+            id: baseId + index,
+            stringNumber: note.stringNumber,
+            position: 30 + (note.offset * 0.7),
+            timing: Date.now(),
+            isChord: true,
+            chord: currentChord,
+            fret: note.fret
+          }));
+
+          setShadowNotes(shadowNotes);
+        }
+      }
+    };
+
+    // 초기 업데이트
+    updateShadowNotes();
+
+    // 빠른 업데이트 간격 (16ms = 약 60fps)
+    const interval = setInterval(updateShadowNotes, 16);
+
+    return () => {
+      clearInterval(interval);
+      setShadowNotes([]);
+    };
+  }, [testNotes]);
 
   // 실제 연주 노트 이동 효과 제거
   useEffect(() => {
@@ -769,81 +543,37 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
           transform: 'translateZ(-2px)',
         }} />
         {note.fret && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-            <div className="relative" style={{ 
-              transformStyle: 'preserve-3d',
-              transform: 'scale(2) rotateX(15deg) rotateY(-15deg)',
-              width: '30px',
-              height: '30px'
-            }}>
-              {/* 앞면 - 메인 숫자 */}
-              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center" style={{ 
-                transform: 'translateZ(6px)',
-                background: 'linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%)',
-                borderRadius: '4px',
-                border: '3px solid #FFFFFF',
-                boxShadow: 'inset 0 0 15px rgba(255,255,255,1), 0 0 15px rgba(0,0,0,0.7)'
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
+              {/* 앞면 */}
+              <div className="relative text-white text-3xl font-black" style={{ 
+                transform: 'translateZ(4px)',
+                textShadow: '0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3)',
+                WebkitTextStroke: '0.5px rgba(255,255,255,0.7)',
+                letterSpacing: '-1px',
+                filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))',
+                fontFamily: "'Orbitron', sans-serif",
+                fontWeight: '500'
               }}>
-                <span className="text-black text-2xl" style={{ 
-                  fontFamily: "'Orbitron', sans-serif",
-                  textShadow: '0px 1px 2px rgba(255,255,255,1), 0px -1px 2px rgba(0,0,0,0.5)',
-                  WebkitTextStroke: '0.5px rgba(0,0,0,0.7)',
-                  filter: 'contrast(1.8) brightness(1.3)',
-                  letterSpacing: '0px',
-                  fontWeight: '500'
-                }}>
-                  {note.fret}
-                </span>
+                {note.fret}
               </div>
-              
-              {/* 위쪽 면 */}
+              {/* 윗면 */}
               <div className="absolute top-0 left-0 w-full" style={{ 
-                height: '6px',
-                transform: 'rotateX(-90deg) translateZ(-6px)',
+                transform: 'rotateX(-90deg) translateZ(-4px)',
                 transformOrigin: 'top',
-                background: 'linear-gradient(to bottom, #FFFFFF 0%, #DDDDDD 100%)',
-                borderRadius: '2px 2px 0 0',
-                boxShadow: '0 -3px 6px rgba(0,0,0,0.5)'
+                height: '4px',
+                background: 'rgba(255,255,255,0.9)',
+                boxShadow: '0 2px 4px rgba(255,255,255,0.3)'
               }} />
-              
-              {/* 오른쪽 면 */}
+              {/* 오른쪽면 */}
               <div className="absolute top-0 right-0 h-full" style={{ 
-                width: '6px',
-                transform: 'rotateY(90deg) translateZ(-6px)',
+                transform: 'rotateY(90deg) translateZ(8px)',
                 transformOrigin: 'right',
-                background: 'linear-gradient(to left, #DDDDDD 0%, #AAAAAA 100%)',
-                borderRadius: '0 2px 2px 0',
-                boxShadow: '3px 0 6px rgba(0,0,0,0.5)'
-              }} />
-              
-              {/* 왼쪽 면 */}
-              <div className="absolute top-0 left-0 h-full" style={{ 
-                width: '6px',
-                transform: 'rotateY(-90deg) translateZ(0px)',
-                transformOrigin: 'left',
-                background: 'linear-gradient(to right, #DDDDDD 0%, #AAAAAA 100%)',
-                borderRadius: '2px 0 0 2px',
-                boxShadow: '-3px 0 6px rgba(0,0,0,0.5)'
-              }} />
-              
-              {/* 아래쪽 면 */}
-              <div className="absolute bottom-0 left-0 w-full" style={{ 
-                height: '6px',
-                transform: 'rotateX(90deg) translateZ(0px)',
-                transformOrigin: 'bottom',
-                background: 'linear-gradient(to top, #AAAAAA 0%, #888888 100%)',
-                borderRadius: '0 0 2px 2px',
-                boxShadow: '0 3px 6px rgba(0,0,0,0.5)'
+                width: '4px',
+                background: 'rgba(255,255,255,0.7)',
+                boxShadow: '0 2px 4px rgba(255,255,255,0.3)'
               }} />
             </div>
-            
-            {/* 그림자 효과 */}
-            <div className="absolute top-1/2 left-1/2 w-12 h-4" style={{
-              transform: 'translate(-50%, 15px) rotateX(90deg) scale(1.3, 0.8)',
-              background: 'radial-gradient(ellipse, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 70%)',
-              filter: 'blur(2px)',
-              zIndex: -1
-            }} />
           </div>
         )}
       </div>
@@ -866,6 +596,17 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
             }
             100% {
               opacity: 0.3;
+              transform: translate(-50%, -50%) scale(1);
+            }
+          }
+          
+          @keyframes shadowFade {
+            0% {
+              opacity: 0;
+              transform: translate(-50%, -50%) scale(0.8);
+            }
+            100% {
+              opacity: 1;
               transform: translate(-50%, -50%) scale(1);
             }
           }
@@ -988,57 +729,7 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
             ))}
 
             {/* 그림자 노트 */}
-            {shadowNotes.length > 0 && shadowNotes.map((note) => (
-              <div
-                key={`shadow-${note.id}`}
-                className="absolute w-10 h-10 rounded-full"
-                style={{
-                  top: `${getStringPosition(note.stringNumber - 1)}%`,
-                  left: `${note.position}%`,
-                  transform: 'translate(-50%, -50%) perspective(1000px) rotateX(20deg)',
-                  background: 'radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 0.9) 0%, rgba(251, 191, 36, 0.7) 20%, rgba(251, 191, 36, 0.5) 40%, rgba(251, 191, 36, 0.3) 60%, transparent 100%)',
-                  boxShadow: '0 0 15px rgba(251, 191, 36, 0.8), 0 0 30px rgba(251, 191, 36, 0.6), inset 0 0 15px rgba(251, 191, 36, 0.8), 0 10px 20px rgba(0, 0, 0, 0.5)',
-                  animation: 'shadowPulse 1s ease-in-out infinite',
-                  zIndex: 1,
-                  filter: 'brightness(1.2)',
-                }}
-              >
-                {note.fret && (
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
-                      {/* 앞면 */}
-                      <div className="relative text-white text-3xl font-black" style={{ 
-                        transform: 'translateZ(4px)',
-                        textShadow: '0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3)',
-                        WebkitTextStroke: '0.5px rgba(255,255,255,0.7)',
-                        letterSpacing: '-1px',
-                        filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))',
-                        fontFamily: "'Orbitron', sans-serif",
-                        fontWeight: '500'
-                      }}>
-                        {note.fret}
-                      </div>
-                      {/* 윗면 */}
-                      <div className="absolute top-0 left-0 w-full" style={{ 
-                        transform: 'rotateX(-90deg) translateZ(-4px)',
-                        transformOrigin: 'top',
-                        height: '4px',
-                        background: 'rgba(255,255,255,0.9)',
-                        boxShadow: '0 2px 4px rgba(255,255,255,0.3)'
-                      }} />
-                      {/* 오른쪽면 */}
-                      <div className="absolute top-0 right-0 h-full" style={{ 
-                        transform: 'rotateY(90deg) translateZ(8px)',
-                        transformOrigin: 'right',
-                        width: '4px',
-                        background: 'rgba(255,255,255,0.7)',
-                        boxShadow: '0 2px 4px rgba(255,255,255,0.3)'
-                      }} />
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+            <ShadowNotes notes={shadowNotes} getStringPosition={getStringPosition} />
 
             {/* 노트 애니메이션 */}
             {[...testNotes].map((note) => {
@@ -1161,14 +852,6 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
           )}
         </div>
       </div>
-      {currentChord && (
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute left-0 right-0 h-1 bg-purple-500/30" 
-               style={{ top: `${getStringPosition(Math.min(...currentChord.strings) - 1)}px` }} />
-          <div className="absolute left-0 right-0 h-1 bg-purple-500/30" 
-               style={{ top: `${getStringPosition(Math.max(...currentChord.strings) - 1)}px` }} />
-        </div>
-      )}
       <style>
         {`
           @keyframes noteHit {
@@ -1205,27 +888,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
     // 여기에 연주 종료 시 필요한 초기화 로직 추가
   };
 
-  // 게임 시작 시 타이머 시작
-  useEffect(() => {
-    if (isPlaying) {
-      setGameStartTime(Date.now());
-      const timer = setInterval(() => {
-        setCurrentTime(Date.now());
-      }, 16); // 약 60fps
-
-      return () => clearInterval(timer);
-    } else {
-      setGameStartTime(null);
-      setCurrentTime(0);
-      setCurrentSheetIndex(0);
-      onSheetIndexChange(0);
-    }
-  }, [isPlaying, onSheetIndexChange]);
-
-  // 코드 생성 및 악보 표시 로직
   useEffect(() => {
     if (!isPlaying || !songDetail) return;
-
+    
     // 게임 시작 시 초기화
     setTestNotes([]);
     setShadowNotes([]);
@@ -1238,63 +903,87 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
     
     console.log('===== 노트 생성 시작 =====');
     
-    // 코드 생성 애니메이션 프레임 함수
-    const animate = () => {
-      const currentTime = Date.now();
-      const elapsedTime = (currentTime - startTime) / 1000; // 경과 시간(초)
-      
-      // 현재 시간 업데이트
-      setCurrentTime(elapsedTime);
-      
-      // 모든 악보 데이터를 순회하면서 코드 생성 확인
-      songDetail.sheetMusicResponseDtos.forEach(sheet => {
-        // 이미 생성된 코드인지 확인하기 위한 키 생성
-        const chordKey = `${sheet.chord}-${sheet.sheetOrder}`;
+    // 코드와 순서를 관리하기 위한 변수
+    let currentIndex = 0;
+    const chordCount = songDetail.sheetMusicResponseDtos.length;
+    const allChords = [...songDetail.sheetMusicResponseDtos]
+      .sort((a, b) => a.sheetOrder - b.sheetOrder);  // 순서대로 정렬
+    
+    // 코드 사이의 간격 시간 (현재는 데이터가 모두 같은 타이밍인 것 같아서 강제로 간격 설정)
+    const INTERVAL_SECONDS = 3.0;  // 3초 간격으로 설정
+    
+    // 코드 생성 함수
+    const createNextChord = () => {
+      if (currentIndex < chordCount) {
+        const chord = allChords[currentIndex];
         
-        // 해당 코드의 생성 시간이 경과 시간에 해당하는지 확인 (약간의 여유 추가)
-        if (Math.abs(sheet.chordTiming - elapsedTime) < 0.05 && 
-            !generatedChords.has(chordKey)) {
-          
-          console.log(`코드 생성: ${sheet.chord}, 순서: ${sheet.sheetOrder}, 타이밍: ${sheet.chordTiming}초, 현재 시간: ${elapsedTime.toFixed(2)}초`);
-          
-          // createChordNoteWithTiming 함수 사용
-          createChordNoteWithTiming(sheet.chord, sheet.sheetOrder);
-          
-          // 현재 악보 인덱스 업데이트
-          setCurrentSheetIndex(sheet.sheetOrder);
-          onSheetIndexChange(sheet.sheetOrder);
-          
-          // 현재 코드 정보 업데이트
-          if (onChordChange) {
-            onChordChange({
-              id: Date.now(),
-              chord: sheet.chord,
-              timing: sheet.chordTiming,
-              strings: [1, 2, 3], // 예시 값, 필요에 따라 조정
-              fretPositions: [0, 0, 0] // 예시 값, 필요에 따라 조정
-            });
-          }
-          
-          // 생성된 코드 목록에 추가
-          generatedChords.add(chordKey);
+        // 실제로 코드를 생성하는 로직
+        console.log(`코드 생성: ${chord.chord}, 순서: ${chord.sheetOrder}, 순차적 출력 ${currentIndex+1}/${chordCount}`);
+        
+        // 코드에 맞는 생성 함수 호출
+        switch(chord.chord) {
+          case 'Am':
+            createAmChordNoteWithTiming(chord.sheetOrder);
+            break;
+          case 'C':
+            createCChordNoteWithTiming(chord.sheetOrder);
+            break;
+          case 'D':
+            createDChordNoteWithTiming(chord.sheetOrder);
+            break;
+          case 'Em':
+            createEmChordNoteWithTiming(chord.sheetOrder);
+            break;
+          case 'G':
+            createGChordNoteWithTiming(chord.sheetOrder);
+            break;
+          default:
+            console.warn(`지원되지 않는 코드: ${chord.chord}`);
+            createChordNoteWithTiming(chord.chord, chord.sheetOrder, setTestNotes, setShadowNotes);
         }
-      });
-      
-      // 게임이 계속 진행 중이면 다음 프레임 요청
-      if (isPlaying) {
-        requestRef.current = requestAnimationFrame(animate);
+        
+        // 악보 인덱스 업데이트
+        setCurrentSheetIndex(chord.sheetOrder);
+        onSheetIndexChange(chord.sheetOrder);
+        
+        // 현재 코드 정보 업데이트
+        if (onChordChange) {
+          onChordChange(null);
+        }
+        
+        // 다음 코드 인덱스로 증가
+        currentIndex++;
+        
+        // 다음 코드 생성 시간 예약 (1초 후)
+        if (currentIndex < chordCount && isPlaying) {
+          setTimeout(createNextChord, INTERVAL_SECONDS * 1000);
+        }
       }
     };
     
-    // 생성된 코드를 추적하는 Set
-    const generatedChords = new Set<string>();
+    // 첫 번째 코드 생성 시작 (2초 후)
+    const initialDelay = setTimeout(() => {
+      createNextChord();
+    }, 2000);
+    
+    // 실시간 시간 업데이트를 위한 애니메이션 프레임
+    const updateTime = () => {
+      const currentTime = Date.now();
+      const elapsedTime = (currentTime - startTime) / 1000;
+      setCurrentTime(elapsedTime);
+      
+      if (isPlaying) {
+        requestRef.current = requestAnimationFrame(updateTime);
+      }
+    };
     
     // 애니메이션 시작
-    requestRef.current = requestAnimationFrame(animate);
+    requestRef.current = requestAnimationFrame(updateTime);
     
-    // 컴포넌트 언마운트 또는 isPlaying이 false로 바뀔 때 실행
+    // 언마운트 또는 isPlaying이 false로 바뀔 때 실행되는 cleanup 함수
     return () => {
       console.log('===== 노트 생성 중단 =====');
+      clearTimeout(initialDelay);
       if (requestRef.current) {
         cancelAnimationFrame(requestRef.current);
         requestRef.current = null;
@@ -1304,199 +993,29 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
     };
   }, [isPlaying, songDetail, onSheetIndexChange, onChordChange]);
 
-  // 코드 생성 함수 수정
-  // const createChordNote = (chord: string, sheetOrder: number) => {
-  //   switch (chord) {
-  //     case 'Am':
-  //       createAmChordNoteWithTiming(sheetOrder);
-  //       break;
-  //     case 'C':
-  //       createCChordNoteWithTiming(sheetOrder);
-  //       break;
-  //     case 'D':
-  //       createDChordNoteWithTiming(sheetOrder);
-  //       break;
-  //     case 'Em':
-  //       createEmChordNoteWithTiming(sheetOrder);
-  //       break;
-  //     case 'G':
-  //       createGChordNoteWithTiming(sheetOrder);
-  //       break;
-  //     // 다른 코드들에 대한 case 추가
-  //     default:
-  //       console.warn('Unsupported chord:', chord);
-  //   }
-  // };
-
   // 타이밍 정보를 포함한 코드 생성 함수 예시 (Am)
   const createAmChordNoteWithTiming = (sheetOrder: number) => {
-    const amChordNotes = [
-      { stringNumber: 2, position: 100, offset: -5, fret: 2 },    // 2번 줄 (2번 프렛)
-      { stringNumber: 3, position: 100, offset: 0, fret: 2 },    // 3번 줄 (2번 프렛)
-      { stringNumber: 4, position: 100, offset: 5, fret: 2 }    // 4번 줄 (2번 프렛)
-    ];
-
-    const newNotes = amChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: sheetOrder, // sheetOrder를 타이밍 정보로 사용
-      isChord: true,
-      chord: 'Am',
-      fret: note.fret
-    }));
-
-    setShadowNotes(amChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset,
-      timing: sheetOrder,
-      isChord: true,
-      chord: 'Am',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithTimingWithoutShadow('Am', sheetOrder, setTestNotes);
   };
 
   // 다른 코드들도 같은 방식으로 수정
   const createCChordNoteWithTiming = (sheetOrder: number) => {
-    const cChordNotes = [
-      { stringNumber: 2, position: 100, offset: 5, fret: 1 },    // 2번 줄 (1번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 2 },    // 4번 줄 (2번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 3 }    // 5번 줄 (3번 프렛)
-    ];
-
-    const newNotes = cChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: sheetOrder,
-      isChord: true,
-      chord: 'C',
-      fret: note.fret
-    }));
-
-    setShadowNotes(cChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset,
-      timing: sheetOrder,
-      isChord: true,
-      chord: 'C',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithTimingWithoutShadow('C', sheetOrder, setTestNotes);
   };
 
   const createDChordNoteWithTiming = (sheetOrder: number) => {
-    const dChordNotes = [
-      { stringNumber: 4, position: 100, offset: -5, fret: 2 },
-      { stringNumber: 6, position: 100, offset: 0, fret: 3 },
-      { stringNumber: 5, position: 100, offset: 5, fret: 2 }
-    ];
-
-    const newNotes = dChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: sheetOrder,
-      isChord: true,
-      chord: 'D',
-      fret: note.fret
-    }));
-
-    setShadowNotes(dChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset,
-      timing: sheetOrder,
-      isChord: true,
-      chord: 'D',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithTimingWithoutShadow('D', sheetOrder, setTestNotes);
   };
 
   const createEmChordNoteWithTiming = (sheetOrder: number) => {
-    const emChordNotes = [
-      { stringNumber: 4, position: 100, offset: 0, fret: 2 },
-      { stringNumber: 5, position: 100, offset: -5, fret: 2 }
-    ];
-
-    const newNotes = emChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: sheetOrder,
-      isChord: true,
-      chord: 'Em',
-      fret: note.fret
-    }));
-
-    setShadowNotes(emChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset,
-      timing: sheetOrder,
-      isChord: true,
-      chord: 'Em',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithTimingWithoutShadow('Em', sheetOrder, setTestNotes);
   };
 
   const createGChordNoteWithTiming = (sheetOrder: number) => {
-    const gChordNotes = [
-      { stringNumber: 2, position: 100, offset: -5, fret: 3 },
-      { stringNumber: 1, position: 100, offset: 0, fret: 2 },
-      { stringNumber: 6, position: 100, offset: 5, fret: 3 }
-    ];
-
-    const newNotes = gChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: note.position + note.offset,
-      timing: sheetOrder,
-      isChord: true,
-      chord: 'G',
-      fret: note.fret
-    }));
-
-    setShadowNotes(gChordNotes.map(note => ({
-      id: Date.now() + Math.random(),
-      stringNumber: note.stringNumber,
-      position: 31.25 + note.offset,
-      timing: sheetOrder,
-      isChord: true,
-      chord: 'G',
-      fret: note.fret
-    })));
-    setTestNotes(prev => [...prev, ...newNotes]);
+    createChordNoteWithTimingWithoutShadow('G', sheetOrder, setTestNotes);
   };
 
-  const createChordNoteWithTiming = (chord: string, sheetOrder: number) => {
-    switch (chord) {
-      case 'Am':
-        createAmChordNoteWithTiming(sheetOrder);
-        break;
-      case 'C':
-        createCChordNoteWithTiming(sheetOrder);
-        break;
-      case 'D':
-        createDChordNoteWithTiming(sheetOrder);
-        break;
-      case 'Em':
-        createEmChordNoteWithTiming(sheetOrder);
-        break;
-      case 'G':
-        createGChordNoteWithTiming(sheetOrder);
-        break;
-      // 다른 코드들에 대한 case 추가
-      default:
-        console.warn('Unsupported chord:', chord);
-    }
-  };
-
+  // 컴포넌트 반환
   return (
     <div className="relative w-full h-full bg-gradient-to-b from-zinc-900 to-black rounded-lg overflow-hidden">
       <style>
