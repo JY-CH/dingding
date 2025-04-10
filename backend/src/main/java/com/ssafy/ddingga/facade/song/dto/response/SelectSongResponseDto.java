@@ -19,6 +19,7 @@ public class SelectSongResponseDto {
 	private String songImage;
 	private String songWriter;
 	private String songSinger;
+	private String songVoiceFileUrl;
 
 	private List<SheetMusicResponseDto> sheetMusicResponseDtos;
 }

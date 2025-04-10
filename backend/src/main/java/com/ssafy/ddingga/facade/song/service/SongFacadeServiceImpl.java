@@ -69,6 +69,7 @@ public class SongFacadeServiceImpl implements SongFacadeService {
 				result.setSongImage(sheetMusic.getSong().getSongImage());
 				result.setSongWriter(sheetMusic.getSong().getSongWriter());
 				result.setSongSinger(sheetMusic.getSong().getSongSinger());
+				result.setSongVoiceFileUrl(sheetMusic.getSong().getSongVoiceFileUrl());
 				count++;
 			}
 			SheetMusicResponseDto responseDto = SheetMusicResponseDto.builder()
