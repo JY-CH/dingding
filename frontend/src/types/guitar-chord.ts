@@ -1,5 +1,11 @@
 export interface TemplateData {
     label: string;
+    label_idx: number;
+    features: {
+      chroma: number[][];
+      mel: number[];
+    };
+    duration: number;
     mel_profile: number[];
     chroma_profile: number[][];
   }

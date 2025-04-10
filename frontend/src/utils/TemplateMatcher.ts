@@ -14,7 +14,6 @@ import { TemplateData } from '../types/guitar-chord';
 
 class TemplateMatcher {
   private templates: TemplateData[] = [];
-  private sampleRate: number = 22050;
   // private duration: number = 1.0;
   private confidenceThreshold: number = 0.7;
   private fftSize: number = 2048;
@@ -23,7 +22,7 @@ class TemplateMatcher {
   constructor(
     templates: RawTemplateData[],
     confidenceThreshold: number = 0.7,
-    sampleRate: number = 22050,
+    _sampleRate: number = 22050,
   ) {
     if (!Array.isArray(templates)) {
       console.error('템플릿 데이터가 배열이 아닙니다:', templates);
@@ -38,6 +37,9 @@ class TemplateMatcher {
     // 새로운 데이터 구조로 변환
     this.templates = templates.map(template => ({
       label: template.label,
+      label_idx: template.label_idx,
+      features: template.features,
+      duration: 1.0,
       chroma_profile: template.features.chroma,
       mel_profile: template.features.mel
     }));
@@ -45,7 +47,6 @@ class TemplateMatcher {
     console.log('변환된 템플릿 데이터:', this.templates[0]);
 
     this.confidenceThreshold = confidenceThreshold;
-    this.sampleRate = sampleRate;
   }
 
   // Web Audio API에서 오디오 처리
@@ -168,7 +169,7 @@ class TemplateMatcher {
 
     for (const template of this.templates) {
       const templateChroma = template.chroma_profile;
-      const templateMel = template.mel_profile;
+      // const templateMel = template.mel_profile;
 
       // 템플릿의 평균 크로마 계산
       const templateAvgChroma = new Float32Array(12).fill(0);
