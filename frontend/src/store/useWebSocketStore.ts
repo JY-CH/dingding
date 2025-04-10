@@ -2,19 +2,22 @@ import { create } from 'zustand';
 
 import { websocketService } from '../services/websocket';
 
+export interface WebSocketMessage {
+  type: string;
+  message: string;
+  role?: 'user' | 'assistant';
+  score?: number;
+  image?: string;
+  chord?: string;
+  confidence?: number;
+  isCorrect?: boolean;
+  feedback?: string;
+}
+
 interface WebSocketState {
   isConnected: boolean;
   score: number;
-  messages: Array<{
-    type: string;
-    message: string;
-    role?: 'user' | 'assistant';
-    score?: number;
-    image?: string;
-    chord?: string;
-    confidence?: number;
-    isCorrect?: boolean;
-  }>;
+  messages: Array<WebSocketMessage>;
   connect: (roomId: string) => void;
   disconnect: () => void;
   sendMessage: (message: any) => void;
@@ -47,6 +50,15 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
       console.error('➡️ 에러 정보:', error);
       set({ isConnected: false });
       window.dispatchEvent(new Event('websocketStateChange'));
+
+      // 특정 에러 타입에 따른 처리
+      if (error.type === 'no_token') {
+        console.error('인증 토큰이 없습니다. 로그인 페이지로 이동합니다.');
+        window.location.href = '/login';
+      } else if (error.type === 'max_reconnect_attempts') {
+        console.error('최대 재연결 시도 횟수를 초과했습니다. 페이지를 새로고침해주세요.');
+        alert('연결에 실패했습니다. 페이지를 새로고침해주세요.');
+      }
     });
 
     websocketService.setOnOpenHandler(() => {
@@ -65,6 +77,14 @@ export const useWebSocketStore = create<WebSocketState>((set, get) => ({
           reason: event.reason,
           wasClean: event.wasClean,
         });
+
+        // 비정상 종료인 경우 재연결 시도
+        if (!event.wasClean && event.code !== 1000) {
+          console.log('비정상 종료 감지, 재연결 시도...');
+          setTimeout(() => {
+            websocketService.connect(roomId);
+          }, 1000);
+        }
       }
       set({ isConnected: false });
       window.dispatchEvent(new Event('websocketStateChange'));

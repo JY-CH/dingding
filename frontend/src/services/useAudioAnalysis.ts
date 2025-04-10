@@ -131,32 +131,11 @@ export const useAudioAnalysis = ({
   }, [isSuccess, templateData, confidenceThreshold, recordingDuration]);
 
   // 백엔드 API 호출 뮤테이션
-  const { mutate: analyzeAudio, isPending: isAnalyzing } = useMutation({
+  const { mutateAsync: analyzeAudioAsync, isPending: isAnalyzing } = useMutation({
     mutationFn: guitarChordApi.analyzeAudio,
-    onSuccess: (data) => {
-      console.log('백엔드 분석 결과:', data);
-      if (onResult) {
-        onResult({
-          chord: data.chord,
-          confidence: data.confidence,
-          source: 'backend',
-          isCorrect: targetChord ? data.chord === targetChord : undefined,
-        });
-      }
-      setError(null);
-    },
     onError: (error) => {
       console.error('백엔드 분석 오류:', error);
       setError(`백엔드 분석 오류: ${(error as Error).message}`);
-
-      // 백엔드 오류 발생 시 프론트엔드 결과라도 전달
-      if (localResult && onResult) {
-        onResult({
-          ...localResult,
-          source: 'frontend',
-          isCorrect: targetChord ? localResult.chord === targetChord : undefined,
-        });
-      }
     },
   });
 
@@ -164,11 +143,10 @@ export const useAudioAnalysis = ({
   const initAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       try {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-        // 오디오 출력을 완전히 비활성화
-        audioContextRef.current.destination.channelCount = 0;
-        audioContextRef.current.destination.channelCountMode = 'explicit';
-        audioContextRef.current.destination.channelInterpretation = 'discrete';
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({
+          sampleRate: 48000,
+          latencyHint: 'interactive',
+        });
         console.log('오디오 컨텍스트 초기화 성공:', audioContextRef.current.sampleRate);
       } catch (error) {
         console.error('오디오 컨텍스트 초기화 실패:', error);
@@ -224,57 +202,47 @@ export const useAudioAnalysis = ({
 
       console.log(`녹음 시작 (설정 시간: ${recordingDuration}초)`);
 
-      // 오디오 스트림 요청 - 기본 설정
+      // 오디오 스트림 요청 - 상세 설정
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
-          sampleRate: 44100, // 권장 샘플 레이트
-          channelCount: 1, // 모노 채널
+          sampleRate: 48000,
+          channelCount: 1,
+          sampleSize: 24,
         },
-        video: false, // 비디오 비활성화
+        video: false,
       });
 
-      // 오디오 출력 차단
+      // 오디오 트랙 설정 확인 및 게인 조정
       const audioTracks = stream.getAudioTracks();
-      audioTracks.forEach((track) => {
-        track.enabled = false; // 트랙 비활성화
-      });
+      const audioTrack = audioTracks[0];
+      console.log('오디오 트랙 설정:', audioTrack.getSettings());
+
+      // 오디오 트랙 활성화 및 게인 설정
+      audioTrack.enabled = true;
+      if ('gain' in audioTrack) {
+        (audioTrack as any).gain.value = 10.0;
+      }
 
       streamRef.current = stream;
 
-      // 브라우저 호환성 확인
-      const supportedTypes = [
-        'audio/webm;codecs=opus',
-        'audio/webm',
-        'audio/ogg;codecs=opus',
-        'audio/mp4',
-        'audio/wav',
-      ];
+      // MediaRecorder 설정
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus',
+        audioBitsPerSecond: 512000,
+      });
 
-      let selectedType = '';
-      for (const type of supportedTypes) {
-        if (MediaRecorder.isTypeSupported(type)) {
-          selectedType = type;
-          break;
-        }
-      }
-
-      console.log('선택된 MIME 타입:', selectedType || '기본 타입');
-
-      const mediaRecorder = new MediaRecorder(
-        stream,
-        selectedType ? { mimeType: selectedType } : undefined,
-      );
       mediaRecorderRef.current = mediaRecorder;
 
       // 청크 초기화
       chunksRef.current = [];
 
-      // 데이터 수집
+      // 데이터 수집 - 더 자주 데이터 수집
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
+          console.log('수집된 오디오 청크:', e.data.size);
           chunksRef.current.push(e.data);
         }
       };
@@ -282,13 +250,21 @@ export const useAudioAnalysis = ({
       // 녹음 완료 처리
       mediaRecorder.onstop = async () => {
         try {
-          // 원본 녹음 오디오 (WebM/Opus 등)
-          const originalBlob = new Blob(chunksRef.current, { type: selectedType || 'audio/webm' });
-          console.log('원본 녹음 오디오:', {
-            size: originalBlob.size,
-            type: originalBlob.type,
+          if (chunksRef.current.length === 0) {
+            console.log('이미 처리된 녹음입니다.');
+            return;
+          }
+
+          // WebM 파일 생성
+          const webmBlob = new Blob(chunksRef.current, { type: 'audio/webm;codecs=opus' });
+          console.log('WebM 파일 생성:', {
+            size: webmBlob.size,
+            type: webmBlob.type,
             chunks: chunksRef.current.length,
           });
+
+          // 청크 초기화 (중복 처리 방지)
+          chunksRef.current = [];
 
           // 오디오 컨텍스트 초기화
           const audioContext = initAudioContext();
@@ -296,14 +272,8 @@ export const useAudioAnalysis = ({
             throw new Error('오디오 컨텍스트가 초기화되지 않았습니다.');
           }
 
-          // 원본 오디오 디코딩
-          const arrayBuffer = await originalBlob.arrayBuffer();
-          console.log('오디오 버퍼 크기:', arrayBuffer.byteLength);
-
-          if (arrayBuffer.byteLength === 0) {
-            throw new Error('녹음된 오디오 데이터가 없습니다.');
-          }
-
+          // WebM 파일 디코딩
+          const arrayBuffer = await webmBlob.arrayBuffer();
           const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
           console.log('디코딩된 오디오:', {
             duration: audioBuffer.duration,
@@ -311,60 +281,54 @@ export const useAudioAnalysis = ({
             numberOfChannels: audioBuffer.numberOfChannels,
           });
 
-          // 템플릿 매칭 부분 - 별도의 try-catch로 분리
-          try {
-            if (templateMatcherRef.current) {
-              console.log('템플릿 매칭 분석 시작...');
-              const result = await templateMatcherRef.current.processAudio(audioBuffer);
-              console.log('템플릿 매칭 결과:', result);
-
-              setLocalResult(result);
-
-              // 프론트엔드 결과 콜백
-              if (onResult) {
-                onResult({
-                  ...result,
-                  source: 'frontend',
-                  isCorrect: targetChord ? result.chord === targetChord : undefined,
-                });
-              }
-            }
-          } catch (templateError) {
-            console.error('템플릿 매칭 오류:', templateError);
-            // 템플릿 매칭 오류 발생 시에도 계속 진행
-          }
-
-          // WAV로 변환 (librosa 호환성 향상) - 템플릿 매칭과 독립적으로 진행
-          console.log('WAV 형식으로 변환 시작...');
-          const wavBlob = await encodeWAV(audioBuffer, 22050);
-
-          // WAV 검증
-          const wavArray = await wavBlob.arrayBuffer();
-          const wavView = new Uint8Array(wavArray);
-
-          // RIFF 헤더 확인
-          if (
-            wavView.length < 44 ||
-            wavView[0] !== 82 || // R
-            wavView[1] !== 73 || // I
-            wavView[2] !== 70 || // F
-            wavView[3] !== 70 // F
-          ) {
-            throw new Error('WAV 변환 실패: 유효한 RIFF 헤더가 아닙니다.');
-          }
-
-          console.log('WAV 변환 완료 및 검증됨:', {
+          // WAV로 변환
+          const wavBlob = await encodeWAV(audioBuffer, 48000);
+          console.log('WAV 변환 완료:', {
             size: wavBlob.size,
-            type: 'audio/wav',
-            header: String.fromCharCode(wavView[0], wavView[1], wavView[2], wavView[3]),
+            type: wavBlob.type,
           });
+
+          // 템플릿 매칭과 백엔드 분석을 동시에 수행
+          if (templateMatcherRef.current) {
+            console.log('템플릿 매칭 및 백엔드 분석 동시 수행 시작...');
+            const [frontendResult, backendResult] = await Promise.all([
+              templateMatcherRef.current.processAudio(audioBuffer),
+              analyzeAudioAsync(wavBlob),
+            ]);
+            console.log('템플릿 매칭 결과:', frontendResult);
+            console.log('백엔드 분석 결과:', backendResult);
+
+            // targetChord가 설정되어 있고, 템플릿 결과가 틀리면 백엔드 결과로 대체
+            let finalResult = frontendResult;
+            let usedSource: 'frontend' | 'backend' = 'frontend';
+            if (targetChord && frontendResult.chord !== targetChord) {
+              finalResult = backendResult;
+              usedSource = 'backend';
+            }
+            setLocalResult(finalResult);
+            if (onResult) {
+              onResult({
+                ...finalResult,
+                source: usedSource,
+                isCorrect: targetChord ? finalResult.chord === targetChord : undefined,
+              });
+            }
+          } else {
+            // templateMatcherRef가 없으면 백엔드 분석만 진행
+            console.log('템플릿 매처 미사용 - 백엔드 분석만 수행');
+            const backendResult = await analyzeAudioAsync(wavBlob);
+            setLocalResult(backendResult);
+            if (onResult) {
+              onResult({
+                ...backendResult,
+                source: 'backend',
+                isCorrect: targetChord ? backendResult.chord === targetChord : undefined,
+              });
+            }
+          }
 
           // WAV 파일 저장
           setAudioBlob(wavBlob);
-
-          // 백엔드 분석 요청 - 템플릿 매칭 성공 여부와 관계없이 실행
-          console.log('WAV 형식으로 백엔드 분석 요청...');
-          analyzeAudio(wavBlob);
         } catch (error) {
           console.error('오디오 처리 오류:', error);
           setError(`오디오 처리 오류: ${(error as Error).message}`);
@@ -396,15 +360,7 @@ export const useAudioAnalysis = ({
       console.error('오디오 녹음 오류:', error);
       setError(`마이크 접근 또는 녹음 시작 실패: ${(error as Error).message}`);
     }
-  }, [
-    analyzeAudio,
-    initAudioContext,
-    isRecording,
-    onResult,
-    recordingDuration,
-    stopRecording,
-    targetChord,
-  ]);
+  }, [isRecording, recordingDuration, stopRecording, initAudioContext, onResult, targetChord]);
 
   // 자원 정리
   const cleanup = useCallback(() => {

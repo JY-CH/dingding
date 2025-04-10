@@ -5,12 +5,23 @@ import { TemplateDataResponse, PredictionResult } from '../types/guitar-chord';
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const guitarChordApi = {
-  // 템플릿 데이터 가져오기
+  // 템플릿 데이터 가져오기 - 퍼블릭 폴더에서 직접 로드
   async getTemplateData(): Promise<TemplateDataResponse> {
-    console.log('API URL:', API_URL);
-    const response = await axios.get<TemplateDataResponse>(`${API_URL}/template-data`);
-    console.log('템플릿 데이터:', response.data);
-    return response.data;
+    console.log('템플릿 데이터 로딩 시작...');
+    try {
+      const response = await fetch('/templates_max_performance.json');
+      console.log('템플릿 데이터 응답:', response);
+      if (!response.ok) {
+        console.error('템플릿 데이터 로드 실패:', response.status, response.statusText);
+        throw new Error('템플릿 데이터 로드 실패');
+      }
+      const data = await response.json();
+      console.log('템플릿 데이터 로드 성공:', data);
+      return data;
+    } catch (error) {
+      console.error('템플릿 데이터 로드 중 오류 발생:', error);
+      throw error;
+    }
   },
 
   // 오디오 파일 분석
