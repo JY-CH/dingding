@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -21,15 +21,23 @@ const PracticeSelection: React.FC<PracticeSelectionProps> = ({
   onExerciseSelect,
   currentExercise,
 }) => {
-  const [selectedChords, setSelectedChords] = useState<string[]>(
-    currentExercise?.chords || ['C', 'G', 'F'],
-  );
-  const [duration, setDuration] = useState(currentExercise?.duration || 30);
-  const [repeatCount, setRepeatCount] = useState(currentExercise?.repeatCount || 3);
-  const [bpm, setBpm] = useState(currentExercise?.bpm || 60);
+  const [selectedChords, setSelectedChords] = useState<string[]>([]);
+  const [duration, setDuration] = useState(30);
+  const [repeatCount, setRepeatCount] = useState(3);
+  const [bpm, setBpm] = useState(60);
 
   const majorChords = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
   // const minorChords = ['Am', 'Bm', 'Cm', 'Dm', 'Em', 'Fm', 'Gm'];
+
+  useEffect(() => {
+    if (currentExercise) {
+      console.log('현재 연습 설정 업데이트:', currentExercise);
+      setSelectedChords(currentExercise.chords);
+      setDuration(currentExercise.duration);
+      setRepeatCount(currentExercise.repeatCount);
+      setBpm(currentExercise.bpm);
+    }
+  }, [currentExercise]);
 
   const toggleChord = (chord: string) => {
     setSelectedChords((prev) =>
