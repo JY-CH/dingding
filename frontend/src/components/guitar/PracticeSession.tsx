@@ -395,7 +395,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
       }
       console.log('씨발련아3');
 
-      // blob 없이 완료 처리 fallback 
+      // blob 없이 완료 처리 fallback
       try {
         const averageScore = await calculateAverageScore();
         const sessionData = await getAllData();
@@ -463,7 +463,8 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
           audioResults: audioResults || { chord: '', confidence: 0, isCorrect: false },
           videoResults: videoResults || { chord: '', confidence: 0, isCorrect: false },
         });
-        await clearAllData();
+        // 데이터 초기화 제거
+        // await clearAllData();
         console.log('데이터 초기화 완료');
       } catch (error) {
         console.error('완료 처리 중 오류:', error);
@@ -1062,6 +1063,12 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                       mode: 'PRACTICE',
                       videoTime: recordingTime,
                     });
+                    console.log('업로드 데이터:', {
+                      songId: 15,
+                      score: averageScore || 0,
+                      mode: 'PRACTICE',
+                      videoTime: recordingTime,
+                    });
                     console.log('업로드 결과:', uploadResult); // 확인용
                     setUploadingStatus({
                       isUploading: false,
@@ -1081,6 +1088,8 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                           averageScore,
                         });
                         setIsReady(false);
+                        clearAllData(); // 여기에 추가
+                        console.log('데이터 초기화 완료');
 
                         // ✅ 여기서 3초 뒤에 새로고침
                         // setTimeout(() => {
