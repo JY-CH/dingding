@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { useAudioAnalysis } from '@/services/useAudioAnalysis';
 
-import {useIndexedDB} from '../../hooks/useIndexedDB';
+import { useMutation } from '@tanstack/react-query';
+import { useIndexedDB } from '../../hooks/useIndexedDB';
+import { _axiosAuth } from '../../services/JYapi';
 import RecordingService from '../../services/recordingApi';
 import { useWebSocketStore } from '../../store/useWebSocketStore';
 import { Exercise } from '../../types/guitar';
-import { useMutation } from '@tanstack/react-query';
-import { _axiosAuth } from '../../services/JYapi'
 
 interface PracticeSessionProps {
   exercise: Exercise;
@@ -87,7 +87,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
         console.error('API 요청 실패:', {
           url: '/api/chord/score',
           data: scoreData,
-          error: error.response?.data || error.message
+          error: error.response?.data || error.message,
         });
         throw error;
       }
@@ -99,26 +99,26 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
       console.error('점수 저장 중 오류:', {
         message: error.message,
         status: error.response?.status,
-        data: error.response?.data
+        data: error.response?.data,
       });
-    }
+    },
   });
 
   // RecordingService 초기화
   useEffect(() => {
     recordingServiceRef.current = new RecordingService();
-    
+
     // 녹화 시간 업데이트 리스너 설정
     recordingServiceRef.current.onProgress((duration) => {
       const totalSeconds = Math.floor(duration / 1000);
       const hours = Math.floor(totalSeconds / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = totalSeconds % 60;
-      
+
       setRecordingTime(
         `${hours.toString().padStart(2, '0')}:${minutes
           .toString()
-          .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+          .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`,
       );
     });
 
@@ -188,7 +188,6 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
 
   // 음성 분석 상태 동기화
   useEffect(() => {
-
     setIsAudioRecording(isRecording);
     setIsAudioAnalyzing(isAnalyzing);
   }, [isRecording, isAnalyzing]);
@@ -198,14 +197,14 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
     if (wsMessages.length > 0) {
       const lastMessage = wsMessages[wsMessages.length - 1];
       console.log('웹소켓 메시지 도착:', lastMessage); // 디버깅용 로그
-      
+
       if (lastMessage.type === 'AI') {
-        console.log('시발럼아')
+        console.log('시발럼아');
         // 실시간으로 영상 분석 결과 업데이트
         // const score = lastMessage.score || 0;
         const feedback = lastMessage.feedback || lastMessage.message || '';
         const isCorrect = score > 0;
-        
+
         // 감지된 코드 추출
         let detectedChord = '감지되지 않음';
         if (feedback.includes('감지된 코드:')) {
@@ -214,9 +213,9 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
             detectedChord = match[1];
           }
         }
-        
+
         console.log('새로운 분석 결과:', { score, feedback, isCorrect, detectedChord }); // 디버깅용 로그
-        
+
         // videoResults 업데이트
         const newVideoResults = {
           chord: detectedChord,
@@ -225,7 +224,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
           score,
           feedback,
         };
-        console.log('시발ㄹ련아 여기왔냐?')
+        console.log('시발ㄹ련아 여기왔냐?');
         console.log('videoResults 업데이트:', newVideoResults); // 디버깅용 로그
         setVideoResults(newVideoResults);
         console.log('videoResults 업데이트 후:', videoResults); // 디버깅용 로그s
@@ -348,7 +347,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
       });
 
       const totalScore = scores.reduce((acc: number, score: number) => acc + score, 0);
-      const averageScore = scores.length > 0 ? totalScore / scores.length : 0;
+      const averageScore = scores.length > 0 ? Math.round(totalScore / scores.length) : 0;
       console.log('평균 점수:', averageScore);
       return averageScore;
     } catch (error) {
@@ -363,12 +362,12 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
     console.log('완료 처리 시작:', { isLastStep, currentStep, totalSteps: exercise.chords.length });
 
     if (isLastStep) {
-      console.log('씨;발련아')
+      console.log('씨;발련아');
       // 마지막 단계일 때만 녹음을 중지
       if (isRecording) {
         stopRecording();
       }
-      console.log('씨;발련아2')
+      console.log('씨;발련아2');
       try {
         console.log('녹화 중지 시도...');
         if (!recordingServiceRef.current) {
@@ -396,12 +395,12 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
       }
       console.log('씨발련아3');
 
-      // blob 없이 완료 처리 fallback
+      // blob 없이 완료 처리 fallback 
       try {
         const averageScore = await calculateAverageScore();
         const sessionData = await getAllData();
-        console.log('blob""""""""""""""""""""""""""1')
-        
+        console.log('blob""""""""""""""""""""""""""1');
+
         // 코드별 점수 계산
         const chordScores = new Map();
         sessionData.forEach((data: any) => {
@@ -420,20 +419,22 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
             console.error('메시지 파싱 오류:', error);
           }
         });
-        console.log('blob""""""""""""""""""""""""""2')
+        console.log('blob""""""""""""""""""""""""""2');
         // API 요청을 위한 데이터 형식 변환
-        const scoreData = Array.from(chordScores.entries()).map(([chord, data]) => {
-          const songId = getSongIdFromChord(chord);
-          if (songId === 0) {
-            console.warn(`알 수 없는 코드: ${chord}`);
-            return null;
-          }
-          return {
-            songId,
-            score: Math.round(data.totalScore / data.count),
-            count: data.count
-          };
-        }).filter(Boolean); // null 값 제거
+        const scoreData = Array.from(chordScores.entries())
+          .map(([chord, data]) => {
+            const songId = getSongIdFromChord(chord);
+            if (songId === 0) {
+              console.warn(`알 수 없는 코드: ${chord}`);
+              return null;
+            }
+            return {
+              songId,
+              score: Math.round(data.totalScore / data.count),
+              count: data.count,
+            };
+          })
+          .filter(Boolean); // null 값 제거
 
         console.log('전송할 점수 데이터:', scoreData);
         // useMutation을 사용하여 점수 저장
@@ -447,7 +448,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
           videoResults,
           score,
         });
-        console.log('데이터 초기화 준비')
+        console.log('데이터 초기화 준비');
         disconnect();
         cleanupAudio();
         setIsReady(false);
@@ -463,7 +464,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
           videoResults: videoResults || { chord: '', confidence: 0, isCorrect: false },
         });
         await clearAllData();
-        console.log('데이터 초기화 완료')
+        console.log('데이터 초기화 완료');
       } catch (error) {
         console.error('완료 처리 중 오류:', error);
         setIsReady(false);
@@ -477,14 +478,26 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
         }, 500);
       }
     }
-    console.log('----------------------------------------------------')
+    console.log('----------------------------------------------------');
   };
 
   // 코드를 songId로 변환하는 함수
   const getSongIdFromChord = (chord: string): number => {
     const chordToId: { [key: string]: number } = {
-      'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7,
-      'Am': 8, 'Bm': 9, 'Cm': 10, 'Dm': 11, 'Em': 12, 'Fm': 13, 'Gm': 14
+      A: 1,
+      B: 2,
+      C: 3,
+      D: 4,
+      E: 5,
+      F: 6,
+      G: 7,
+      Am: 8,
+      Bm: 9,
+      Cm: 10,
+      Dm: 11,
+      Em: 12,
+      Fm: 13,
+      Gm: 14,
     };
     return chordToId[chord] || 0;
   };
@@ -541,7 +554,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
       // 녹화 시작
       // console.log('녹화 시작 시도...');
       const success = await recordingServiceRef.current.startRecording();
-      
+
       if (!success) {
         // console.error('녹화 시작 실패');
         setIsScreenRecording(false);
@@ -560,7 +573,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
       if (onRoomIdChange) {
         onRoomIdChange(roomId);
       }
-      
+
       // 화면 공유가 성공적으로 시작된 후 1초 후에 연습 시작
       setTimeout(() => {
         setIsReady(true);
@@ -579,9 +592,8 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
       disconnect();
       cleanupAudio();
       if (recordingServiceRef.current && recordingServiceRef.current.state !== 'inactive') {
-        recordingServiceRef.current
-          .stopRecording()
-          // .catch((error) => console.error('화면 녹화 중지 중 오류:', error));
+        recordingServiceRef.current.stopRecording();
+        // .catch((error) => console.error('화면 녹화 중지 중 오류:', error));
       }
     };
   }, [disconnect, cleanupAudio]);
@@ -767,10 +779,10 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                   </div>
                   {videoResults && (
                     <div className="mt-2 space-y-2">
-                      <div className="text-lg text-white">
-                        현재 코드: {videoResults.chord}
-                      </div>
-                      <div className={`text-lg ${videoResults.score > 50 ? 'text-green-400' : 'text-red-400'}`}>
+                      <div className="text-lg text-white">현재 코드: {videoResults.chord}</div>
+                      <div
+                        className={`text-lg ${videoResults.score > 50 ? 'text-green-400' : 'text-red-400'}`}
+                      >
                         {videoResults.score > 70 ? '정확히 잡았습니다! ✓' : '다시 시도해보세요 ✗'}
                       </div>
                     </div>
@@ -785,10 +797,10 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                   </div>
                   {audioResults && (
                     <div className="mt-2 space-y-2">
-                      <div className="text-lg text-white">
-                        현재 코드: {audioResults.chord}
-                      </div>
-                      <div className={`text-lg ${audioResults.isCorrect ? 'text-green-400' : 'text-red-400'}`}>
+                      <div className="text-lg text-white">현재 코드: {audioResults.chord}</div>
+                      <div
+                        className={`text-lg ${audioResults.isCorrect ? 'text-green-400' : 'text-red-400'}`}
+                      >
                         {audioResults.isCorrect ? '정확히 잡았습니다! ✓' : '다시 시도해보세요 ✗'}
                       </div>
                     </div>
@@ -1046,7 +1058,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                     const sessionData = await getAllData();
                     const uploadResult = await recordingServiceRef.current.uploadRecording({
                       songId: 15,
-                      score: score || 0,
+                      score: averageScore || 0,
                       mode: 'PRACTICE',
                       videoTime: recordingTime,
                     });
@@ -1056,27 +1068,27 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                       success: uploadResult.success,
                       message: uploadResult.success ? '업로드 완료!' : '',
                     });
-                    setTimeout(() => {
-                      setShowUploadModal(false);
-                      onComplete({
-                        totalScore: score || 0,
-                        accuracy: (score || 0) / 100,
-                        correctChords: Math.round((score || 0) / 10),
-                        totalChords: exercise.chords.length,
-                        duration: 120,
-                        sessionData,
-                        averageScore,
-                      });
-                      setIsReady(false);
-                    
-                      // ✅ 여기서 3초 뒤에 새로고침
-                      // setTimeout(() => {
-                      //   window.location.reload();
-                      // }, 10000);
-                    
-                    }, uploadResult.success ? 1000 : 2000);
-                    
-                    
+                    setTimeout(
+                      () => {
+                        setShowUploadModal(false);
+                        onComplete({
+                          totalScore: score || 0,
+                          accuracy: (score || 0) / 100,
+                          correctChords: Math.round((score || 0) / 10),
+                          totalChords: exercise.chords.length,
+                          duration: 120,
+                          sessionData,
+                          averageScore,
+                        });
+                        setIsReady(false);
+
+                        // ✅ 여기서 3초 뒤에 새로고침
+                        // setTimeout(() => {
+                        //   window.location.reload();
+                        // }, 10000);
+                      },
+                      uploadResult.success ? 1000 : 2000,
+                    );
                   } catch (error) {
                     console.error('업로드 중 오류:', error);
                     setUploadingStatus({
@@ -1096,12 +1108,11 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({
                         averageScore: await calculateAverageScore(),
                       });
                       setIsReady(false);
-                  
+
                       // ✅ 페이지 새로고침
                       window.location.reload(); // 또는 window.location.href = window.location.href;
                     }, 1000);
                   }
-                  
                 }}
                 className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
                 disabled={uploadingStatus.isUploading}
