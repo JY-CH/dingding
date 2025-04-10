@@ -1,20 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { Settings } from 'lucide-react';
 import { GiGuitar } from 'react-icons/gi';
 import { HiOutlineVideoCamera, HiOutlineVideoCameraSlash } from 'react-icons/hi2';
 import { RiMusicLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
-import { Settings } from 'lucide-react';
 
 import GameModeNavbar from '../components/common/GameModeNavbar';
 import AudioVisualizer3D from '../components/guitar/AudioVisualizer3D';
 import FretboardVisualizer from '../components/guitar/FretboardVisualizer';
-import PracticeSession from '../components/guitar/PracticeSession';
 import PracticeSelection from '../components/guitar/PracticeSelection';
+import PracticeSession from '../components/guitar/PracticeSession';
 import { useWebSocketStore } from '../store/useWebSocketStore';
-import { GuitarString, Visualization, Exercise } from '../types/guitar';
+import { Exercise, GuitarString, Visualization } from '../types/guitar';
 
 const PlayPage: React.FC = () => {
   const navigate = useNavigate();
@@ -482,16 +482,16 @@ const PlayPage: React.FC = () => {
                     exit={{ opacity: 0, x: 20 }}
                     className="p-3 rounded-lg bg-amber-500/20 text-amber-400"
                   >
-                    {messages.length > 0 && (() => {
-                      const match = messages[messages.length - 1].message.match(/점수:\s*([\d.]+)점/);
-                      const score = match ? parseFloat(match[1]) : 0;
+                    {messages.length > 0 &&
+                      (() => {
+                        const match =
+                          messages[messages.length - 1].message.match(/점수:\s*([\d.]+)점/);
+                        const score = match ? parseFloat(match[1]) : 0;
 
-                      if (score >= 70) return '잘하고 있어요! 👍';
-                      else if (score >= 40) return '조금 더 자세를 신경 써보세요!';
-                      else return '혹시 다른 코드를 잡고 있는 건 아닐까요? 🤔';
-                    })()
-                    }
-
+                        if (score >= 70) return '잘하고 있어요! 👍';
+                        else if (score >= 40) return '조금 더 자세를 신경 써보세요!';
+                        else return '혹시 다른 코드를 잡고 있는 건 아닐까요? 🤔';
+                      })()}
                   </motion.div>
                 </AnimatePresence>
               </div>
