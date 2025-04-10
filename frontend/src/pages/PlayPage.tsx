@@ -436,7 +436,7 @@ const PlayPage: React.FC = () => {
                   selectedExercise?.chords[currentStep]
                     ? {
                         name: selectedExercise.chords[currentStep],
-                        fingering: [],
+                        // fingering: [],
                       }
                     : undefined
                 }

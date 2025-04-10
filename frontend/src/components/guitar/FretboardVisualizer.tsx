@@ -12,7 +12,6 @@ interface FretboardVisualizerProps {
 
 const FretboardVisualizer: React.FC<FretboardVisualizerProps> = ({
   strings,
-  activeNotes = [],
   currentChord,
 }) => {
   const chordFingerings: Record<string, { fingering: number[]; fingers: number[] }> = {
