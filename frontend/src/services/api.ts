@@ -672,14 +672,23 @@ export const fetchRecommendSongs = async (): Promise<RecommendSong[]> => {
 interface RankingSong {
   songId: number;
   songTitle: string;
-  songImage: string;
   songSinger: string;
-  playCount: number;
+  songImage: string;
+  songVoiceFileUrl: string;
+  songDuration: string;
+  songWriter: string;
+  releaseDate: string;
+  category: string;
+}
+
+interface RecommendSong {
+  recommendSongId: number;
+  song: RankingSong;
   category: string;
 }
 
 // 월간 랭킹 가져오기
-export const fetchMonthlyRanking = async (): Promise<RankingSong[]> => {
+export const fetchMonthlyRanking = async (): Promise<RecommendSong[]> => {
   try {
     const response = await fetch(`${API_URL}/recommendSong`, {
       headers: {
@@ -695,17 +704,7 @@ export const fetchMonthlyRanking = async (): Promise<RankingSong[]> => {
     const data = await response.json();
     console.log('월간 랭킹 API 응답:', data);
     
-    const filteredData = data
-      .filter((song: RecommendSong) => song.category === 'THIS MONTH')
-      .map((song: RecommendSong) => ({
-        songId: song.song.songId,
-        songTitle: song.song.songTitle,
-        songImage: song.song.songImage,
-        songSinger: song.song.songSinger,
-        playCount: song.recommendSongId,
-        category: song.category
-      }));
-    
+    const filteredData = data.filter((song: RecommendSong) => song.category === 'THIS MONTH');
     console.log('필터링된 월간 랭킹:', filteredData);
     return filteredData;
   } catch (error) {
@@ -715,7 +714,7 @@ export const fetchMonthlyRanking = async (): Promise<RankingSong[]> => {
 };
 
 // 주간 랭킹 가져오기
-export const fetchWeeklyRanking = async (): Promise<RankingSong[]> => {
+export const fetchWeeklyRanking = async (): Promise<RecommendSong[]> => {
   try {
     const response = await fetch(`${API_URL}/recommendSong`, {
       headers: {
@@ -731,17 +730,7 @@ export const fetchWeeklyRanking = async (): Promise<RankingSong[]> => {
     const data = await response.json();
     console.log('주간 랭킹 API 응답:', data);
     
-    const filteredData = data
-      .filter((song: RecommendSong) => song.category === 'THIS WEEK')
-      .map((song: RecommendSong) => ({
-        songId: song.song.songId,
-        songTitle: song.song.songTitle,
-        songImage: song.song.songImage,
-        songSinger: song.song.songSinger,
-        playCount: song.recommendSongId,
-        category: song.category
-      }));
-    
+    const filteredData = data.filter((song: RecommendSong) => song.category === 'THIS WEEK');
     console.log('필터링된 주간 랭킹:', filteredData);
     return filteredData;
   } catch (error) {
@@ -751,7 +740,7 @@ export const fetchWeeklyRanking = async (): Promise<RankingSong[]> => {
 };
 
 // 일간 랭킹 가져오기
-export const fetchDailyRanking = async (): Promise<RankingSong[]> => {
+export const fetchDailyRanking = async (): Promise<RecommendSong[]> => {
   try {
     const response = await fetch(`${API_URL}/recommendSong`, {
       headers: {
@@ -767,17 +756,7 @@ export const fetchDailyRanking = async (): Promise<RankingSong[]> => {
     const data = await response.json();
     console.log('일간 랭킹 API 응답:', data);
     
-    const filteredData = data
-      .filter((song: RecommendSong) => song.category === 'THIS DAY')
-      .map((song: RecommendSong) => ({
-        songId: song.song.songId,
-        songTitle: song.song.songTitle,
-        songImage: song.song.songImage,
-        songSinger: song.song.songSinger,
-        playCount: song.recommendSongId,
-        category: song.category
-      }));
-    
+    const filteredData = data.filter((song: RecommendSong) => song.category === 'THIS DAY');
     console.log('필터링된 일간 랭킹:', filteredData);
     return filteredData;
   } catch (error) {

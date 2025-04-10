@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import { CommunityPage } from '@/pages/CommunityPage';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -27,7 +28,7 @@ interface AppContentProps {
 const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
   const location = useLocation();
   const { isAuthenticated } = useAuthStore();
-  const isFullscreenPage = ['/login', '/signup'].includes(location.pathname);
+  const isFullscreenPage = ['/login', '/signup', '/play', '/performance'].includes(location.pathname);
   const shouldShowMusicPlayer = !isFullscreenPage;
   const [currentSong, setCurrentSong] = useState<any>(null);
 
@@ -90,25 +91,27 @@ const AppContent: React.FC<AppContentProps> = ({ isExpanded }) => {
         </div>
       </div>
 
-      <div
-        className={`
-          fixed bottom-0 left-0 right-0
-          transition-all duration-500 ease-in-out
-          transform
-          ${isFullscreenPage ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}
-          ${!shouldShowMusicPlayer && 'hidden'}
-        `}
-        style={{
-          marginLeft: isExpanded ? '16rem' : '5rem',
-        }}
-      >
-        <div className="min-w-[976px] w-full">
-          <MusicPlayer 
-            songs={currentSong ? [currentSong] : mockSongs} 
-            isExpanded={isExpanded} 
-          />
-        </div>
-      </div>
+      <AnimatePresence mode="wait">
+        {!isFullscreenPage && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
+            className="fixed bottom-0 left-0 right-0"
+            style={{
+              marginLeft: isExpanded ? '16rem' : '5rem',
+            }}
+          >
+            <div className="min-w-[976px] w-full">
+              <MusicPlayer 
+                songs={currentSong ? [currentSong] : mockSongs} 
+                isExpanded={isExpanded} 
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 };

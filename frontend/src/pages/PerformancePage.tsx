@@ -161,9 +161,9 @@ const PerformancePage: React.FC = () => {
 
       {/* 상단 컴포넌트 영역 */}
       <div className="h-[calc(44vh-4rem)] flex gap-4 p-4">
-        {/* 플레이리스트 */}
+        {/* 플레이리스트 - 가로 크기 축소 */}
         <motion.div 
-          className="w-[45%] h-full bg-black/20 rounded-xl overflow-auto"
+          className="w-[35%] h-full bg-black/20 rounded-xl overflow-auto"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -174,14 +174,14 @@ const PerformancePage: React.FC = () => {
           />
         </motion.div>
 
-        {/* 악보 */}
+        {/* 악보 - 가로 크기 확장 */}
         <motion.div
-          className="w-[25%] h-full"
+          className="w-[35%] h-full"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <div className="h-1/2">
+          <div className="h-full">
             <SheetMusic
               currentSong={currentSong}
               currentChord={currentChord?.chord}
@@ -189,15 +189,16 @@ const PerformancePage: React.FC = () => {
               isLoading={isLoading}
               error={error}
               currentSheetIndex={currentSheetIndex}
+              visualization={visualization}
             />
           </div>
         </motion.div>
         
         {/* 오른쪽 영역: 음향 시각화 + 웹캠 */}
         <div className="w-[30%] h-full flex gap-4">
-          {/* 음향 시각화 (데시벨 측정기) */}
+          {/* 음향 시각화 (데시벨 측정기) - 숨김 처리 */}
           <motion.div 
-            className="w-[8%] h-full bg-black/20 rounded-xl overflow-hidden"
+            className="hidden w-[8%] h-full bg-black/20 rounded-xl overflow-hidden"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
@@ -205,9 +206,9 @@ const PerformancePage: React.FC = () => {
             <AudioVisualizer3D visualization={visualization} />
           </motion.div>
           
-          {/* 웹캠 */}
+          {/* 웹캠 - 전체 너비 사용 */}
           <motion.div 
-            className="w-[92%] h-full bg-black/20 rounded-xl overflow-hidden"
+            className="w-full h-full bg-black/20 rounded-xl overflow-hidden"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}

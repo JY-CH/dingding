@@ -1,6 +1,6 @@
 // import React from 'react';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type NotificationType = 'info' | 'success' | 'warning' | 'error';
 
@@ -103,7 +103,16 @@ export const useNotificationStore = create<NotificationState>()(
       clearAll: () => set({ notifications: [], unreadCount: 0 }),
     }),
     {
-      name: 'notification-storage', // localStorage에 저장될 키 이름
+      name: 'notification-storage',
+      storage: createJSONStorage(() => localStorage, {
+        reviver: (key, value) => {
+          // date 필드를 Date 객체로 변환
+          if (key === 'date' && typeof value === 'string') {
+            return new Date(value);
+          }
+          return value;
+        }
+      })
     }
   )
 );

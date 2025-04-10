@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { fetchWeekSongRanking } from '../../services/api';
 
 interface WeekSongUserInfo {
@@ -32,7 +33,12 @@ interface FeaturedItem {
   };
 }
 
-const FeaturedCarousel = () => {
+interface FeaturedCarouselProps {
+  onPlaySong?: (song: any) => void;
+}
+
+const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ onPlaySong }) => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [weekSongData, setWeekSongData] = useState<WeekSongData | null>(null);
@@ -259,10 +265,30 @@ const FeaturedCarousel = () => {
                 ${currentSlide === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
               `}
               >
-                <button className="px-8 py-3.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold transition-colors">
+                <button 
+                  className="px-8 py-3.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold transition-colors"
+                  onClick={() => {
+                    if (onPlaySong) {
+                      // 벚꽃엔딩 재생
+                      onPlaySong({
+                        id: 101,
+                        title: "벚꽃엔딩",
+                        artist: "버스커버스커",
+                        duration: "4:15",
+                        thumbnail: "https://i.imgur.com/example.jpg",
+                        songTitle: "벚꽃엔딩",
+                        songSinger: "버스커버스커",
+                        songImage: "https://i.imgur.com/example.jpg"
+                      });
+                    }
+                  }}
+                >
                   지금 듣기
                 </button>
-                <button className="px-8 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold transition-colors flex items-center gap-2">
+                <button 
+                  className="px-8 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold transition-colors flex items-center gap-2"
+                  onClick={() => navigate('/performance')}
+                >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
                       d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
@@ -409,10 +435,10 @@ const FeaturedCarousel = () => {
                                         : 'text-white group-hover:text-orange-800'
                                     }
                                   `}>
-                                    {weekSongData && weekSongData.song ? weekSongData.song.songTitle : ''}
+                                    {user.username}
                                   </div>
                                   <div className="text-xs text-zinc-400 truncate group-hover:text-zinc-300 transition-colors">
-                                    {user.username}
+                                    
                                   </div>
                                 </motion.div>
                               </div>
@@ -469,10 +495,10 @@ const FeaturedCarousel = () => {
                             <div className="text-xl font-bold text-white/80">{index + 4}</div>
                             <div className="flex-1 min-w-0">
                               <div className="text-sm font-medium text-white truncate">
-                                {weekSongData && weekSongData.song ? weekSongData.song.songTitle : ''}
+                                {user.username}
                               </div>
                               <div className="text-xs text-zinc-400 truncate mt-1">
-                                {user.username}
+                                
                               </div>
                             </div>
                             <div className="text-xs text-amber-500">
@@ -492,7 +518,7 @@ const FeaturedCarousel = () => {
                   {/* 하단 정보 */}
                   <div className="mt-4 pt-3 border-t border-white/10">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-zinc-400">업데이트: 5분 전</span>
+                      <span className="text-zinc-400">업데이트: 1분 전</span>
                       <button className="text-amber-500 hover:text-amber-400">
                         전체보기
                       </button>

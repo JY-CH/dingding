@@ -29,6 +29,7 @@ const PlayPage: React.FC = () => {
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [showPracticeModal, setShowPracticeModal] = useState(false);
+  const [isWebcamOn, setIsWebcamOn] = useState(false);
   const [defaultExercise, setDefaultExercise] = useState({
     chords: ['C', 'G', 'F'],
     duration: 30,
@@ -156,7 +157,7 @@ const PlayPage: React.FC = () => {
     const captureAndSendImage = async () => {
       try {
         const webcam = webcamRef.current;
-        if (!webcam || !isConnected || !selectedExercise || !currentRoomId) {
+        if (!webcam || !isConnected || !selectedExercise || !currentRoomId || !isWebcamOn) {
           return;
         }
 
@@ -176,7 +177,7 @@ const PlayPage: React.FC = () => {
       }
     };
 
-    if (isReady) {
+    if (isReady && isWebcamOn) {
       intervalId = setInterval(captureAndSendImage, 200);
     }
 
@@ -185,7 +186,11 @@ const PlayPage: React.FC = () => {
         clearInterval(intervalId);
       }
     };
-  }, [isReady, isConnected, currentStep, sendMessage, selectedExercise, currentRoomId]);
+  }, [isReady, isConnected, currentStep, sendMessage, selectedExercise, currentRoomId, isWebcamOn]);
+
+  const toggleWebcam = () => {
+    setIsWebcamOn(!isWebcamOn);
+  };
 
   const handleComplete = (performance: any) => {
     console.log('Practice completed:', performance);
@@ -333,45 +338,35 @@ const PlayPage: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="bg-white/5 rounded-xl overflow-hidden"
             >
-              <div className="relative aspect-video">
-                {settings.webcamMirrored ? (
-                  <>
-                    <Webcam
-                      ref={webcamRef}
-                      audio={false}
-                      className="rounded-lg w-full"
-                      mirrored={settings.webcamMirrored}
-                      screenshotFormat="image/jpeg"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                    <div className="absolute bottom-4 right-4 flex items-center gap-2">
-                      <button
-                        onClick={() =>
-                          setSettings((s) => ({ ...s, webcamMirrored: !s.webcamMirrored }))
-                        }
-                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-colors"
-                      >
-                        미러링 {settings.webcamMirrored ? 'ON' : 'OFF'}
-                      </button>
-                      <button
-                        onClick={() => setSettings((s) => ({ ...s, webcamMirrored: false }))}
-                        className="p-2 bg-red-500/80 hover:bg-red-500 text-white rounded-lg backdrop-blur-sm transition-colors"
-                      >
-                        <HiOutlineVideoCameraSlash className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </>
+              <div className="relative h-[400px] bg-black/20 rounded-xl overflow-hidden backdrop-blur-sm border border-white/5">
+                {isWebcamOn ? (
+                  <Webcam
+                    ref={webcamRef}
+                    audio={false}
+                    screenshotFormat="image/jpeg"
+                    className="w-full h-full object-cover"
+                    mirrored={settings.webcamMirrored}
+                  />
                 ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50">
-                    <HiOutlineVideoCamera className="w-12 h-12 text-zinc-400 mb-4" />
-                    <button
-                      onClick={() => setSettings((s) => ({ ...s, webcamMirrored: true }))}
-                      className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
-                    >
-                      웹캠 켜기
-                    </button>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-zinc-500">
+                      <HiOutlineVideoCameraSlash className="w-12 h-12 mx-auto mb-2" />
+                      <p>웹캠이 꺼져있습니다</p>
+                    </div>
                   </div>
                 )}
+                
+                {/* 웹캠 토글 버튼 */}
+                <button
+                  onClick={toggleWebcam}
+                  className="absolute bottom-4 right-4 p-3 rounded-xl bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors"
+                >
+                  {isWebcamOn ? (
+                    <HiOutlineVideoCamera className="w-6 h-6 text-white" />
+                  ) : (
+                    <HiOutlineVideoCameraSlash className="w-6 h-6 text-white" />
+                  )}
+                </button>
               </div>
             </motion.div>
 

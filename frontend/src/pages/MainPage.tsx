@@ -69,14 +69,14 @@ const MainPage: React.FC<MainPageProps> = ({ onPlaySong }) => {
             className="flex justify-between items-center mb-4"
           >
             <div>
-              <h1 className="text-3xl font-bold">Discover</h1>
-              <p className="text-zinc-400">Listen to the best music for your mood</p>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">이주의 연습곡</h1>
+              <p className="text-zinc-400 text-sm mt-2">이번 주 추천 연습곡으로 실력을 향상시켜보세요</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search for songs, artists..."
+                  placeholder="노래, 게시글 검색..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyPress={(e) => {
@@ -227,7 +227,7 @@ const MainPage: React.FC<MainPageProps> = ({ onPlaySong }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <FeaturedCarousel />
+            <FeaturedCarousel onPlaySong={handlePlaySong} />
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}

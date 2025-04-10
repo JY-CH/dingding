@@ -114,7 +114,7 @@ const ExploreSection: React.FC<ExploreSectionProps> = ({ onUpdatePlaylist }) => 
     >
       <div className="mb-8">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
-          Guitar Styles
+          기타 스타일
         </h2>
         <p className="text-zinc-400 text-sm mt-2">나만의 기타 스타일을 찾아보세요</p>
       </div>

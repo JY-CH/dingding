@@ -1,22 +1,15 @@
 import { GiGuitar } from 'react-icons/gi';
 import { IoArrowBack } from 'react-icons/io5';
-import { IoStatsChartOutline } from 'react-icons/io5';
-import { RiMusicLine, RiSettings4Line } from 'react-icons/ri';
+import { RiMusicLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { HiChevronLeft } from 'react-icons/hi';
 
 interface GameModeNavbarProps {
-  showStats: boolean;
-  setShowStats: (show: boolean) => void;
-  showSettings: boolean;
-  setShowSettings: (show: boolean) => void;
   currentMode: 'practice' | 'performance';
 }
 
 const GameModeNavbar: React.FC<GameModeNavbarProps> = ({
-  showStats,
-  setShowStats,
-  showSettings,
-  setShowSettings,
   currentMode,
 }) => {
   const navigate = useNavigate();
@@ -26,14 +19,9 @@ const GameModeNavbar: React.FC<GameModeNavbarProps> = ({
       <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
         {/* 왼쪽 영역 */}
         <div className="flex items-center gap-6 pl-4">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 text-zinc-400 rounded-lg 
-              hover:bg-zinc-700 hover:text-white transition-colors"
-          >
-            <IoArrowBack className="w-5 h-5" />
-            <span>메인으로</span>
-          </button>
+          <Link to="/" className="text-white/60 hover:text-white transition-colors">
+            <HiChevronLeft className="w-6 h-6" />
+          </Link>
           <div className="h-8 w-px bg-white/10" />
           <div className="flex items-center gap-2">
             <img src="/ding.svg" alt="Ding Ding Logo" className="w-8 h-8 mt-0.5" />
@@ -100,29 +88,6 @@ const GameModeNavbar: React.FC<GameModeNavbarProps> = ({
                   실시간 연주 분석
                 </span>
               </div>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setShowStats(!showStats)}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
-          >
-            <IoStatsChartOutline className="w-5 h-5 text-zinc-400 group-hover:text-amber-500" />
-          </button>
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
-          >
-            <RiSettings4Line className="w-5 h-5 text-zinc-400 group-hover:text-amber-500" />
-          </button>
-          <div className="h-8 w-px bg-white/10" />
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
-              <span className="text-amber-500 font-medium">7</span>
-            </div>
-            <div className="text-sm">
-              <div className="text-zinc-400">연습 스트릭</div>
-              <div className="text-white font-medium">7일 연속</div>
             </div>
           </div>
         </div>

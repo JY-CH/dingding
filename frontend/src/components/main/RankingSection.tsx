@@ -16,10 +16,28 @@ interface RankUser {
   rank?: number;
 }
 
+interface RankingSong {
+  songId: number;
+  songTitle: string;
+  songSinger: string;
+  songImage: string;
+  songVoiceFileUrl: string;
+  songDuration: string;
+  songWriter: string;
+  releaseDate: string;
+  category: string;
+}
+
+interface RecommendSong {
+  recommendSongId: number;
+  song: RankingSong;
+  category: string;
+}
+
 interface RankingSectionProps {
-  dailyTracks: any[];
-  weeklyTracks: any[];
-  monthlyTracks: any[];
+  dailyTracks: RecommendSong[];
+  weeklyTracks: RecommendSong[];
+  monthlyTracks: RecommendSong[];
   onPlayTrack: (track: Song) => void;
   onPlaySong: (song: any) => void;
 }
@@ -51,17 +69,17 @@ const RankingSection: React.FC<RankingSectionProps> = ({
     day: dailyTracks
   };
 
-  const { data: monthlyRanking = [] } = useQuery({
+  const { data: monthlyRanking = [] } = useQuery<RecommendSong[]>({
     queryKey: ['monthlyRanking'],
     queryFn: fetchMonthlyRanking,
   });
 
-  const { data: weeklyRanking = [] } = useQuery({
+  const { data: weeklyRanking = [] } = useQuery<RecommendSong[]>({
     queryKey: ['weeklyRanking'],
     queryFn: fetchWeeklyRanking,
   });
 
-  const { data: dailyRanking = [] } = useQuery({
+  const { data: dailyRanking = [] } = useQuery<RecommendSong[]>({
     queryKey: ['dailyRanking'],
     queryFn: fetchDailyRanking,
   });
@@ -278,37 +296,40 @@ const RankingSection: React.FC<RankingSectionProps> = ({
     return '0시간 0분';
   };
 
-  const getCurrentRanking = () => {
-    // 먼저 API 데이터 사용 시도
-    const apiData = {
-      month: monthlyRanking,
-      week: weeklyRanking,
-      day: dailyRanking
-    };
-
-    // API 데이터가 없으면 props로 받은 데이터 사용
-    const result = apiData[activeTab].length > 0 
-      ? apiData[activeTab] 
-      : fallbackData[activeTab];
-    
-    return result;
+  const getCurrentTracks = (): RecommendSong[] => {
+    switch (activeTab) {
+      case 'month':
+        return monthlyRanking;
+      case 'week':
+        return weeklyRanking;
+      case 'day':
+        return dailyRanking;
+      default:
+        return [];
+    }
   };
 
-  const handlePlayMusic = (song: any) => {
-    // 필요에 따라 onPlayTrack 또는 onPlaySong 사용 
-    if (onPlaySong) {
-      onPlaySong(song);
-    } else if (onPlayTrack) {
-      onPlayTrack(song);
-    }
+  const handlePlaySong = (track: RecommendSong) => {
+    const songData = {
+      id: track.song.songId,
+      title: track.song.songTitle,
+      artist: track.song.songSinger,
+      thumbnail: track.song.songImage,
+      duration: track.song.songDuration,
+      difficulty: 'medium' as 'medium',
+      notes: [],
+      bpm: 120,
+      songVoiceFileUrl: track.song.songVoiceFileUrl
+    };
+    onPlaySong(songData);
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
-      className="bg-white/5 backdrop-blur-md rounded-xl p-6 shadow-lg"
+      transition={{ delay: 0.3 }}
+      className="bg-white/5 backdrop-blur-md rounded-xl p-6 mt-6 shadow-lg"
     >
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -418,97 +439,87 @@ const RankingSection: React.FC<RankingSectionProps> = ({
             transition={{ duration: 0.3 }}
           >
             {rankingType === 'music' ? (
-              <div className="space-y-2">
-                {getCurrentRanking().map((song, index) => (
+              getCurrentTracks().length > 0 ? (
+                getCurrentTracks().map((track, index) => (
                   <motion.div
-                    key={`${song.songId}-${index}`}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{
-                      duration: 0.4,
-                      delay: 0.1 + index * 0.1,
-                      ease: 'easeOut',
-                    }}
+                    key={track.recommendSongId}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + index * 0.1 }}
                     className="relative group"
                     onMouseEnter={() => setHoveredTrack(index)}
                     onMouseLeave={() => setHoveredTrack(null)}
                   >
                     <div
                       className={`
-                        flex items-center gap-3 p-3 rounded-lg transition-all duration-300
+                        flex items-center gap-4 p-3 rounded-xl transition-all duration-300
                         ${hoveredTrack === index ? 'bg-white/10 transform scale-[1.02]' : 'hover:bg-white/5'}
+                        cursor-pointer
                       `}
-                      onClick={() => handlePlayMusic(song)}
+                      onClick={() => handlePlaySong(track)}
                     >
                       <div className="w-6 text-center">
-                        <span
-                          className={`
-                            text-sm font-bold transition-colors duration-300
-                            ${hoveredTrack === index ? 'text-amber-500' : 'text-zinc-600'}
-                          `}
-                        >
+                        <span className={`text-sm font-bold transition-colors duration-300 ${
+                          hoveredTrack === index ? 'text-amber-500' : 'text-zinc-600'
+                        }`}>
                           {(index + 1).toString().padStart(2, '0')}
                         </span>
                       </div>
 
-                      <div className="relative w-10 h-10 rounded-md overflow-hidden">
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
                         <img
-                          src={song.songImage}
-                          alt={song.songTitle}
+                          src={track.song.songImage}
+                          alt={track.song.songTitle}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.src = '/default-song-image.png';
                           }}
                         />
-                        <div
-                          className={`
-                            absolute inset-0 bg-gradient-to-br from-amber-500/20 to-purple-500/20
-                            transition-opacity duration-300
-                            ${hoveredTrack === index ? 'opacity-100' : 'opacity-0'}
-                          `}
-                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-white text-sm truncate">{song.songTitle}</h4>
-                        <p className="text-xs text-amber-400/80 truncate">{song.songSinger}</p>
+                        <h3 className="text-white font-medium text-sm truncate">
+                          {track.song.songTitle}
+                        </h3>
+                        <p className="text-zinc-400 text-xs truncate">
+                          {track.song.songSinger}
+                        </p>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <div
-                          className={`
-                            p-2 rounded-full transition-all duration-300
-                            ${hoveredTrack === index ? 'bg-amber-500' : 'bg-white/5'}
-                          `}
-                        >
-                          <svg
-                            className={`w-4 h-4 ${hoveredTrack === index ? 'text-white' : 'text-zinc-400'}`}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                            />
-                          </svg>
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="w-8 h-8 flex items-center justify-center bg-amber-500 rounded-full text-white">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                              />
+                            </svg>
+                          </button>
                         </div>
                       </div>
-
-                      <div
-                        className={`
-                          absolute inset-0 bg-gradient-to-r from-amber-500/5 to-purple-500/5 rounded-lg
-                          transition-opacity duration-300 pointer-events-none
-                          ${hoveredTrack === index ? 'opacity-100' : 'opacity-0'}
-                        `}
-                      />
                     </div>
                   </motion.div>
-                ))}
-              </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto bg-zinc-700/50 rounded-full flex items-center justify-center mb-3">
+                    <svg className="w-8 h-8 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                      />
+                    </svg>
+                  </div>
+                  <p className="text-zinc-400 text-sm">랭킹 정보가 없습니다.</p>
+                </div>
+              )
             ) : (
               renderUserRankings()
             )}

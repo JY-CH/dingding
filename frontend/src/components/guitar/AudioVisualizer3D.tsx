@@ -2,11 +2,11 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Visualization } from '../../types/guitar';
 
-interface AudioVisualizer3DProps {
+interface AudioVisualizerProps {
   visualization: Visualization;
 }
 
-const AudioVisualizer3D: React.FC<AudioVisualizer3DProps> = ({ visualization }) => {
+const AudioVisualizer3D: React.FC<AudioVisualizerProps> = ({ visualization }) => {
   // 적절한 민감도로 데이터 처리
   const averageLevel = useMemo(() => {
     // 중저음과 고음에 적당한 가중치 부여 (약간 낮춤)
@@ -41,27 +41,27 @@ const AudioVisualizer3D: React.FC<AudioVisualizer3DProps> = ({ visualization }) 
   };
 
   return (
-    <div className="h-full flex items-center justify-center">
-      {/* 축소된 측정기 */}
-      <div className="relative h-[85%] w-4 bg-black/40 rounded-full overflow-hidden">
+    <div className="w-full h-full flex items-end justify-center pb-4">
+      {/* 가로로 눕힌 측정기 */}
+      <div className="relative w-[85%] h-4 bg-black/40 rounded-full overflow-hidden">
         <motion.div 
-          className={`absolute bottom-0 w-full rounded-t-full bg-gradient-to-t ${getColor(averageLevel)}`}
+          className={`absolute left-0 h-full rounded-r-full bg-gradient-to-r ${getColor(averageLevel)}`}
           style={{ 
-            height: `${Math.max(averageLevel * 100, 10)}%`, // 최소 높이를 3%에서 10%로 증가
+            width: `${Math.max(averageLevel * 100, 10)}%`,
             boxShadow: `0 0 5px ${getGlowColor(averageLevel)}`
           }}
-          animate={{ height: `${Math.max(averageLevel * 100, 10)}%` }}
+          animate={{ width: `${Math.max(averageLevel * 100, 10)}%` }}
           transition={{ duration: 0.1 }}
         />
         
         <motion.div 
-          className="absolute w-full h-1 rounded-full"
+          className="absolute h-full w-1 rounded-full"
           style={{
             background: getGlowColor(averageLevel),
-            bottom: `${Math.max(averageLevel * 100, 10)}%`, // 최소 높이를 3%에서 10%로 증가
+            left: `${Math.max(averageLevel * 100, 10)}%`,
             boxShadow: `0 0 6px ${getGlowColor(averageLevel)}`
           }}
-          animate={{ bottom: `${Math.max(averageLevel * 100, 10)}%` }}
+          animate={{ left: `${Math.max(averageLevel * 100, 10)}%` }}
           transition={{ duration: 0.1 }}
         />
       </div>

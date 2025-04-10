@@ -90,13 +90,16 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   const [shadowNotes, setShadowNotes] = useState<Note[]>([]);
   const [_currentSheetIndex, setCurrentSheetIndex] = useState<number>(0);
   const [_gameStartTime, setGameStartTime] = useState<number | null>(null);
-  const [, setCurrentTime] = useState<number>(0);
+  const [currentTime, setCurrentTime] = useState<number>(0);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
   // const [instrumentVolume, setInstrumentVolume] = useState<number>(0.5);
   const [selectedChord, setSelectedChord] = useState('C');
   const [feedbacks, setFeedbacks] = useState<FeedbackMessage[]>([]);
   const requestRef = useRef<number | null>(null);
   const shadowNotesRef = useRef<Note[]>([]);
+  const startTimeRef = useRef<number>(0);
+  const animationFrameRef = useRef<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const stringColors = [
     'rgba(251, 191, 36, 0.6)',   // 1번줄 - amber-400 (가장 얇은 줄)
@@ -874,28 +877,134 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   );
 
   // 연주 시작/종료 처리 함수
-  const handlePlayToggle = () => {
+  const handlePlayToggle = async () => {
     if (!currentSong) {
       addFeedback("연주할 곡을 선택해주세요", "warning");
       return;
     }
-    onPlayingChange(!isPlaying);
+    
+    if (!isPlaying) {
+      try {
+        // 시작 전 모든 상태 초기화
+        await handleStop();
+        
+        // 연주 시작
+        startTimeRef.current = Date.now();
+        setTestNotes([]); // 노트 초기화
+        setShadowNotes([]); // 그림자 노트 초기화
+        setCurrentSheetIndex(0); // 악보 인덱스 초기화
+        onSheetIndexChange(0); // 부모 컴포넌트 악보 인덱스 업데이트
+        setGameStartTime(Date.now()); // 게임 시작 시간 설정
+        
+        if (audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.playbackRate = playbackSpeed;
+          await audioRef.current.play().catch(error => {
+            console.error('오디오 재생 실패:', error);
+            addFeedback("오디오 재생에 실패했습니다", "error");
+            handleStop();
+            return;
+          });
+        }
+        onPlayingChange(true);
+        addFeedback("연주를 시작합니다", "success");
+      } catch (error) {
+        console.error('연주 시작 실패:', error);
+        handleStop();
+      }
+    } else {
+      handleStop();
+    }
   };
 
   // 연주 종료 처리 함수
-  const handleStop = () => {
-    onPlayingChange(false);
-    // 여기에 연주 종료 시 필요한 초기화 로직 추가
+  const handleStop = async () => {
+    try {
+      // 애니메이션 프레임 정리
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+        requestRef.current = null;
+      }
+
+      // 오디오 정리
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+
+      // 상태 초기화
+      setTestNotes([]); // 노트 초기화
+      setShadowNotes([]); // 그림자 노트 초기화
+      setCurrentSheetIndex(0); // 악보 인덱스 초기화
+      onSheetIndexChange(0); // 부모 컴포넌트 악보 인덱스 업데이트
+      setGameStartTime(null); // 게임 시작 시간 초기화
+      setCurrentTime(0); // 현재 시간 초기화
+      
+      // 진행 중인 타이머나 인터벌 정리
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+
+      onPlayingChange(false);
+      
+      // 실제 연주가 시작된 적이 있을 때만 종료 메시지 표시
+      if (startTimeRef.current !== 0) {
+        addFeedback("연주를 종료했습니다", "warning");
+      }
+      startTimeRef.current = 0;
+    } catch (error) {
+      console.error('연주 종료 중 오류 발생:', error);
+      addFeedback("연주 종료 중 오류가 발생했습니다", "error");
+    }
   };
 
+  // 컴포넌트 언마운트 시 정리
+  useEffect(() => {
+    return () => {
+      handleStop();
+    };
+  }, []);
+
+  // 오디오 재생 속도 변경 시 처리
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackSpeed;
+    }
+  }, [playbackSpeed]);
+
+  // 오디오 종료 시 처리
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.onended = () => {
+        handleStop();
+      };
+    }
+  }, []);
+
+  // 연주 상태 변경 감지 및 처리
+  useEffect(() => {
+    if (!isPlaying && startTimeRef.current !== 0) {
+      handleStop();
+    }
+  }, [isPlaying]);
+
+  // 노트 생성 및 게임 로직
   useEffect(() => {
     if (!isPlaying || !songDetail) return;
     
-    // 게임 시작 시 초기화
-    setTestNotes([]);
-    setShadowNotes([]);
-    setCurrentSheetIndex(0);
-    onSheetIndexChange(0);
+    let timeoutIds: NodeJS.Timeout[] = [];
+    let isActive = true;
+    
+    const cleanup = () => {
+      isActive = false;
+      timeoutIds.forEach(clearTimeout);
+      timeoutIds = [];
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+        requestRef.current = null;
+      }
+    };
     
     // 게임 시작 시간 설정
     const startTime = Date.now();
@@ -907,20 +1016,17 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
     let currentIndex = 0;
     const chordCount = songDetail.sheetMusicResponseDtos.length;
     const allChords = [...songDetail.sheetMusicResponseDtos]
-      .sort((a, b) => a.sheetOrder - b.sheetOrder);  // 순서대로 정렬
+      .sort((a, b) => a.sheetOrder - b.sheetOrder);
     
-    // 코드 사이의 간격 시간 (현재는 데이터가 모두 같은 타이밍인 것 같아서 강제로 간격 설정)
-    const INTERVAL_SECONDS = 3.0;  // 3초 간격으로 설정
+    const INTERVAL_SECONDS = 3.0;
     
-    // 코드 생성 함수
     const createNextChord = () => {
+      if (!isActive) return;
       if (currentIndex < chordCount) {
         const chord = allChords[currentIndex];
         
-        // 실제로 코드를 생성하는 로직
         console.log(`코드 생성: ${chord.chord}, 순서: ${chord.sheetOrder}, 순차적 출력 ${currentIndex+1}/${chordCount}`);
         
-        // 코드에 맞는 생성 함수 호출
         switch(chord.chord) {
           case 'Am':
             createAmChordNoteWithTiming(chord.sheetOrder);
@@ -942,55 +1048,46 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
             createChordNoteWithTiming(chord.chord, chord.sheetOrder, setTestNotes, setShadowNotes);
         }
         
-        // 악보 인덱스 업데이트
-        setCurrentSheetIndex(chord.sheetOrder);
-        onSheetIndexChange(chord.sheetOrder);
-        
-        // 현재 코드 정보 업데이트
-        if (onChordChange) {
-          onChordChange(null);
-        }
-        
-        // 다음 코드 인덱스로 증가
-        currentIndex++;
-        
-        // 다음 코드 생성 시간 예약 (1초 후)
-        if (currentIndex < chordCount && isPlaying) {
-          setTimeout(createNextChord, INTERVAL_SECONDS * 1000);
+        if (isActive) {
+          setCurrentSheetIndex(chord.sheetOrder);
+          onSheetIndexChange(chord.sheetOrder);
+          
+          if (onChordChange) {
+            onChordChange(null);
+          }
+          
+          currentIndex++;
+          
+          if (currentIndex < chordCount && isPlaying) {
+            const timeoutId = setTimeout(createNextChord, INTERVAL_SECONDS * 1000);
+            timeoutIds.push(timeoutId);
+          }
         }
       }
     };
     
-    // 첫 번째 코드 생성 시작 (2초 후)
     const initialDelay = setTimeout(() => {
-      createNextChord();
+      if (isActive) {
+        createNextChord();
+      }
     }, 2000);
+    timeoutIds.push(initialDelay);
     
-    // 실시간 시간 업데이트를 위한 애니메이션 프레임
     const updateTime = () => {
+      if (!isActive) return;
+      
       const currentTime = Date.now();
       const elapsedTime = (currentTime - startTime) / 1000;
       setCurrentTime(elapsedTime);
       
-      if (isPlaying) {
+      if (isPlaying && isActive) {
         requestRef.current = requestAnimationFrame(updateTime);
       }
     };
     
-    // 애니메이션 시작
     requestRef.current = requestAnimationFrame(updateTime);
     
-    // 언마운트 또는 isPlaying이 false로 바뀔 때 실행되는 cleanup 함수
-    return () => {
-      console.log('===== 노트 생성 중단 =====');
-      clearTimeout(initialDelay);
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
-        requestRef.current = null;
-      }
-      setGameStartTime(null);
-      setCurrentTime(0);
-    };
+    return cleanup;
   }, [isPlaying, songDetail, onSheetIndexChange, onChordChange]);
 
   // 타이밍 정보를 포함한 코드 생성 함수 예시 (Am)
@@ -1036,8 +1133,8 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
       </style>
       <FeedbackNotifications />
       
-      {/* 테스트 버튼들 */}
-      <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+      {/* 테스트 버튼들 - 숨김 처리 */}
+      <div className="hidden absolute top-4 left-4 flex flex-wrap gap-2 z-10">
         {/* 피드백 테스트 버튼들 */}
         <div className="flex gap-2">
           <button
@@ -1153,39 +1250,44 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
           onClick={handlePlayToggle}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          disabled={!currentSong}
           className={`
             px-4 py-2 rounded-lg flex items-center gap-2 font-medium text-sm
             transition-colors duration-200
-            ${isPlaying 
-              ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30' 
-              : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30'
-            }
-          `}
-        >
-          <HiPlay className={`w-4 h-4 ${isPlaying ? 'hidden' : 'block'}`} />
-          <span>{isPlaying ? '연주 중...' : '시작'}</span>
-        </motion.button>
-
-        <motion.button
-          onClick={handleStop}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          disabled={!isPlaying}
-          className={`
-            px-4 py-2 rounded-lg flex items-center gap-2 font-medium text-sm
-            transition-colors duration-200
-            ${!isPlaying
+            ${!currentSong 
               ? 'bg-zinc-500/10 text-zinc-400 cursor-not-allowed'
-              : 'bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 border border-rose-500/30'
+              : isPlaying 
+                ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30' 
+                : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30'
             }
           `}
         >
-          <HiStop className="w-4 h-4" />
-          <span>종료</span>
+          {isPlaying ? (
+            <>
+              <HiStop className="w-4 h-4" />
+              <span>정지</span>
+            </>
+          ) : (
+            <>
+              <HiPlay className="w-4 h-4" />
+              <span>시작</span>
+            </>
+          )}
         </motion.button>
       </div>
 
       {renderTimelineContent()}
+
+      {currentSong && (
+        <audio
+          ref={audioRef}
+          src={currentSong.songVoiceFileUrl}
+          onEnded={() => {
+            onPlayingChange(false);
+            setCurrentTime(0);
+          }}
+        />
+      )}
     </div>
   );
 };

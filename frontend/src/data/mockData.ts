@@ -187,38 +187,38 @@ export const mockMonthlyTracks: Song[] = [
 export const mockArtists: Artist[] = [
   {
     id: '1',
-    name: 'NewJeans',
-    image: 'https://i.scdn.co/image/ab6761610000e5eb42f6aa1e748206bbf3d2a3e4',
-    followers: 2564789,
-    genres: ['K-Pop', 'Pop']
+    name: 'G-DRAGON',
+    image: '/src/assets/GD_profile.jpg',
+    followers: 8954321,
+    genres: ['K-Pop', 'Hip-hop']
   },
   {
     id: '2',
-    name: 'The Weeknd',
-    image: 'https://i.scdn.co/image/ab6761610000e5ebe5541c2f2ff9d6ff868e221f',
-    followers: 8954321,
-    genres: ['R&B', 'Pop']
+    name: 'Ed Sheeran',
+    image: '/src/assets/에드시런.jpg',
+    followers: 12458963,
+    genres: ['Pop', 'Folk']
   },
   {
     id: '3',
-    name: 'Jung Kook',
-    image: 'https://i.scdn.co/image/ab6761610000e5ebb1072333f5da991666613775',
+    name: '투모로우바이투게더',
+    image: '/src/assets/투모로우바이투게더.jpg',
     followers: 4125698,
     genres: ['K-Pop', 'Pop']
   },
   {
     id: '4',
-    name: 'FIFTY FIFTY',
-    image: 'https://i.scdn.co/image/ab6761610000e5eb4d1fea9353f28d38f2c3ebcf',
-    followers: 1285634,
+    name: 'JENNIE',
+    image: '/src/assets/제니.jpg',
+    followers: 7285634,
     genres: ['K-Pop', 'Pop']
   },
   {
     id: '5',
-    name: 'Taylor Swift',
-    image: 'https://i.scdn.co/image/ab6761610000e5eb6a224073987b930f99adc706',
-    followers: 12458963,
-    genres: ['Pop', 'Country']
+    name: 'Oasis',
+    image: '/src/assets/오아시스.jpg',
+    followers: 6458963,
+    genres: ['Rock', 'Britpop']
   }
 ];
 

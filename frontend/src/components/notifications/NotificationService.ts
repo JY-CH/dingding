@@ -6,6 +6,7 @@ import { NotificationType, useNotificationStore } from '../../store/useNotificat
  */
 class NotificationService {
   private timers: Record<string, NodeJS.Timeout> = {};
+  private store = useNotificationStore;
 
   /**
    * 알림 생성
@@ -16,9 +17,9 @@ class NotificationService {
     type: NotificationType = 'info',
     link?: string
   ) {
-    const { addNotification } = useNotificationStore.getState();
+    const store = this.store.getState();
     
-    addNotification({
+    store.addNotification({
       title,
       message,
       type,
