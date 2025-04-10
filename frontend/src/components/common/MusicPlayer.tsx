@@ -167,7 +167,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ songs, initialSongIndex = 0 }
       <div className="flex items-center gap-4 min-w-[288px] w-72">
         <div className="relative w-14 h-14 flex-shrink-0 group">
           <img
-            src={currentSong.thumbnail}
+            src={currentSong.songImage || currentSong.thumbnail}
             alt={currentSong.title}
             className="w-full h-full object-cover rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105"
             style={{

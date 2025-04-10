@@ -25,6 +25,9 @@ export interface Song {
   category: string;
   songDuration: string;
   notes: Note[];
+  difficulty?: string;
+  thumbnail?: string;
+  bpm?: number;
 }
 
 // 노트 히트 판정 결과

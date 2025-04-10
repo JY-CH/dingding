@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
 import GameModeNavbar from '../components/common/GameModeNavbar';
 import WebcamView from '../components/performance/WebcamView';
 import Playlist from '../components/performance/Playlist';
@@ -12,9 +11,6 @@ import { Visualization } from '../types/guitar';
 import { Song, ChordChange, SongDetailResponse } from '../types/performance';
 
 const PerformancePage: React.FC = () => {
-  const location = useLocation();
-  const initialPlaylist = location.state?.playlist || [];
-  
   const [showStats, setShowStats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isWebcamOn, setIsWebcamOn] = useState(false);

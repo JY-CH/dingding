@@ -23,22 +23,16 @@ interface MainPageProps {
 const MainPage: React.FC<MainPageProps> = ({ onPlaySong }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [isAllNotificationsModalOpen, setIsAllNotificationsModalOpen] = useState(false);
   const { isAuthenticated, user, clearAuth } = useAuthStore();
   const [query, setQuery] = useState<string>('');
-  const [currentSong, setCurrentSong] = useState<any>(null);
 
   // 프로필 메뉴 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
-      }
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
-        setIsNotificationOpen(false);
       }
     };
 
@@ -47,7 +41,6 @@ const MainPage: React.FC<MainPageProps> = ({ onPlaySong }) => {
   }, []);
 
   const handlePlaySong = (song: any) => {
-    setCurrentSong(song);
     onPlaySong(song);
   };
 
@@ -271,6 +264,7 @@ const MainPage: React.FC<MainPageProps> = ({ onPlaySong }) => {
                   weeklyTracks={mockWeeklyTracks}
                   monthlyTracks={mockMonthlyTracks}
                   onPlayTrack={handlePlaySong}
+                  onPlaySong={handlePlaySong}
                 />
               </motion.div>
               <motion.div

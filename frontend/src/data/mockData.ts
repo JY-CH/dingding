@@ -5,6 +5,7 @@ import { Song } from '../types/performance';
 export const mockSongs: Song[] = [
   {
     id: 1,
+    songId: 1,
     title: 'Blinding Lights',
     artist: 'The Weeknd',
     difficulty: 'medium',
@@ -12,10 +13,18 @@ export const mockSongs: Song[] = [
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b27301f1d35d045186e5c8c05a50',
     notes: [],
     bpm: 120,
-    audio: 'https://example.com/audio1.mp3'
+    songTitle: 'Blinding Lights',
+    songImage: 'https://i.scdn.co/image/ab67616d0000b27301f1d35d045186e5c8c05a50',
+    songWriter: 'The Weeknd',
+    songSinger: 'The Weeknd',
+    songVoiceFileUrl: '',
+    releaseDate: '2020-01-01',
+    category: 'Pop',
+    songDuration: '3:23'
   },
   {
     id: 2,
+    songId: 2,
     title: 'Hype Boy',
     artist: 'NewJeans',
     difficulty: 'easy',
@@ -23,10 +32,18 @@ export const mockSongs: Song[] = [
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b2736ec634e5fa8d4b54d661baa7',
     notes: [],
     bpm: 110,
-    audio: 'https://example.com/audio2.mp3'
+    songTitle: 'Hype Boy',
+    songImage: 'https://i.scdn.co/image/ab67616d0000b2736ec634e5fa8d4b54d661baa7',
+    songWriter: 'NewJeans',
+    songSinger: 'NewJeans',
+    songVoiceFileUrl: '',
+    releaseDate: '2022-08-01',
+    category: 'K-Pop',
+    songDuration: '3:00'
   },
   {
     id: 3,
+    songId: 3,
     title: 'Seven (feat. Latto)',
     artist: 'Jung Kook',
     difficulty: 'hard',
@@ -34,10 +51,18 @@ export const mockSongs: Song[] = [
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b273bf5cce5a0e1ed03a626bdd74',
     notes: [],
     bpm: 125,
-    audio: 'https://example.com/audio3.mp3'
+    songTitle: 'Seven (feat. Latto)',
+    songImage: 'https://i.scdn.co/image/ab67616d0000b273bf5cce5a0e1ed03a626bdd74',
+    songWriter: 'Jung Kook',
+    songSinger: 'Jung Kook',
+    songVoiceFileUrl: '',
+    releaseDate: '2023-07-14',
+    category: 'K-Pop',
+    songDuration: '3:14'
   },
   {
     id: 4,
+    songId: 4,
     title: 'Cupid',
     artist: 'FIFTY FIFTY',
     difficulty: 'medium',
@@ -45,10 +70,18 @@ export const mockSongs: Song[] = [
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b273849b5b629ce9aceb822f7905',
     notes: [],
     bpm: 115,
-    audio: 'https://example.com/audio4.mp3'
+    songTitle: 'Cupid',
+    songImage: 'https://i.scdn.co/image/ab67616d0000b273849b5b629ce9aceb822f7905',
+    songWriter: 'FIFTY FIFTY',
+    songSinger: 'FIFTY FIFTY',
+    songVoiceFileUrl: '',
+    releaseDate: '2023-02-24',
+    category: 'K-Pop',
+    songDuration: '2:55'
   },
   {
     id: 5,
+    songId: 5,
     title: 'OMG',
     artist: 'NewJeans',
     difficulty: 'medium',
@@ -56,7 +89,14 @@ export const mockSongs: Song[] = [
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b273d70036292d54f29e8b68ec01',
     notes: [],
     bpm: 118,
-    audio: 'https://example.com/audio5.mp3'
+    songTitle: 'OMG',
+    songImage: 'https://i.scdn.co/image/ab67616d0000b273d70036292d54f29e8b68ec01',
+    songWriter: 'NewJeans',
+    songSinger: 'NewJeans',
+    songVoiceFileUrl: '',
+    releaseDate: '2023-01-02',
+    category: 'K-Pop',
+    songDuration: '3:08'
   }
 ];
 
@@ -65,33 +105,60 @@ export const mockTopSongs: Song[] = [
   ...mockSongs,
   {
     id: 6,
+    songId: 6,
     title: 'Smoke',
     artist: 'Dynamic Duo, Choiza, Gaeko, Mirani',
     difficulty: 'hard',
     duration: '3:25',
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b273c8d3b11fd5331c5c3abac16a',
     notes: [],
-    bpm: 128
+    bpm: 128,
+    songTitle: 'Smoke',
+    songImage: 'https://i.scdn.co/image/ab67616d0000b273c8d3b11fd5331c5c3abac16a',
+    songWriter: 'Dynamic Duo',
+    songSinger: 'Dynamic Duo, Choiza, Gaeko, Mirani',
+    songVoiceFileUrl: '',
+    releaseDate: '2022-05-15',
+    category: 'K-Hip-Hop',
+    songDuration: '3:25'
   },
   {
     id: 7,
+    songId: 7,
     title: 'Anti-Hero',
     artist: 'Taylor Swift',
     difficulty: 'medium',
     duration: '3:30',
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5',
     notes: [],
-    bpm: 122
+    bpm: 122,
+    songTitle: 'Anti-Hero',
+    songImage: 'https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5',
+    songWriter: 'Taylor Swift',
+    songSinger: 'Taylor Swift',
+    songVoiceFileUrl: '',
+    releaseDate: '2022-10-21',
+    category: 'Pop',
+    songDuration: '3:30'
   },
   {
     id: 8,
+    songId: 8,
     title: 'Dangerously',
     artist: 'Charlie Puth',
     difficulty: 'easy',
     duration: '3:18',
     thumbnail: 'https://i.scdn.co/image/ab67616d0000b273633a2d775747bccfbcb17a45',
     notes: [],
-    bpm: 116
+    bpm: 116,
+    songTitle: 'Dangerously',
+    songImage: 'https://i.scdn.co/image/ab67616d0000b273633a2d775747bccfbcb17a45',
+    songWriter: 'Charlie Puth',
+    songSinger: 'Charlie Puth',
+    songVoiceFileUrl: '',
+    releaseDate: '2016-11-11',
+    category: 'Pop',
+    songDuration: '3:18'
   }
 ];
 

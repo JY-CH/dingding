@@ -34,13 +34,12 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   const [testNotes, setTestNotes] = useState<Note[]>([]);
   const [activeStrings, setActiveStrings] = useState<number[]>([]);
   const [shadowNotes, setShadowNotes] = useState<Note[]>([]);
-  const [currentSheetIndex, setCurrentSheetIndex] = useState<number>(0);
-  const [gameStartTime, setGameStartTime] = useState<number | null>(null);
-  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [_currentSheetIndex, setCurrentSheetIndex] = useState<number>(0);
+  const [_gameStartTime, setGameStartTime] = useState<number | null>(null);
+  const [__, setCurrentTime] = useState<number>(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [selectedChord, setSelectedChord] = useState('C');
   const [feedbacks, setFeedbacks] = useState<FeedbackMessage[]>([]);
-  const [currentChordIndex, setCurrentChordIndex] = useState(0);
   const requestRef = useRef<number | null>(null);
 
   const stringColors = [
@@ -1233,79 +1232,101 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
     setCurrentSheetIndex(0);
     onSheetIndexChange(0);
     
+    // 게임 시작 시간 설정
+    const startTime = Date.now();
+    setGameStartTime(startTime);
+    
     console.log('===== 노트 생성 시작 =====');
     
-    // 데이터 받아오기
-    const sheets = songDetail.sheetMusicResponseDtos;
-    
-    // 첫 번째 코드 생성 타이밍 설정
-    let currentIndex = 0;
-    
-    // 첫 번째 코드 생성
-    const generateChord = () => {
-      if (currentIndex < sheets.length) {
-        const currentSheet = sheets[currentIndex];
-        console.log(`코드 생성: ${currentSheet.chord}, 순서: ${currentSheet.sheetOrder}, 타이밍: ${currentSheet.chordTiming}초`);
+    // 코드 생성 애니메이션 프레임 함수
+    const animate = () => {
+      const currentTime = Date.now();
+      const elapsedTime = (currentTime - startTime) / 1000; // 경과 시간(초)
+      
+      // 현재 시간 업데이트
+      setCurrentTime(elapsedTime);
+      
+      // 모든 악보 데이터를 순회하면서 코드 생성 확인
+      songDetail.sheetMusicResponseDtos.forEach(sheet => {
+        // 이미 생성된 코드인지 확인하기 위한 키 생성
+        const chordKey = `${sheet.chord}-${sheet.sheetOrder}`;
         
-        // 코드 노트 생성
-        createChordNoteWithTiming(currentSheet.chord, currentSheet.sheetOrder);
-        
-        // 현재 악보 인덱스 업데이트
-        setCurrentSheetIndex(currentSheet.sheetOrder);
-        onSheetIndexChange(currentSheet.sheetOrder);
-        
-        // 다음 코드
-        currentIndex++;
-        
-        // 다음 코드가 있으면 타이밍 설정
-        if (currentIndex < sheets.length) {
-          const nextSheet = sheets[currentIndex];
-          const timeDiff = nextSheet.chordTiming - currentSheet.chordTiming;
+        // 해당 코드의 생성 시간이 경과 시간에 해당하는지 확인 (약간의 여유 추가)
+        if (Math.abs(sheet.chordTiming - elapsedTime) < 0.05 && 
+            !generatedChords.has(chordKey)) {
           
-          // 실제 시간(초)을 밀리초로 변환하여 다음 코드 생성 예약
-          const delayMs = timeDiff * 1000;
-          console.log(`다음 코드 예약: ${delayMs}ms 후 (${nextSheet.chord}, 타이밍: ${nextSheet.chordTiming}초)`);
+          console.log(`코드 생성: ${sheet.chord}, 순서: ${sheet.sheetOrder}, 타이밍: ${sheet.chordTiming}초, 현재 시간: ${elapsedTime.toFixed(2)}초`);
           
-          setTimeout(generateChord, delayMs);
-        } else {
-          console.log('===== 모든 코드 생성 완료 =====');
+          // createChordNoteWithTiming 함수 사용
+          createChordNoteWithTiming(sheet.chord, sheet.sheetOrder);
+          
+          // 현재 악보 인덱스 업데이트
+          setCurrentSheetIndex(sheet.sheetOrder);
+          onSheetIndexChange(sheet.sheetOrder);
+          
+          // 현재 코드 정보 업데이트
+          if (onChordChange) {
+            onChordChange({
+              id: Date.now(),
+              chord: sheet.chord,
+              timing: sheet.chordTiming,
+              strings: [1, 2, 3], // 예시 값, 필요에 따라 조정
+              fretPositions: [0, 0, 0] // 예시 값, 필요에 따라 조정
+            });
+          }
+          
+          // 생성된 코드 목록에 추가
+          generatedChords.add(chordKey);
         }
+      });
+      
+      // 게임이 계속 진행 중이면 다음 프레임 요청
+      if (isPlaying) {
+        requestRef.current = requestAnimationFrame(animate);
       }
     };
     
-    // 첫 번째 코드 생성 시작
-    console.log('첫 번째 코드 생성 시작');
-    generateChord();
+    // 생성된 코드를 추적하는 Set
+    const generatedChords = new Set<string>();
+    
+    // 애니메이션 시작
+    requestRef.current = requestAnimationFrame(animate);
     
     // 컴포넌트 언마운트 또는 isPlaying이 false로 바뀔 때 실행
     return () => {
       console.log('===== 노트 생성 중단 =====');
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+        requestRef.current = null;
+      }
+      setGameStartTime(null);
+      setCurrentTime(0);
     };
-  }, [isPlaying, songDetail, onSheetIndexChange]);
+  }, [isPlaying, songDetail, onSheetIndexChange, onChordChange]);
 
   // 코드 생성 함수 수정
-  const createChordNote = (chord: string, sheetOrder: number) => {
-    switch (chord) {
-      case 'Am':
-        createAmChordNoteWithTiming(sheetOrder);
-        break;
-      case 'C':
-        createCChordNoteWithTiming(sheetOrder);
-        break;
-      case 'D':
-        createDChordNoteWithTiming(sheetOrder);
-        break;
-      case 'Em':
-        createEmChordNoteWithTiming(sheetOrder);
-        break;
-      case 'G':
-        createGChordNoteWithTiming(sheetOrder);
-        break;
-      // 다른 코드들에 대한 case 추가
-      default:
-        console.warn('Unsupported chord:', chord);
-    }
-  };
+  // const createChordNote = (chord: string, sheetOrder: number) => {
+  //   switch (chord) {
+  //     case 'Am':
+  //       createAmChordNoteWithTiming(sheetOrder);
+  //       break;
+  //     case 'C':
+  //       createCChordNoteWithTiming(sheetOrder);
+  //       break;
+  //     case 'D':
+  //       createDChordNoteWithTiming(sheetOrder);
+  //       break;
+  //     case 'Em':
+  //       createEmChordNoteWithTiming(sheetOrder);
+  //       break;
+  //     case 'G':
+  //       createGChordNoteWithTiming(sheetOrder);
+  //       break;
+  //     // 다른 코드들에 대한 case 추가
+  //     default:
+  //       console.warn('Unsupported chord:', chord);
+  //   }
+  // };
 
   // 타이밍 정보를 포함한 코드 생성 함수 예시 (Am)
   const createAmChordNoteWithTiming = (sheetOrder: number) => {

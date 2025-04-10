@@ -473,16 +473,13 @@ export const fetchWeekSongRanking = async (): Promise<WeekSongRankingResponse> =
 };
 
 // 주목할 최신곡 응답 인터페이스
-interface NewSongResponse {
-  songId: number;
-  songTitle: string;
-  songImage: string;
-  songSinger: string;
-  songVoiceFileUrl: string;
-  releaseDate: string;
-  category: string;
-  songDuration: string;
-}
+// interface NewSongResponse {
+//   // 새 곡을 추가했을 때 서버에서 반환하는 응답
+//   id: string;
+//   title: string;
+//   artist: string;
+//   // 기타 필요한 속성들...
+// }
 
 // 주목할 최신곡 가져오기
 export const fetchNewSongs = async (): Promise<SongResponse[]> => {

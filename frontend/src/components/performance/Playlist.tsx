@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HiOutlinePlay, HiOutlinePause, HiMusicalNote } from 'react-icons/hi2';
+import { HiOutlinePlay, HiOutlinePause } from 'react-icons/hi2';
 import { HiOutlineCollection, HiOutlineHeart, HiOutlineHeart as HiOutlineClock } from 'react-icons/hi';
 import { HiChevronRight, HiOutlineSearch, HiX } from 'react-icons/hi';
 import { Song } from '../../types/performance';
@@ -14,7 +14,7 @@ const Playlist: React.FC<PlaylistProps> = ({ onSongSelect, initialSongs = [] }) 
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'favorites' | 'recent'>('all');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);

@@ -17,9 +17,9 @@ interface RankUser {
 }
 
 interface RankingSectionProps {
-  dailyTracks: Song[];
-  weeklyTracks: Song[];
-  monthlyTracks: Song[];
+  dailyTracks: any[];
+  weeklyTracks: any[];
+  monthlyTracks: any[];
   onPlayTrack: (track: Song) => void;
   onPlaySong: (song: any) => void;
 }
@@ -44,6 +44,13 @@ const RankingSection: React.FC<RankingSectionProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // API 데이터가 없을 때 fallback으로 사용할 값들
+  const fallbackData = {
+    month: monthlyTracks,
+    week: weeklyTracks,
+    day: dailyTracks
+  };
+
   const { data: monthlyRanking = [] } = useQuery({
     queryKey: ['monthlyRanking'],
     queryFn: fetchMonthlyRanking,
@@ -58,17 +65,6 @@ const RankingSection: React.FC<RankingSectionProps> = ({
     queryKey: ['dailyRanking'],
     queryFn: fetchDailyRanking,
   });
-
-  const getTracks = () => {
-    switch (activeTab) {
-      case 'month':
-        return monthlyTracks;
-      case 'week':
-        return weeklyTracks;
-      case 'day':
-        return dailyTracks;
-    }
-  };
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -283,21 +279,28 @@ const RankingSection: React.FC<RankingSectionProps> = ({
   };
 
   const getCurrentRanking = () => {
-    switch (activeTab) {
-      case 'month':
-        return monthlyRanking;
-      case 'week':
-        return weeklyRanking;
-      case 'day':
-        return dailyRanking;
-      default:
-        return [];
-    }
+    // 먼저 API 데이터 사용 시도
+    const apiData = {
+      month: monthlyRanking,
+      week: weeklyRanking,
+      day: dailyRanking
+    };
+
+    // API 데이터가 없으면 props로 받은 데이터 사용
+    const result = apiData[activeTab].length > 0 
+      ? apiData[activeTab] 
+      : fallbackData[activeTab];
+    
+    return result;
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.target as HTMLImageElement;
-    target.src = '/default-song-image.png';
+  const handlePlayMusic = (song: any) => {
+    // 필요에 따라 onPlayTrack 또는 onPlaySong 사용 
+    if (onPlaySong) {
+      onPlaySong(song);
+    } else if (onPlayTrack) {
+      onPlayTrack(song);
+    }
   };
 
   return (
@@ -435,7 +438,7 @@ const RankingSection: React.FC<RankingSectionProps> = ({
                         flex items-center gap-3 p-3 rounded-lg transition-all duration-300
                         ${hoveredTrack === index ? 'bg-white/10 transform scale-[1.02]' : 'hover:bg-white/5'}
                       `}
-                      onClick={() => onPlaySong(song)}
+                      onClick={() => handlePlayMusic(song)}
                     >
                       <div className="w-6 text-center">
                         <span
