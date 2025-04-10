@@ -10,11 +10,7 @@ interface FretboardVisualizerProps {
   };
 }
 
-const FretboardVisualizer: React.FC<FretboardVisualizerProps> = ({
-  strings,
-  activeNotes = [],
-  currentChord,
-}) => {
+const FretboardVisualizer: React.FC<FretboardVisualizerProps> = ({ strings, currentChord }) => {
   const chordFingerings: Record<string, { fingering: number[]; fingers: number[] }> = {
     A: {
       fingering: [0, 0, 2, 2, 2, -1],
