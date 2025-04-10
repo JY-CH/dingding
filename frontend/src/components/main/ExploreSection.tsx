@@ -63,23 +63,41 @@ const ExploreSection: React.FC<ExploreSectionProps> = ({ onUpdatePlaylist }) => 
     const mockSongs: Song[] = [
       {
         id: 1,
+        songId: 1,
         title: `${category} Song 1`,
         artist: "Artist 1",
         difficulty: "easy",
         duration: "3:00",
         thumbnail: "/path/to/cover1.jpg",
         notes: [],
-        bpm: 120
+        bpm: 120,
+        songTitle: `${category} Song 1`,
+        songImage: "/path/to/cover1.jpg",
+        songWriter: "Artist 1",
+        songSinger: "Artist 1",
+        songVoiceFileUrl: "",
+        releaseDate: "2023-01-01",
+        category: category,
+        songDuration: "3:00"
       },
       {
         id: 2,
+        songId: 2,
         title: `${category} Song 2`,
         artist: "Artist 2",
         difficulty: "medium",
         duration: "3:30",
         thumbnail: "/path/to/cover2.jpg",
         notes: [],
-        bpm: 130
+        bpm: 130,
+        songTitle: `${category} Song 2`,
+        songImage: "/path/to/cover2.jpg",
+        songWriter: "Artist 2",
+        songSinger: "Artist 2",
+        songVoiceFileUrl: "",
+        releaseDate: "2023-01-02",
+        category: category,
+        songDuration: "3:30"
       }
     ];
 

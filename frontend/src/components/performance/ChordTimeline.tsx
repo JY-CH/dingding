@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiPlay, HiStop } from 'react-icons/hi2';
 
-import { Song, Note, ChordChange } from '../../types/performance';
+import { Song, Note, ChordChange, SongDetailResponse } from '../../types/performance';
 
 interface FeedbackMessage {
   id: number;
@@ -16,6 +16,9 @@ interface ChordTimelineProps {
   notes: Note[];
   currentChord: ChordChange | null;
   onPlayingChange: (playing: boolean) => void;
+  onChordChange: (chord: ChordChange | null) => void;
+  songDetail: SongDetailResponse | null;
+  onSheetIndexChange: (index: number) => void;
 }
 
 const ChordTimeline: React.FC<ChordTimelineProps> = ({
@@ -23,14 +26,21 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   currentSong,
   notes = [],
   currentChord,
-  onPlayingChange
+  onPlayingChange,
+  onChordChange,
+  songDetail,
+  onSheetIndexChange
 }) => {
   const [testNotes, setTestNotes] = useState<Note[]>([]);
   const [activeStrings, setActiveStrings] = useState<number[]>([]);
   const [shadowNotes, setShadowNotes] = useState<Note[]>([]);
+  const [_currentSheetIndex, setCurrentSheetIndex] = useState<number>(0);
+  const [_gameStartTime, setGameStartTime] = useState<number | null>(null);
+  const [__, setCurrentTime] = useState<number>(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [selectedChord, setSelectedChord] = useState('C');
   const [feedbacks, setFeedbacks] = useState<FeedbackMessage[]>([]);
+  const requestRef = useRef<number | null>(null);
 
   const stringColors = [
     'rgba(251, 191, 36, 0.6)',   // 1번줄 - amber-400 (가장 얇은 줄)
@@ -131,9 +141,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   // C코드 손모양 노트 생성 함수
   const createCChordNote = () => {
     const cChordNotes = [
-      { stringNumber: 2, position: 100, offset: 5, fret: 3 },    // 2번 줄 (3번 프렛)
-      { stringNumber: 3, position: 100, offset: 0, fret: 2 },    // 3번 줄 (2번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 1 }    // 5번 줄 (1번 프렛)
+      { stringNumber: 2, position: 100, offset: 5, fret: 3 },    // 2번 줄 (1번 프렛)
+      { stringNumber: 3, position: 100, offset: 0, fret: 2 },    // 4번 줄 (2번 프렛)
+      { stringNumber: 5, position: 100, offset: -5, fret: 1 }    // 5번 줄 (3번 프렛)
     ];
 
     const newNotes = cChordNotes.map(note => ({
@@ -162,9 +172,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   // A코드 손모양 노트 생성 함수
   const createAChordNote = () => {
     const aChordNotes = [
-      { stringNumber: 3, position: 100, offset: -5, fret: 2 },    // 3번 줄 (2번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 2 },    // 4번 줄 (2번 프렛)
-      { stringNumber: 5, position: 100, offset: 5, fret: 2 }    // 5번 줄 (2번 프렛)
+      { stringNumber: 3, position: 100, offset: -5, fret: 2 },    // 2번 줄 (2번 프렛)
+      { stringNumber: 4, position: 100, offset: 0, fret: 2 },    // 3번 줄 (2번 프렛)
+      { stringNumber: 5, position: 100, offset: 5, fret: 2 }    // 4번 줄 (2번 프렛)
     ];
 
     const newNotes = aChordNotes.map(note => ({
@@ -193,9 +203,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   // Am 코드 손모양 노트 생성 함수
   const createAmChordNote = () => {
     const amChordNotes = [
-      { stringNumber: 3, position: 100, offset: -5, fret: 2 },    // 3번 줄 (2번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 2 },    // 4번 줄 (2번 프렛)
-      { stringNumber: 5, position: 100, offset: 5, fret: 1 }    // 5번 줄 (1번 프렛)
+      { stringNumber: 4, position: 100, offset: 5, fret: 1 },    // 2번 줄 (1번 프렛)
+      { stringNumber: 3, position: 100, offset: 0, fret: 2 },    // 3번 줄 (2번 프렛)
+      { stringNumber: 5, position: 100, offset: -5, fret: 2 }    // 4번 줄 (2번 프렛)
     ];
 
     const newNotes = amChordNotes.map(note => ({
@@ -225,9 +235,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   const createBChordNote = () => {
     const bChordNotes = [
       { stringNumber: 1, position: 100, offset: -5, fret: 2 },    // 1번 줄 (2번 프렛)
-      { stringNumber: 3, position: 100, offset: 0, fret: 4 },    // 3번 줄 (4번 프렛)
-      { stringNumber: 4, position: 100, offset: 5, fret: 4 },    // 4번 줄 (4번 프렛)
-      { stringNumber: 5, position: 100, offset: 0, fret: 2 }    // 5번 줄 (2번 프렛)
+      { stringNumber: 2, position: 100, offset: 0, fret: 4 },    // 2번 줄 (4번 프렛)
+      { stringNumber: 3, position: 100, offset: 5, fret: 4 },    // 3번 줄 (4번 프렛)
+      { stringNumber: 4, position: 100, offset: 0, fret: 4 }     // 4번 줄 (4번 프렛)
     ];
 
     const newNotes = bChordNotes.map(note => ({
@@ -257,9 +267,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   const createBmChordNote = () => {
     const bmChordNotes = [
       { stringNumber: 1, position: 100, offset: -5, fret: 2 },    // 1번 줄 (2번 프렛)
-      { stringNumber: 3, position: 100, offset: 0, fret: 4 },    // 3번 줄 (4번 프렛)
-      { stringNumber: 4, position: 100, offset: 5, fret: 3 },    // 4번 줄 (3번 프렛)
-      { stringNumber: 5, position: 100, offset: 0, fret: 2 }    // 5번 줄 (2번 프렛)
+      { stringNumber: 2, position: 100, offset: 0, fret: 3 },    // 2번 줄 (3번 프렛)
+      { stringNumber: 3, position: 100, offset: 5, fret: 4 },    // 3번 줄 (4번 프렛)
+      { stringNumber: 4, position: 100, offset: 0, fret: 4 }     // 4번 줄 (4번 프렛)
     ];
 
     const newNotes = bmChordNotes.map(note => ({
@@ -319,9 +329,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   // D 코드 손모양 노트 생성 함수
   const createDChordNote = () => {
     const dChordNotes = [
-      { stringNumber: 1, position: 100, offset: -5, fret: 2 },    // 1번 줄 (2번 프렛)
-      { stringNumber: 2, position: 100, offset: 0, fret: 3 },    // 2번 줄 (3번 프렛)
-      { stringNumber: 3, position: 100, offset: 5, fret: 2 }     // 3번 줄 (2번 프렛)
+      { stringNumber: 4, position: 100, offset: -5, fret: 2 },    // 1번 줄 (2번 프렛)
+      { stringNumber: 6, position: 100, offset: 0, fret: 3 },    // 2번 줄 (3번 프렛)
+      { stringNumber: 5, position: 100, offset: 5, fret: 2 }     // 3번 줄 (2번 프렛)
     ];
 
     const newNotes = dChordNotes.map(note => ({
@@ -381,11 +391,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   // E 코드 손모양 노트 생성 함수
   const createEChordNote = () => {
     const eChordNotes = [
-      { stringNumber: 1, position: 100, offset: -5, fret: 0 },    // 1번 줄 (0번 프렛 - 개방)
-      { stringNumber: 2, position: 100, offset: 0, fret: 0 },     // 2번 줄 (0번 프렛 - 개방)
-      { stringNumber: 3, position: 100, offset: 5, fret: 1 },     // 3번 줄 (1번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 2 },     // 4번 줄 (2번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 2 }     // 5번 줄 (2번 프렛)
+      { stringNumber: 3, position: 100, offset: 5, fret: 1 },    // 3번 줄 (1번 프렛)
+      { stringNumber: 4, position: 100, offset: 0, fret: 2 },    // 4번 줄 (2번 프렛)
+      { stringNumber: 5, position: 100, offset: -5, fret: 2 }    // 5번 줄 (2번 프렛)
     ];
 
     const newNotes = eChordNotes.map(note => ({
@@ -414,11 +422,8 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   // Em 코드 손모양 노트 생성 함수
   const createEmChordNote = () => {
     const emChordNotes = [
-      { stringNumber: 1, position: 100, offset: -5, fret: 0 },    // 1번 줄 (0번 프렛 - 개방)
-      { stringNumber: 2, position: 100, offset: 0, fret: 0 },     // 2번 줄 (0번 프렛 - 개방)
-      { stringNumber: 3, position: 100, offset: 5, fret: 0 },     // 3번 줄 (0번 프렛 - 개방)
-      { stringNumber: 4, position: 100, offset: 0, fret: 2 },     // 4번 줄 (2번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 2 }     // 5번 줄 (2번 프렛)
+      { stringNumber: 4, position: 100, offset: 0, fret: 2 },    // 4번 줄 (2번 프렛)
+      { stringNumber: 5, position: 100, offset: -5, fret: 2 }    // 5번 줄 (2번 프렛)
     ];
 
     const newNotes = emChordNotes.map(note => ({
@@ -448,10 +453,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   const createFChordNote = () => {
     const fChordNotes = [
       { stringNumber: 1, position: 100, offset: -5, fret: 1 },    // 1번 줄 (1번 프렛)
-      { stringNumber: 2, position: 100, offset: 0, fret: 1 },     // 2번 줄 (1번 프렛)
-      { stringNumber: 3, position: 100, offset: 5, fret: 2 },     // 3번 줄 (2번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 3 },     // 4번 줄 (3번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 3 }     // 5번 줄 (3번 프렛)
+      { stringNumber: 2, position: 100, offset: 0, fret: 1 },    // 2번 줄 (1번 프렛)
+      { stringNumber: 3, position: 100, offset: 5, fret: 2 },    // 3번 줄 (2번 프렛)
+      { stringNumber: 4, position: 100, offset: 0, fret: 3 }     // 4번 줄 (3번 프렛)
     ];
 
     const newNotes = fChordNotes.map(note => ({
@@ -481,10 +485,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   const createFmChordNote = () => {
     const fmChordNotes = [
       { stringNumber: 1, position: 100, offset: -5, fret: 1 },    // 1번 줄 (1번 프렛)
-      { stringNumber: 2, position: 100, offset: 0, fret: 1 },     // 2번 줄 (1번 프렛)
-      { stringNumber: 3, position: 100, offset: 5, fret: 1 },     // 3번 줄 (1번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 3 },     // 4번 줄 (3번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 3 }     // 5번 줄 (3번 프렛)
+      { stringNumber: 2, position: 100, offset: 0, fret: 1 },    // 2번 줄 (1번 프렛)
+      { stringNumber: 3, position: 100, offset: 5, fret: 1 },    // 3번 줄 (1번 프렛)
+      { stringNumber: 4, position: 100, offset: 0, fret: 3 }     // 4번 줄 (3번 프렛)
     ];
 
     const newNotes = fmChordNotes.map(note => ({
@@ -513,12 +516,9 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   // G 코드 손모양 노트 생성 함수
   const createGChordNote = () => {
     const gChordNotes = [
-      { stringNumber: 1, position: 100, offset: -5, fret: 3 },    // 1번 줄 (3번 프렛)
-      { stringNumber: 2, position: 100, offset: 0, fret: 0 },     // 2번 줄 (0번 프렛 - 개방)
-      { stringNumber: 3, position: 100, offset: 5, fret: 0 },     // 3번 줄 (0번 프렛 - 개방)
-      { stringNumber: 4, position: 100, offset: 0, fret: 0 },     // 4번 줄 (0번 프렛 - 개방)
-      { stringNumber: 5, position: 100, offset: -5, fret: 2 },    // 5번 줄 (2번 프렛)
-      { stringNumber: 6, position: 100, offset: 0, fret: 3 }      // 6번 줄 (3번 프렛)
+      { stringNumber: 2, position: 100, offset: -5, fret: 3 },    // 1번 줄 (3번 프렛)
+      { stringNumber: 1, position: 100, offset: 0, fret: 2 },    // 5번 줄 (2번 프렛)
+      { stringNumber: 6, position: 100, offset: 5, fret: 3 }     // 6번 줄 (3번 프렛)
     ];
 
     const newNotes = gChordNotes.map(note => ({
@@ -548,10 +548,8 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   const createGmChordNote = () => {
     const gmChordNotes = [
       { stringNumber: 1, position: 100, offset: -5, fret: 3 },    // 1번 줄 (3번 프렛)
-      { stringNumber: 2, position: 100, offset: 0, fret: 3 },     // 2번 줄 (3번 프렛)
-      { stringNumber: 3, position: 100, offset: 5, fret: 3 },     // 3번 줄 (3번 프렛)
-      { stringNumber: 4, position: 100, offset: 0, fret: 5 },     // 4번 줄 (5번 프렛)
-      { stringNumber: 5, position: 100, offset: -5, fret: 5 }     // 5번 줄 (5번 프렛)
+      { stringNumber: 2, position: 100, offset: 0, fret: 3 },    // 2번 줄 (3번 프렛)
+      { stringNumber: 5, position: 100, offset: 5, fret: 3 }     // 5번 줄 (3번 프렛)
     ];
 
     const newNotes = gmChordNotes.map(note => ({
@@ -606,27 +604,38 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
             }, 500);
           }
 
-          if (shadowNotes.length > 0) {
-            const displayedChord = shadowNotes[0].chord;
-            const codeNotes = newNotes.filter(note => note.chord === displayedChord);
-            
-            if (codeNotes.length > 0) {
-              const allNotesPassed = codeNotes.every(note => note.position <= 37.5);
-              if (allNotesPassed) {
-                setShadowNotes([]);
-              }
-            } else {
-              setShadowNotes([]);
-            }
-          }
-
           return newNotes;
         });
       }, 16);
 
       return () => clearInterval(interval);
     }
-  }, [testNotes, playbackSpeed, shadowNotes]);
+  }, [testNotes, playbackSpeed]);
+
+  // 그림자 노트 효과 처리
+  useEffect(() => {
+    if (shadowNotes.length > 0 && testNotes.length > 0) {
+      const interval = setInterval(() => {
+        setShadowNotes(prevShadowNotes => {
+          if (prevShadowNotes.length === 0) return prevShadowNotes;
+          
+          const currentChord = prevShadowNotes[0].chord;
+          const relatedNotes = testNotes.filter(note => note.chord === currentChord);
+          
+          // 관련된 모든 노트가 통과했는지 확인
+          const allNotesPassed = relatedNotes.every(note => note.position <= 25);
+          
+          if (allNotesPassed || relatedNotes.length === 0) {
+            return []; // 그림자 노트 제거
+          }
+          
+          return prevShadowNotes;
+        });
+      }, 500);
+      
+      return () => clearInterval(interval);
+    }
+  }, [shadowNotes, testNotes]);
 
   // 실제 연주 노트 이동 효과 제거
   useEffect(() => {
@@ -1194,6 +1203,298 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
   const handleStop = () => {
     onPlayingChange(false);
     // 여기에 연주 종료 시 필요한 초기화 로직 추가
+  };
+
+  // 게임 시작 시 타이머 시작
+  useEffect(() => {
+    if (isPlaying) {
+      setGameStartTime(Date.now());
+      const timer = setInterval(() => {
+        setCurrentTime(Date.now());
+      }, 16); // 약 60fps
+
+      return () => clearInterval(timer);
+    } else {
+      setGameStartTime(null);
+      setCurrentTime(0);
+      setCurrentSheetIndex(0);
+      onSheetIndexChange(0);
+    }
+  }, [isPlaying, onSheetIndexChange]);
+
+  // 코드 생성 및 악보 표시 로직
+  useEffect(() => {
+    if (!isPlaying || !songDetail) return;
+
+    // 게임 시작 시 초기화
+    setTestNotes([]);
+    setShadowNotes([]);
+    setCurrentSheetIndex(0);
+    onSheetIndexChange(0);
+    
+    // 게임 시작 시간 설정
+    const startTime = Date.now();
+    setGameStartTime(startTime);
+    
+    console.log('===== 노트 생성 시작 =====');
+    
+    // 코드 생성 애니메이션 프레임 함수
+    const animate = () => {
+      const currentTime = Date.now();
+      const elapsedTime = (currentTime - startTime) / 1000; // 경과 시간(초)
+      
+      // 현재 시간 업데이트
+      setCurrentTime(elapsedTime);
+      
+      // 모든 악보 데이터를 순회하면서 코드 생성 확인
+      songDetail.sheetMusicResponseDtos.forEach(sheet => {
+        // 이미 생성된 코드인지 확인하기 위한 키 생성
+        const chordKey = `${sheet.chord}-${sheet.sheetOrder}`;
+        
+        // 해당 코드의 생성 시간이 경과 시간에 해당하는지 확인 (약간의 여유 추가)
+        if (Math.abs(sheet.chordTiming - elapsedTime) < 0.05 && 
+            !generatedChords.has(chordKey)) {
+          
+          console.log(`코드 생성: ${sheet.chord}, 순서: ${sheet.sheetOrder}, 타이밍: ${sheet.chordTiming}초, 현재 시간: ${elapsedTime.toFixed(2)}초`);
+          
+          // createChordNoteWithTiming 함수 사용
+          createChordNoteWithTiming(sheet.chord, sheet.sheetOrder);
+          
+          // 현재 악보 인덱스 업데이트
+          setCurrentSheetIndex(sheet.sheetOrder);
+          onSheetIndexChange(sheet.sheetOrder);
+          
+          // 현재 코드 정보 업데이트
+          if (onChordChange) {
+            onChordChange({
+              id: Date.now(),
+              chord: sheet.chord,
+              timing: sheet.chordTiming,
+              strings: [1, 2, 3], // 예시 값, 필요에 따라 조정
+              fretPositions: [0, 0, 0] // 예시 값, 필요에 따라 조정
+            });
+          }
+          
+          // 생성된 코드 목록에 추가
+          generatedChords.add(chordKey);
+        }
+      });
+      
+      // 게임이 계속 진행 중이면 다음 프레임 요청
+      if (isPlaying) {
+        requestRef.current = requestAnimationFrame(animate);
+      }
+    };
+    
+    // 생성된 코드를 추적하는 Set
+    const generatedChords = new Set<string>();
+    
+    // 애니메이션 시작
+    requestRef.current = requestAnimationFrame(animate);
+    
+    // 컴포넌트 언마운트 또는 isPlaying이 false로 바뀔 때 실행
+    return () => {
+      console.log('===== 노트 생성 중단 =====');
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+        requestRef.current = null;
+      }
+      setGameStartTime(null);
+      setCurrentTime(0);
+    };
+  }, [isPlaying, songDetail, onSheetIndexChange, onChordChange]);
+
+  // 코드 생성 함수 수정
+  // const createChordNote = (chord: string, sheetOrder: number) => {
+  //   switch (chord) {
+  //     case 'Am':
+  //       createAmChordNoteWithTiming(sheetOrder);
+  //       break;
+  //     case 'C':
+  //       createCChordNoteWithTiming(sheetOrder);
+  //       break;
+  //     case 'D':
+  //       createDChordNoteWithTiming(sheetOrder);
+  //       break;
+  //     case 'Em':
+  //       createEmChordNoteWithTiming(sheetOrder);
+  //       break;
+  //     case 'G':
+  //       createGChordNoteWithTiming(sheetOrder);
+  //       break;
+  //     // 다른 코드들에 대한 case 추가
+  //     default:
+  //       console.warn('Unsupported chord:', chord);
+  //   }
+  // };
+
+  // 타이밍 정보를 포함한 코드 생성 함수 예시 (Am)
+  const createAmChordNoteWithTiming = (sheetOrder: number) => {
+    const amChordNotes = [
+      { stringNumber: 2, position: 100, offset: -5, fret: 2 },    // 2번 줄 (2번 프렛)
+      { stringNumber: 3, position: 100, offset: 0, fret: 2 },    // 3번 줄 (2번 프렛)
+      { stringNumber: 4, position: 100, offset: 5, fret: 2 }    // 4번 줄 (2번 프렛)
+    ];
+
+    const newNotes = amChordNotes.map(note => ({
+      id: Date.now() + Math.random(),
+      stringNumber: note.stringNumber,
+      position: note.position + note.offset,
+      timing: sheetOrder, // sheetOrder를 타이밍 정보로 사용
+      isChord: true,
+      chord: 'Am',
+      fret: note.fret
+    }));
+
+    setShadowNotes(amChordNotes.map(note => ({
+      id: Date.now() + Math.random(),
+      stringNumber: note.stringNumber,
+      position: 31.25 + note.offset,
+      timing: sheetOrder,
+      isChord: true,
+      chord: 'Am',
+      fret: note.fret
+    })));
+    setTestNotes(prev => [...prev, ...newNotes]);
+  };
+
+  // 다른 코드들도 같은 방식으로 수정
+  const createCChordNoteWithTiming = (sheetOrder: number) => {
+    const cChordNotes = [
+      { stringNumber: 2, position: 100, offset: 5, fret: 1 },    // 2번 줄 (1번 프렛)
+      { stringNumber: 4, position: 100, offset: 0, fret: 2 },    // 4번 줄 (2번 프렛)
+      { stringNumber: 5, position: 100, offset: -5, fret: 3 }    // 5번 줄 (3번 프렛)
+    ];
+
+    const newNotes = cChordNotes.map(note => ({
+      id: Date.now() + Math.random(),
+      stringNumber: note.stringNumber,
+      position: note.position + note.offset,
+      timing: sheetOrder,
+      isChord: true,
+      chord: 'C',
+      fret: note.fret
+    }));
+
+    setShadowNotes(cChordNotes.map(note => ({
+      id: Date.now() + Math.random(),
+      stringNumber: note.stringNumber,
+      position: 31.25 + note.offset,
+      timing: sheetOrder,
+      isChord: true,
+      chord: 'C',
+      fret: note.fret
+    })));
+    setTestNotes(prev => [...prev, ...newNotes]);
+  };
+
+  const createDChordNoteWithTiming = (sheetOrder: number) => {
+    const dChordNotes = [
+      { stringNumber: 4, position: 100, offset: -5, fret: 2 },
+      { stringNumber: 6, position: 100, offset: 0, fret: 3 },
+      { stringNumber: 5, position: 100, offset: 5, fret: 2 }
+    ];
+
+    const newNotes = dChordNotes.map(note => ({
+      id: Date.now() + Math.random(),
+      stringNumber: note.stringNumber,
+      position: note.position + note.offset,
+      timing: sheetOrder,
+      isChord: true,
+      chord: 'D',
+      fret: note.fret
+    }));
+
+    setShadowNotes(dChordNotes.map(note => ({
+      id: Date.now() + Math.random(),
+      stringNumber: note.stringNumber,
+      position: 31.25 + note.offset,
+      timing: sheetOrder,
+      isChord: true,
+      chord: 'D',
+      fret: note.fret
+    })));
+    setTestNotes(prev => [...prev, ...newNotes]);
+  };
+
+  const createEmChordNoteWithTiming = (sheetOrder: number) => {
+    const emChordNotes = [
+      { stringNumber: 4, position: 100, offset: 0, fret: 2 },
+      { stringNumber: 5, position: 100, offset: -5, fret: 2 }
+    ];
+
+    const newNotes = emChordNotes.map(note => ({
+      id: Date.now() + Math.random(),
+      stringNumber: note.stringNumber,
+      position: note.position + note.offset,
+      timing: sheetOrder,
+      isChord: true,
+      chord: 'Em',
+      fret: note.fret
+    }));
+
+    setShadowNotes(emChordNotes.map(note => ({
+      id: Date.now() + Math.random(),
+      stringNumber: note.stringNumber,
+      position: 31.25 + note.offset,
+      timing: sheetOrder,
+      isChord: true,
+      chord: 'Em',
+      fret: note.fret
+    })));
+    setTestNotes(prev => [...prev, ...newNotes]);
+  };
+
+  const createGChordNoteWithTiming = (sheetOrder: number) => {
+    const gChordNotes = [
+      { stringNumber: 2, position: 100, offset: -5, fret: 3 },
+      { stringNumber: 1, position: 100, offset: 0, fret: 2 },
+      { stringNumber: 6, position: 100, offset: 5, fret: 3 }
+    ];
+
+    const newNotes = gChordNotes.map(note => ({
+      id: Date.now() + Math.random(),
+      stringNumber: note.stringNumber,
+      position: note.position + note.offset,
+      timing: sheetOrder,
+      isChord: true,
+      chord: 'G',
+      fret: note.fret
+    }));
+
+    setShadowNotes(gChordNotes.map(note => ({
+      id: Date.now() + Math.random(),
+      stringNumber: note.stringNumber,
+      position: 31.25 + note.offset,
+      timing: sheetOrder,
+      isChord: true,
+      chord: 'G',
+      fret: note.fret
+    })));
+    setTestNotes(prev => [...prev, ...newNotes]);
+  };
+
+  const createChordNoteWithTiming = (chord: string, sheetOrder: number) => {
+    switch (chord) {
+      case 'Am':
+        createAmChordNoteWithTiming(sheetOrder);
+        break;
+      case 'C':
+        createCChordNoteWithTiming(sheetOrder);
+        break;
+      case 'D':
+        createDChordNoteWithTiming(sheetOrder);
+        break;
+      case 'Em':
+        createEmChordNoteWithTiming(sheetOrder);
+        break;
+      case 'G':
+        createGChordNoteWithTiming(sheetOrder);
+        break;
+      // 다른 코드들에 대한 case 추가
+      default:
+        console.warn('Unsupported chord:', chord);
+    }
   };
 
   return (

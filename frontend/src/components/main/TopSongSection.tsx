@@ -1,33 +1,57 @@
 import React, { useState } from 'react';
 
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
-import { mockTopSongs } from '../../data/mockData';
-import { Song } from '../../types/performance';
+import { fetchRecommendSongs } from '../../services/api';
 
 interface TopSongSectionProps {
-  onPlaySong: (song: Song) => void;
+  onPlaySong: (song: any) => void;
 }
 
 const TopSongSection: React.FC<TopSongSectionProps> = ({ onPlaySong }) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const totalPages = 3;
+  const totalPages = 2;
+
+  const { data: recommendSongs = [] } = useQuery({
+    queryKey: ['recommendSongs'],
+    queryFn: fetchRecommendSongs,
+  });
 
   const pageContent = [
     {
       title: "주목할 최신곡",
       description: "지금 가장 주목받는 신곡을 만나보세요",
-      songs: mockTopSongs.slice(0, 6)
+      songs: recommendSongs
+        .filter(song => song.category === 'NEW SONG')
+        .map(song => ({
+          id: song.song.songId,
+          title: song.song.songTitle,
+          artist: song.song.songSinger,
+          thumbnail: song.song.songImage,
+          duration: song.song.songDuration,
+          difficulty: 'medium' as 'medium',
+          notes: [],
+          bpm: 120,
+          songVoiceFileUrl: song.song.songVoiceFileUrl
+        }))
     },
     {
       title: "봄 노래 추천",
       description: "따스한 봄날에 어울리는 음악을 들려드립니다",
-      songs: mockTopSongs.slice(6, 12)
-    },
-    {
-      title: "즐거운 음악",
-      description: "기분 좋은 하루를 만들어줄 밝은 음악들",
-      songs: mockTopSongs.slice(12, 18)
+      songs: recommendSongs
+        .filter(song => song.category === 'SPRING')
+        .map(song => ({
+          id: song.song.songId,
+          title: song.song.songTitle,
+          artist: song.song.songSinger,
+          thumbnail: song.song.songImage,
+          duration: song.song.songDuration,
+          difficulty: 'medium' as 'medium',
+          notes: [],
+          bpm: 120,
+          songVoiceFileUrl: song.song.songVoiceFileUrl
+        }))
     }
   ];
 
@@ -113,38 +137,48 @@ const TopSongSection: React.FC<TopSongSectionProps> = ({ onPlaySong }) => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 h-[570px]">
-        {getCurrentPageItems().map((song, index) => (
-          <motion.div
-            key={`${song.id}-${currentPage}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + index * 0.1 }}
-            className="group cursor-pointer h-[180px]"
-            onClick={() => onPlaySong(song)}
-          >
-            <div className="h-[200px] rounded-lg overflow-hidden relative mb-1">
-              <img
-                src={song.thumbnail}
-                alt={song.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
-                <button className="w-8 h-8 flex items-center justify-center bg-amber-500 rounded-full text-white">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                    />
-                  </svg>
-                </button>
+        {getCurrentPageItems().length > 0 ? (
+          getCurrentPageItems().map((song, index) => (
+            <motion.div
+              key={`${song.id}-${currentPage}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.1 }}
+              className="group cursor-pointer h-[180px]"
+              onClick={() => onPlaySong(song)}
+            >
+              <div className="h-[200px] rounded-lg overflow-hidden relative mb-1">
+                <img
+                  src={song.thumbnail}
+                  alt={song.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/default-song-image.png';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                  <button className="w-8 h-8 flex items-center justify-center bg-amber-500 rounded-full text-white">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </div>
-            <h3 className="font-medium text-white text-sm truncate">{song.title}</h3>
-            <p className="text-amber-400 text-xs truncate">{song.artist}</p>
-          </motion.div>
-        ))}
+              <h3 className="font-medium text-white text-sm truncate">{song.title}</h3>
+              <p className="text-amber-400 text-xs truncate">{song.artist}</p>
+            </motion.div>
+          ))
+        ) : (
+          <div className="col-span-full flex items-center justify-center h-full">
+            <p className="text-zinc-400">데이터가 없습니다.</p>
+          </div>
+        )}
       </div>
 
       {/* 페이지 인디케이터 */}

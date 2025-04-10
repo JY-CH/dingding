@@ -12,13 +12,22 @@ export interface Note {
 
 export interface Song {
   id: number;
+  songId: number;
   title: string;
   artist: string;
-  difficulty: 'easy' | 'medium' | 'hard';
   duration: string;
-  thumbnail: string;
+  songTitle: string;
+  songImage: string;
+  songWriter: string;
+  songSinger: string;
+  songVoiceFileUrl: string;
+  releaseDate: string;
+  category: string;
+  songDuration: string;
   notes: Note[];
-  bpm: number;          // 분당 비트 수
+  difficulty?: string;
+  thumbnail?: string;
+  bpm?: number;
 }
 
 // 노트 히트 판정 결과
@@ -71,4 +80,37 @@ export interface ChordChange {
 }
 
 // 노트 타입
-export type NoteType = 'single' | 'chord' | 'slide' | 'hold'; 
+export type NoteType = 'single' | 'chord' | 'slide' | 'hold';
+
+export interface RecommendSong {
+  recommendSongId: number;
+  song: {
+    songId: number;
+    songTitle: string;
+    songImage: string;
+    songWriter: string;
+    songSinger: string;
+    songVoiceFileUrl: string;
+    releaseDate: string;
+    category: string;
+    songDuration: string;
+  };
+  category: string;
+}
+
+export interface SheetMusicResponse {
+  sheetImage: string;
+  sheetOrder: number;
+  chord: string;
+  chordTiming: number;
+}
+
+export interface SongDetailResponse {
+  songId: number;
+  songTitle: string;
+  songImage: string;
+  songWriter: string;
+  songSinger: string;
+  songVoiceFileUrl: string;
+  sheetMusicResponseDtos: SheetMusicResponse[];
+} 
