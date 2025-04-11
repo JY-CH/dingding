@@ -115,19 +115,22 @@ const SearchBar: React.FC<SearchBarProps> = ({ query, setQuery, className = '' }
         {/* 검색창 배경 효과 */}
         <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-zinc-800/5 rounded-full group-hover:from-amber-500/10 group-hover:to-zinc-800/10 transition-all duration-300"></div>
 
-        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-          <Search className="w-5 h-5 text-amber-500" />
+        {/* 돋보기 아이콘 */}
+        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
+          <div className="w-7 h-7 flex items-center justify-center bg-amber-500 rounded-full glow-amber">
+            <Search className="w-4 h-4 text-zinc-900" />
+          </div>
         </div>
 
         <input
           ref={inputRef}
           type="text"
           placeholder="노래, 코드를 검색하세요..."
-          value={tempQuery} // ✅ 실시간 입력값만 표시
-          onChange={(e) => setTempQuery(e.target.value)} // ✅ query 변경 X
+          value={tempQuery}
+          onChange={(e) => setTempQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
-          onKeyPress={handleKeyPress} // ✅ 엔터 시에만 반영
-          className="w-full py-3 px-4 pl-12 bg-zinc-800/70 backdrop-blur-sm border border-white/10 rounded-full text-white placeholder-zinc-400 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition-all"
+          onKeyPress={handleKeyPress}
+          className="w-full py-3 px-4 pl-16 bg-zinc-800/70 backdrop-blur-sm border border-white/10 rounded-full text-white placeholder-zinc-400 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition-all"
         />
 
         {query && (

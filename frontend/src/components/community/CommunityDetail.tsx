@@ -1,9 +1,11 @@
 import { useState } from 'react';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { HiOutlineHeart, HiOutlineChat, HiOutlineArrowLeft, HiOutlinePencilAlt, HiOutlineTrash } from 'react-icons/hi';
+import { motion, AnimatePresence } from 'framer-motion';
 
-import lickeIcon from '@/assets/like.svg'; // 필요한 경로로 조정하세요
-import unLikeIcon from '@/assets/unlike.svg'; // 필요한 경로로 조정하세요
+// import lickeIcon from '@/assets/like.svg'; // 필요한 경로로 조정하세요
+// import unLikeIcon from '@/assets/unlike.svg'; // 필요한 경로로 조정하세요
 
 import { CommunityComment } from './CommunityComment';
 import { CommunityEdit } from './CommunityEdit';
@@ -48,11 +50,12 @@ interface ArticleDetail {
 export const CommunityDetail: React.FC<CommunityDetailProps> = ({
   articleId,
   setSelectedPost,
-  posts,
+  // posts,
 }) => {
   const [newComment, setNewComment] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   const queryClient = useQueryClient();
-  const currentUserId = useAuthStore.getState().getUser()?.username || ''; // 현재 로그인한 사용자의 username (string 타입)
+  const currentUserId = useAuthStore.getState().getUser()?.username || '';
 
   const {
     data: articleDetail,
@@ -72,48 +75,15 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['article', articleId],
-      });
-      setSelectedPost(null); // 게시글 삭제 후 목록으로 돌아가기
-      window.location.reload(); // 페이지 새로고침
+      queryClient.invalidateQueries({ queryKey: ['article', articleId] });
+      setSelectedPost(null);
+      window.location.reload();
     },
     onError: (error) => {
       console.error('게시글 삭제 실패:', error);
-      alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
+      alert('게시글 삭제에 실패했습니다.');
     },
   });
-  const [isEditing, setIsEditing] = useState(false); // 수정 모드 상태 추가
-
-  const handleDeleteArticle = () => {
-    if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
-      deleteArticle.mutate();
-    }
-  };
-
-  // 게시글 목록 페이지 이동용
-  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태
-  const postsPerPage = 4; // 페이지당 게시글 수
-
-  // 페이지네이션 계산
-  const indexOfLastPost = currentPage * postsPerPage;
-  const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
-  const totalPages = Math.ceil(posts.length / postsPerPage);
-  // 날짜변경용용
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear().toString().slice(2); // 연도 마지막 두 자리
-    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 월
-    const day = date.getDate().toString().padStart(2, '0'); // 일
-    const hours = date.getHours().toString().padStart(2, '0'); // 시간
-    const minutes = date.getMinutes().toString().padStart(2, '0'); // 분
-
-    return `${year}.${month}.${day}. ${hours}:${minutes}`;
-  };
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
 
   const likeMutation = useMutation({
     mutationFn: async () => {
@@ -121,74 +91,44 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['article', articleId],
-      });
+      queryClient.invalidateQueries({ queryKey: ['article', articleId] });
     },
   });
 
-  const unLickeMutation = useMutation({
+  const unlikeMutation = useMutation({
     mutationFn: async () => {
       await _axiosAuth.delete(`/article/${articleId}/like`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['article', articleId],
-      });
+      queryClient.invalidateQueries({ queryKey: ['article', articleId] });
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: async (newComment: string) => {
+  const commentMutation = useMutation({
+    mutationFn: async (content: string) => {
       const response = await _axiosAuth.post(`/article/${articleId}/comment`, {
-        content: newComment,
+        content,
       });
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['article', articleId],
-      });
+      queryClient.invalidateQueries({ queryKey: ['article', articleId] });
       setNewComment('');
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (commentId: number) => {
-      await _axiosAuth.delete(`/comment/${commentId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['article', articleId],
-      });
-    },
-  });
-
-  // 댓글 수정
-
-  const [editMode, setEditMode] = useState<{ [key: number]: boolean }>({});
-  const [editContent, setEditContent] = useState('');
-
-  const handleEditClick = (commentId: number, content: string) => {
-    setEditMode((prev) => ({ ...prev, [commentId]: true }));
-    setEditContent(content);
-  };
-
-  const handleEditSave = async (commentId: number) => {
-    if (editContent.trim() === '') {
-      alert('수정할 내용을 입력하세요.');
-      return;
+  const handleDeleteArticle = () => {
+    if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+      deleteArticle.mutate();
     }
-    await _axiosAuth.put(`/comment/${commentId}`, { content: editContent });
-    setEditMode((prev) => ({ ...prev, [commentId]: false }));
-    queryClient.invalidateQueries({ queryKey: ['article', articleId] });
   };
 
-  const handleLikeClick = () => {
-    likeMutation.mutate();
-  };
-  const handleUnlikeClick = () => {
-    unLickeMutation.mutate();
+  const handleLikeToggle = () => {
+    if (articleDetail?.isLike) {
+      unlikeMutation.mutate();
+    } else {
+      likeMutation.mutate();
+    }
   };
 
   const handleCommentSubmit = () => {
@@ -196,266 +136,220 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({
       alert('댓글을 입력하세요!');
       return;
     }
-
-    mutation.mutate(newComment);
-    setNewComment('');
-  };
-
-  const handleDeleteComment = (commentId: number) => {
-    if (window.confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
-      deleteMutation.mutate(commentId);
-    }
+    commentMutation.mutate(newComment);
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <div className="text-center py-12 text-red-400">
+        <p>오류가 발생했습니다: {error.message}</p>
+      </div>
+    );
   }
 
   if (!articleDetail) {
-    return <div>No article found.</div>;
+    return (
+      <div className="text-center py-12 text-zinc-400">
+        <p>게시글을 찾을 수 없습니다.</p>
+      </div>
+    );
   }
+
   if (isEditing) {
     return (
       <CommunityEdit
         articleDetail={articleDetail}
-        onCancel={() => setIsEditing(false)} // 수정 취소 시 호출
-        onComplete={() => setIsEditing(false)} // 수정 완료 시 호출
+        onCancel={() => setIsEditing(false)}
+        onComplete={() => setIsEditing(false)}
       />
     );
   }
 
-  return (
-    <div className="flex">
-      <div className="bg-zinc-900 py-4 w-2/3 text-white rounded-lg pb-[100px] pr-[80px]">
-        <div className="flex flex-row justify-between">
-          <button
-            onClick={() => {
-              setSelectedPost(null);
-              // 강제로 쿼리 무효화 및 리페치
-              queryClient.invalidateQueries({ queryKey: ['articles'] });
-              queryClient.refetchQueries({ queryKey: ['articles'] });
-            }}
-            className="mb-4 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
-          >
-            Back
-          </button>
-          <div className="flex flex-row gap-4">
-            <button
-              className="mb-4 py-2 px-4 bg-amber-800 hover:bg-amber-600 text-white rounded-lg"
-              onClick={() => setIsEditing(true)} // 수정 모드로 전환
-            >
-              Edit
-            </button>
-            <button
-              className="mb-4 py-2 px-4 bg-amber-800 hover:bg-amber-600 text-white rounded-lg"
-              onClick={() => handleDeleteArticle()}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+      if (diffHours === 0) {
+        const diffMinutes = Math.floor(diffTime / (1000 * 60));
+        return `${diffMinutes}분 전`;
+      }
+      return `${diffHours}시간 전`;
+    } else if (diffDays < 7) {
+      return `${diffDays}일 전`;
+    } else {
+      return date.toLocaleDateString('ko-KR', {
+        year: '2-digit',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+  };
 
-        <div className="flex flex-col">
-          <div className="flex flex-row justify-between items-center">
-            <h1 className="text-2xl font-[1000] mb-2">{articleDetail.title}</h1>
-            <button
-              onClick={() => (articleDetail.isLike ? handleUnlikeClick() : handleLikeClick())}
-              className="flex items-center gap-2"
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="max-w-4xl mx-auto"
+    >
+      {/* 헤더 */}
+      <div className="flex justify-between items-center mb-8">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            setSelectedPost(null);
+            queryClient.invalidateQueries({ queryKey: ['articles'] });
+          }}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300
+                     hover:bg-zinc-700 transition-colors"
+        >
+          <HiOutlineArrowLeft className="w-5 h-5" />
+          <span>돌아가기</span>
+        </motion.button>
+
+        {articleDetail.username === currentUserId && (
+          <div className="flex gap-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/20 text-amber-400
+                       hover:bg-amber-500/30 transition-colors"
             >
-              <img
-                src={articleDetail.isLike ? unLikeIcon : lickeIcon}
-                alt={articleDetail.isLike ? '좋아요 취소' : '좋아요'}
-                className="w-6 h-6"
-              />
-              <span>{articleDetail.recommend}</span>
-            </button>
+              <HiOutlinePencilAlt className="w-5 h-5" />
+              <span>수정</span>
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleDeleteArticle}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/20 text-red-400
+                       hover:bg-red-500/30 transition-colors"
+            >
+              <HiOutlineTrash className="w-5 h-5" />
+              <span>삭제</span>
+            </motion.button>
           </div>
-          <div className="text-sm text-gray-400 items-center flex flex-row gap-3 justify-between">
-            <div>{new Date(articleDetail.updatedAt).toLocaleString()}</div>
-            <div className="flex items-center gap-2">
+        )}
+      </div>
+
+      {/* 게시글 내용 */}
+      <div className="bg-zinc-800/90 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-8 mb-8">
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-zinc-700">
               <img
-                src={
-                  articleDetail.userProfile ||
-                  'https://ddingga.s3.ap-northeast-2.amazonaws.com/basic_profile.png'
-                }
-                alt="작성자 프로필"
-                className="w-8 h-8 rounded-full"
+                src={articleDetail.userProfile || '/profile-placeholder.png'}
+                alt={articleDetail.username}
+                className="w-full h-full object-cover"
               />
-              <span>{articleDetail.username}</span>
+            </div>
+            <div>
+              <h3 className="font-medium text-lg text-white">{articleDetail.username}</h3>
+              <p className="text-sm text-zinc-400">{formatDate(articleDetail.createdAt)}</p>
             </div>
           </div>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleLikeToggle}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors
+                     ${articleDetail.isLike
+                       ? 'bg-amber-500/20 text-amber-400'
+                       : 'bg-zinc-700/50 text-zinc-400 hover:bg-zinc-700'
+                     }`}
+          >
+            <HiOutlineHeart className={`w-5 h-5 ${articleDetail.isLike ? 'fill-amber-400' : ''}`} />
+            <span>{articleDetail.recommend}</span>
+          </motion.button>
         </div>
-        <p className="mb-10 mt-[70px]">{articleDetail.content}</p>
 
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-2">댓글</h2>
-          <hr className="border-gray-700" />
-          <div className="mb-4 mt-2">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="댓글을 입력하세요..."
-              className="w-full pt-5 pl-4 flex h-[50px] text-[10px] bg-zinc-800 text-white rounded-lg resize-none"
-              rows={3}
-            />
-            <button
-              onClick={handleCommentSubmit}
-              className="mt-2 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
-            >
-              댓글 작성
-            </button>
+        <h1 className="text-2xl font-bold mb-4">{articleDetail.title}</h1>
+        <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap mb-6">
+          {articleDetail.content}
+        </p>
+
+        <div className="flex items-center gap-4 text-sm text-zinc-400">
+          <div className="flex items-center gap-1">
+            <HiOutlineChat className="w-4 h-4" />
+            <span>{articleDetail.comments.length}개의 댓글</span>
           </div>
+          <span>•</span>
+          <span>{formatDate(articleDetail.updatedAt)}</span>
+        </div>
+      </div>
+
+      {/* 댓글 작성 */}
+      <div className="bg-zinc-800/90 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-8 mb-8">
+        <h2 className="text-xl font-bold mb-6">댓글 작성</h2>
+        <div className="flex gap-4">
+          <textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="댓글을 입력하세요..."
+            className="flex-1 px-4 py-3 bg-zinc-900/50 border border-zinc-700 rounded-lg
+                     text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500
+                     transition-colors resize-none h-24"
+          />
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleCommentSubmit}
+            className="px-6 py-3 h-fit rounded-lg bg-gradient-to-r from-amber-500 to-amber-600
+                     hover:from-amber-600 hover:to-amber-700 text-white font-medium
+                     transition-colors whitespace-nowrap"
+          >
+            댓글 작성
+          </motion.button>
+        </div>
+      </div>
+
+      {/* 댓글 목록 */}
+      <div className="space-y-6">
+        <AnimatePresence>
           {articleDetail.comments.length > 0 ? (
             articleDetail.comments
               .slice()
               .reverse()
               .map((comment) => (
-                <div key={comment.commentId} className="mb-4 p-7 bg-zinc-800 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <div className="h-auto">
-                      <div className="text-sm h-full text-gray-400 mb-1 flex flex-row gap-2 items-center">
-                        <div className="w-12 h-12 rounded-full overflow-hidden bg-black flex items-center justify-center">
-                          <img
-                            src={comment.userProfile}
-                            alt="댓글 작성자 프로필"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-gray-1000 text-lg">
-                            {comment.username}
-                          </span>
-                          <span className="text-xs">
-                            {new Date(comment.updateAt).toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {!comment.isDeleted && comment.username === currentUserId && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleDeleteComment(comment.commentId)}
-                          className="text-sm text-red-500 hover:underline"
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 댓글 내용 부분 - 수정 기능 추가 */}
-                  <div className="mt-2">
-                    {comment.isDeleted ? (
-                      <span className="text-gray-500 italic">삭제된 댓글입니다</span>
-                    ) : editMode[comment.commentId] ? (
-                      <div className="flex flex-col gap-2">
-                        <textarea
-                          value={editContent}
-                          onChange={(e) => setEditContent(e.target.value)}
-                          className="w-full p-2 text-sm border border-gray-700 bg-zinc-800 text-white rounded-lg resize-none"
-                          rows={3}
-                        />
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleEditSave(comment.commentId)}
-                            className="text-sm bg-green-500 hover:bg-green-600 text-white rounded-lg px-3 py-1"
-                          >
-                            저장
-                          </button>
-                          <button
-                            onClick={() =>
-                              setEditMode((prev) => ({ ...prev, [comment.commentId]: false }))
-                            }
-                            className="text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-lg px-3 py-1"
-                          >
-                            취소
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-row justify-between items-start">
-                        <p className="break-words">{comment.content}</p>
-                        {!comment.isDeleted && comment.username === currentUserId && (
-                          <button
-                            onClick={() => handleEditClick(comment.commentId, comment.content)}
-                            className="text-gray-400 hover:bg-gray-700 rounded-lg px-2 ml-2"
-                          >
-                            수정
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 대댓글 렌더링 */}
-                  <div className="mt-4 pl-4 border-l border-gray-600">
-                    <CommunityComment
-                      comments={comment.comments}
-                      parentId={comment.commentId}
-                      articleId={articleId}
-                      commentIsDeleted={comment.isDeleted}
-                    />
-                  </div>
-                </div>
+                <motion.div
+                  key={comment.commentId}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                >
+                  <CommunityComment
+                    comments={[comment]}
+                    parentId={comment.commentId}
+                    articleId={articleId}
+                    commentIsDeleted={comment.isDeleted}
+                  />
+                </motion.div>
               ))
           ) : (
-            <p>댓글이 없습니다.</p>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12 text-zinc-400"
+            >
+              <p>첫 번째 댓글을 작성해보세요!</p>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
       </div>
-      <div className="m-10 w-[27%] h-[80%] p-10 border-solid border-zinc-700 rounded-3xl border-2 fixed right-10 top-0 overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-10 text-amber-500">게시글 목록</h2>
-        <div className=" rounded-lg">
-          {currentPosts.length > 0 ? (
-            currentPosts
-              .slice()
-              .reverse()
-              .map((post) => (
-                <div className="mb-4" key={post.articleId}>
-                  <button
-                    onClick={() => setSelectedPost(post.articleId)}
-                    className="mb-4 rounded-lg cursor-pointer transition-colors text-left w-full bg-transparent"
-                  >
-                    <div className="text-xl font-semibold mb-2">{post.title}</div>
-                    <div className="flex flex-row items-center justify-between text-xs text-gray-400">
-                      <div>{formatDate(post.updatedAt)}</div>
-                      <div className="flex items-center gap-1">
-                        <img src={lickeIcon} alt="Like Icon" className="w-4 h-4" />
-                        <span>{post.recommend}</span>
-                      </div>
-                    </div>
-                  </button>
-                  <hr />
-                </div>
-              ))
-          ) : (
-            <div className="text-center text-gray-400">게시물이 없습니다.</div>
-          )}
-        </div>
-
-        {/* 페이지네이션 */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-4">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index}
-                onClick={() => handlePageChange(index + 1)}
-                className={`px-3 py-1 mx-1 rounded-lg ${
-                  currentPage === index + 1
-                    ? 'bg-amber-500 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-              >
-                {index + 1}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    </motion.div>
   );
 };

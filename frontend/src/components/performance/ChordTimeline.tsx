@@ -1018,7 +1018,7 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
     const allChords = [...songDetail.sheetMusicResponseDtos]
       .sort((a, b) => a.sheetOrder - b.sheetOrder);
     
-    const INTERVAL_SECONDS = 3.0;
+    const INTERVAL_SECONDS = 2.2;
     
     const createNextChord = () => {
       if (!isActive) return;

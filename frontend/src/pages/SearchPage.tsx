@@ -18,18 +18,23 @@ const SearchPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [key, setKey] = useState<number>(0); // 컴포넌트 강제 리렌더링을 위한 키
 
-  // URL에서 직접 검색어를 사용 (중간 상태 변수 제거)
+  // URL에서 직접 검색어를 사용
   const searchQuery = searchParams.get('q') || '';
+  
+  // 장르 검색인지 확인
+  const isGenreSearch = ['어쿠스틱', '일렉트릭', '클래식', '핑거스타일'].includes(searchQuery);
 
-  // 디버깅용
-  console.log('현재 검색어:', searchQuery);
-
-  // useEffect 단순화: 값이 다를 때만 업데이트
+  // useEffect: 검색어가 변경되면 쿼리 상태 업데이트
   useEffect(() => {
     if (searchQuery !== query) {
       setQuery(searchQuery);
     }
-  }, [searchQuery, query]);
+    
+    // 장르 검색이면 자동으로 앨범 탭으로 전환
+    if (isGenreSearch) {
+      setActiveTab('albums');
+    }
+  }, [searchQuery, query, isGenreSearch]);
 
   // 게시물 검색 쿼리
   const { data: searchCommunity = [] } = useQuery<SearchCommunityPost[], Error>({
@@ -38,31 +43,31 @@ const SearchPage: React.FC = () => {
       const { data } = await _axiosAuth.get<SearchCommunityPost[]>('/article/search', {
         params: { keyword: searchQuery },
       });
-      return data; // ✅ 배열 반환 보장
+      return data;
     },
     staleTime: 1000 * 60,
-    enabled: !!searchQuery || !!query,
+    enabled: !!searchQuery,
   });
 
   // 노래 검색 쿼리
-  const { data: searchSongs = [] } = useQuery<SearchSong[], Error>({
+  const { data: searchSongs = [],  } = useQuery<SearchSong[], Error>({
     queryKey: ['songs', searchQuery],
     queryFn: async () => {
       const { data } = await _axiosAuth.get<SearchSong[]>('/song/search', {
         params: { keyword: searchQuery },
       });
-      return data; // ✅ 배열 반환 보장
+      return data;
     },
     staleTime: 1000 * 60,
-    enabled: !!searchQuery || !!query,
+    enabled: !!searchQuery,
   });
 
   // 검색 초기화 함수
   const resetSearch = () => {
-    setQuery(''); // 검색어 초기화
-    setSearchParams({}); // URL 파라미터 초기화
-    setActiveTab('all'); // 탭 초기화
-    setKey((prevKey) => prevKey + 1); // 컴포넌트 강제 리렌더링
+    setQuery('');
+    setSearchParams({});
+    setActiveTab('all');
+    setKey((prevKey) => prevKey + 1);
   };
 
   return (
@@ -83,21 +88,27 @@ const SearchPage: React.FC = () => {
         >
           <div className="flex flex-row justify-between gap-10 items-center">
             <h1 className="text-3xl font-bold text-white mb-2">
-              {searchQuery ? `"${searchQuery}" 검색 결과` : '탐색하기'}
+              {isGenreSearch 
+                ? `'${searchQuery}' 장르 탐색` 
+                : searchQuery 
+                  ? `"${searchQuery}" 검색 결과` 
+                  : '탐색하기'}
             </h1>
             {searchQuery && (
               <button
                 onClick={resetSearch}
-                className="text-white bg-amber-500 hover:bg-amber-500/30 rounded-full px-4 py-2 text-sm font-medium transition-colors"
+                className="text-white bg-amber-500 hover:bg-amber-600 rounded-full px-4 py-2 text-sm font-medium transition-colors"
               >
                 검색창으로
               </button>
             )}
           </div>
           <p className="text-zinc-400">
-            {searchQuery
-              ? '마음에 드는 노래, 코드 또는 커뮤니티 게시글을 찾아보세요'
-              : '새로운 음악을 발견하고 다른 기타리스트들과 연결하세요'}
+            {isGenreSearch
+              ? `${searchQuery} 장르의 인기 곡들을 탐색해보세요`
+              : searchQuery
+                ? '마음에 드는 노래, 코드 또는 커뮤니티 게시글을 찾아보세요'
+                : '새로운 음악을 발견하고 다른 기타리스트들과 연결하세요'}
           </p>
         </motion.div>
 
@@ -133,6 +144,8 @@ const SearchPage: React.FC = () => {
               activeTab={activeTab}
               searchCommunity={searchCommunity}
               searchSongs={searchSongs}
+              isGenreSearch={isGenreSearch}
+              genreName={searchQuery}
             />
           ) : (
             <HotContent activeTab={activeTab} />

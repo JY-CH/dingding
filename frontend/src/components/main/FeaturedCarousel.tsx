@@ -39,8 +39,7 @@ interface FeaturedCarouselProps {
 
 const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ onPlaySong }) => {
   const navigate = useNavigate();
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [currentSlide, ] = useState(0);
   const [weekSongData, setWeekSongData] = useState<WeekSongData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,46 +78,18 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ onPlaySong }) => {
   const featuredItems: FeaturedItem[] = [
     {
       id: 1,
-      title: 'Story Time',
-      artist: 'Luddy Dave',
-      description: "L'heure du Conte - 새로운 앨범 발매",
-      imageUrl: '/images/featured/story-time-banner.jpg',
-      albumCover: '/images/featured/story-time-cover.jpg',
-      gradient: 'from-blue-600 via-blue-800 to-blue-900',
-      type: 'ALBUM',
-      stats: {
-        likes: 24680,
-        plays: 158900,
-      },
-    },
-    {
-      id: 2,
-      title: 'Midnight Melodies',
-      artist: 'Sarah Moon',
-      description: '깊어가는 밤, 감성을 담은 어쿠스틱 기타',
-      imageUrl: '/images/featured/story-time-banner.jpg',
-      albumCover: '/images/featured/story-time-cover.jpg',
-      gradient: 'from-purple-600 via-purple-800 to-purple-900',
-      type: 'PLAYLIST',
-      stats: {
-        likes: 18920,
-        plays: 142500,
-      },
-    },
-    {
-      id: 3,
-      title: 'Guitar Dreams',
+      title: '도전! 인기곡 연주',
       artist: 'Alex Rivers',
-      description: '지친 하루를 위로하는 따뜻한 선율',
+      description: '많은 사람들이 도전하고 있는 인기 연습곡을 만나보세요',
       imageUrl: '/images/featured/story-time-banner.jpg',
       albumCover: '/images/featured/story-time-cover.jpg',
       gradient: 'from-emerald-600 via-emerald-800 to-emerald-900',
       type: 'ALBUM',
       stats: {
-        likes: 31240,
-        plays: 203400,
+        likes: 42,
+        plays: 156,
       },
-    },
+    }
   ];
 
   // 현재 보여줄 데이터가 있는지 확인 
@@ -139,26 +110,6 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ onPlaySong }) => {
                        weekSongData.song && 
                        weekSongData.song.songId === 0;
   
-  // 슬라이드 자동 변경을 위한 타이머
-  useEffect(() => {
-    const timer = setInterval(() => {
-      handleNext();
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [currentSlide]);
-
-  const handlePrev = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentSlide((prev) => (prev - 1 + featuredItems.length) % featuredItems.length);
-  };
-
-  const handleNext = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentSlide((prev) => (prev + 1) % featuredItems.length);
-  };
-
   return (
     <div className="relative h-[400px] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900">
       {isLoading && (
@@ -201,9 +152,8 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ onPlaySong }) => {
           className={`
             absolute inset-0 w-full h-full
             ${currentSlide === index ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+            transition-opacity duration-500
           `}
-          style={{ transition: 'none' }}
-          onTransitionEnd={() => setIsTransitioning(false)}
         >
           <div className="absolute inset-0 flex" style={{ transition: 'none' }}>
             {/* 왼쪽 콘텐츠 영역 */}
@@ -225,10 +175,10 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ onPlaySong }) => {
               `}
               >
                 {item.type === 'ALBUM'
-                  ? '새로운 앨범'
+                  ? '이주의 연습곡'
                   : item.type === 'PLAYLIST'
-                    ? '추천 플레이리스트'
-                    : '아티스트 특집'}
+                    ? '단계별 연습곡'
+                    : '인기 연습곡'}
               </span>
               <h2
                 className={`
@@ -268,18 +218,8 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ onPlaySong }) => {
                 <button 
                   className="px-8 py-3.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold transition-colors"
                   onClick={() => {
-                    if (onPlaySong) {
-                      // 벚꽃엔딩 재생
-                      onPlaySong({
-                        id: 101,
-                        title: "벚꽃엔딩",
-                        artist: "버스커버스커",
-                        duration: "4:15",
-                        thumbnail: "https://i.imgur.com/example.jpg",
-                        songTitle: "벚꽃엔딩",
-                        songSinger: "버스커버스커",
-                        songImage: "https://i.imgur.com/example.jpg"
-                      });
+                    if (onPlaySong && weekSongData && weekSongData.song) {
+                      onPlaySong(weekSongData.song);
                     }
                   }}
                 >
@@ -530,26 +470,6 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ onPlaySong }) => {
           </div>
         </div>
       ))}
-
-      {/* 네비게이션 버튼 */}
-      <button
-        onClick={handlePrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white/80 hover:bg-black/50 transition-colors z-20"
-        disabled={isTransitioning}
-      >
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-      <button
-        onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white/80 hover:bg-black/50 transition-colors z-20"
-        disabled={isTransitioning}
-      >
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
     </div>
   );
 };

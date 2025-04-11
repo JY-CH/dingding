@@ -382,7 +382,16 @@ const PlayPage: React.FC = () => {
                 <div className="text-center">
                   <PracticeSelection
                     isOpen={true}
-                    onClose={() => {}}
+                    onClose={() => {
+                      setShowPracticeModal(false);
+                      // 기본 연습 세션 자동 선택
+                      handleExerciseSelect(
+                        defaultExercise.chords,
+                        defaultExercise.duration,
+                        defaultExercise.repeatCount,
+                        defaultExercise.bpm
+                      );
+                    }}
                     onExerciseSelect={handleExerciseSelect}
                     currentExercise={defaultExercise}
                   />

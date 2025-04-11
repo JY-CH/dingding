@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { HiOutlinePencilAlt, HiOutlineTrash, HiOutlineReply } from 'react-icons/hi';
+import { motion,  } from 'framer-motion';
 
 import { _axiosAuth } from '@/services/JYapi';
 import { Comment } from '@/types/index'; // 필요한 경로로 조정하세요
@@ -13,150 +15,195 @@ interface CommunityCommentProps {
   articleId: number; // 게시물 ID
   commentIsDeleted: boolean; // 댓글 삭제 여부
 }
+
 export const CommunityComment: React.FC<CommunityCommentProps> = ({
   comments,
   parentId,
   articleId,
-  commentIsDeleted,
 }) => {
   const [replyContent, setReplyContent] = useState(''); // 대댓글 입력 상태
+  const [editContent, setEditContent] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [showReplyForm, setShowReplyForm] = useState(false);
   const queryClient = useQueryClient();
   const currentUserId = useAuthStore.getState().getUser()?.username || ''; // 현재 로그인한 사용자의 username (string 타입)
-  const [commentModal, setCommentModal] = useState(false); // 댓글 모달 상태
-  console.log('현재 로그인된 사용자:', currentUserId);
 
-  const replyMutation = useMutation<void, Error, string>({
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+      if (diffHours === 0) {
+        const diffMinutes = Math.floor(diffTime / (1000 * 60));
+        return `${diffMinutes}분 전`;
+      }
+      return `${diffHours}시간 전`;
+    } else if (diffDays < 7) {
+      return `${diffDays}일 전`;
+    } else {
+      return date.toLocaleDateString('ko-KR', {
+        year: '2-digit',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+  };
+
+  const replyMutation = useMutation({
     mutationFn: async (content: string) => {
       const response = await _axiosAuth.post(`/article/${articleId}/comment/${parentId}`, {
         content,
-      }); // 대댓글 작성 API 호출
+      });
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['article', articleId],
-      });
-      setReplyContent(''); // 입력 필드 초기화
+      queryClient.invalidateQueries({ queryKey: ['article', articleId] });
+      setReplyContent('');
+      setShowReplyForm(false);
     },
   });
 
-  const deleteMutation = useMutation<void, Error, number>({
+  const deleteMutation = useMutation({
     mutationFn: async (commentId: number) => {
-      console.log('삭제 요청 commentId:', commentId); // 요청 ID 확인
-      const response = await _axiosAuth.delete(`/comment/${commentId}`);
-      console.log('삭제 요청 응답:', response); // 응답 확인
+      await _axiosAuth.delete(`/comment/${commentId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['article', articleId],
-      });
+      queryClient.invalidateQueries({ queryKey: ['article', articleId] });
     },
   });
 
-  const [editMode, setEditMode] = useState<{ [key: number]: boolean }>({});
-  const [editContent, setEditContent] = useState('');
+  const editMutation = useMutation({
+    mutationFn: async ({ commentId, content }: { commentId: number; content: string }) => {
+      await _axiosAuth.put(`/comment/${commentId}`, { content });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['article', articleId] });
+      setEditingCommentId(null);
+      setEditContent('');
+    },
+  });
 
-  const handleEditClick = (commentId: number, content: string) => {
-    setEditMode((prev) => ({ ...prev, [commentId]: true }));
-    setEditContent(content);
-  };
-
-  const handleEditSave = async (commentId: number) => {
-    if (editContent.trim() === '') {
-      alert('수정할 내용을 입력하세요.');
-      return;
-    }
-    await _axiosAuth.put(`/comment/${commentId}`, { content: editContent });
-    setEditMode((prev) => ({ ...prev, [commentId]: false }));
-    queryClient.invalidateQueries({ queryKey: ['article', articleId] });
-  };
   const handleReplySubmit = () => {
     if (replyContent.trim() === '') {
-      alert('대댓글 내용을 입력해주세요.');
+      alert('댓글 내용을 입력해주세요.');
       return;
     }
     replyMutation.mutate(replyContent);
   };
 
   const handleDeleteComment = (commentId: number) => {
-    if (window.confirm('정말로 이 대댓글을 삭제하시겠습니까?')) {
+    if (window.confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
       deleteMutation.mutate(commentId);
     }
   };
 
+  const handleEditStart = (comment: Comment) => {
+    setEditingCommentId(comment.commentId);
+    setEditContent(comment.content);
+  };
+
+  const handleEditSubmit = (commentId: number) => {
+    if (editContent.trim() === '') {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
+    editMutation.mutate({ commentId, content: editContent });
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {comments.map((comment) => (
-        <div key={comment.commentId} className="p-4 bg-zinc-800 rounded-lg">
-          <div className="flex justify-between items-center mb-2">
-            <div className="flex items-center gap-2">
-              {/* 유저 프로필 이미지 */}
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-black flex items-center justify-center">
+        <motion.div
+          key={comment.commentId}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-6"
+        >
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-zinc-700">
                 <img
-                  src={comment.userProfile}
-                  alt="댓글 작성자 프로필"
+                  src={comment.userProfile || '/profile-placeholder.png'}
+                  alt={comment.username}
                   className="w-full h-full object-cover"
                 />
               </div>
-              {/* 유저 이름과 작성 시간 */}
-              <p className="text-sm text-gray-400 flex flex-col gap-1">
-                <span className="font-bold text-gray-1000 text-md">{comment.username}</span>
-                <span className="text-xs">{new Date(comment.createdAt).toLocaleString()}</span>
-              </p>
+              <div>
+                <h3 className="font-medium text-zinc-200">{comment.username}</h3>
+                <span className="text-xs text-zinc-400">{formatDate(comment.createdAt)}</span>
+              </div>
             </div>
-            {/* 삭제 버튼 */}
+
             {!comment.isDeleted && comment.username === currentUserId && (
-              <button
-                onClick={() => handleDeleteComment(comment.commentId)}
-                className="text-sm text-red-500 hover:underline"
-              >
-                x
-              </button>
+              <div className="flex gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleEditStart(comment)}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg text-sm
+                           bg-zinc-700/50 text-zinc-400 hover:bg-zinc-700"
+                >
+                  <HiOutlinePencilAlt className="w-4 h-4" />
+                  <span>수정</span>
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleDeleteComment(comment.commentId)}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg text-sm
+                           bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                >
+                  <HiOutlineTrash className="w-4 h-4" />
+                  <span>삭제</span>
+                </motion.button>
+              </div>
             )}
           </div>
-          {/* 댓글 내용 */}
-          <p className="mb-2">
-            {comment.isDeleted ? (
-              <span className="text-gray-500 italic">삭제된 댓글입니다.</span>
-            ) : editMode[comment.commentId] ? (
-              <div className="flex flex-col gap-2">
-                <textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  className="w-full p-2 text-sm border border-gray-700 bg-zinc-800 text-white rounded-lg resize-none"
-                  rows={2}
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    onClick={() => handleEditSave(comment.commentId)}
-                    className="text-sm bg-green-500 hover:bg-green-600 text-white rounded-lg px-3 py-1"
-                  >
-                    저장
-                  </button>
-                  <button
-                    onClick={() => setEditMode((prev) => ({ ...prev, [comment.commentId]: false }))}
-                    className="text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-lg px-3 py-1"
-                  >
-                    취소
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-row justify-between">
-                <span>{comment.content}</span>
-                <button
-                  onClick={() => handleEditClick(comment.commentId, comment.content)}
-                  className="text-gray-400 hover:bg-gray-700 rounded-lg px-2"
-                >
-                  수정
-                </button>
-              </div>
-            )}
-          </p>
 
-          {/* 대댓글 렌더링 */}
+          {comment.isDeleted ? (
+            <p className="text-zinc-500 italic">삭제된 댓글입니다.</p>
+          ) : editingCommentId === comment.commentId ? (
+            <div className="space-y-3">
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-700 rounded-lg
+                         text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500
+                         transition-colors resize-none h-24"
+                placeholder="댓글을 수정하세요..."
+              />
+              <div className="flex justify-end gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setEditingCommentId(null)}
+                  className="px-3 py-1 rounded-lg bg-zinc-700 text-zinc-300 hover:bg-zinc-600
+                           transition-colors text-sm"
+                >
+                  취소
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleEditSubmit(comment.commentId)}
+                  className="px-3 py-1 rounded-lg bg-amber-500 text-white hover:bg-amber-600
+                           transition-colors text-sm"
+                >
+                  저장
+                </motion.button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-zinc-300 whitespace-pre-wrap">{comment.content}</p>
+          )}
+
+          {/* 대댓글 목록 */}
           {!comment.isDeleted && comment.comments.length > 0 && (
-            <div className="mt-4 pl-4 border-l border-gray-600">
+            <div className="mt-4 pl-6 border-l border-zinc-700/50">
               <CommunityComment
                 comments={comment.comments}
                 parentId={comment.commentId}
@@ -165,50 +212,57 @@ export const CommunityComment: React.FC<CommunityCommentProps> = ({
               />
             </div>
           )}
-        </div>
-      ))}
 
-      {/* 항상 최하단에 위치하는 대댓글 입력창 */}
-      {!commentIsDeleted ? (
-        commentModal ? (
-          <div className="mt-4">
-            <div className="flex flex-row items-center justify-between gap-1 mt-2 h-[50px]">
-              <textarea
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                placeholder="댓글을 입력하세요..."
-                className="w-full pt-4 pl-4 flex h-[50px] text-[10px] border-2 border-gray-700 bg-zinc-800 text-white rounded-lg resize-none"
-                rows={2}
-              />
-              <div className="flex ">
-                <button
-                  onClick={handleReplySubmit}
-                  className="bg-amber-500 w-[70px]  hover:bg-amber-600 text-white rounded-lg px-2 py-1 min-h-[50px]"
+          {/* 답글 작성 폼 */}
+          {!comment.isDeleted && (
+            <div className="mt-4">
+              {showReplyForm ? (
+                <div className="space-y-3">
+                  <textarea
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder="답글을 입력하세요..."
+                    className="w-full px-4 py-3 bg-zinc-900/50 border border-zinc-700 rounded-lg
+                             text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500
+                             transition-colors resize-none h-24"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowReplyForm(false)}
+                      className="px-3 py-1 rounded-lg bg-zinc-700 text-zinc-300 hover:bg-zinc-600
+                               transition-colors text-sm"
+                    >
+                      취소
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleReplySubmit}
+                      className="px-3 py-1 rounded-lg bg-amber-500 text-white hover:bg-amber-600
+                               transition-colors text-sm"
+                    >
+                      답글 작성
+                    </motion.button>
+                  </div>
+                </div>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowReplyForm(true)}
+                  className="flex items-center gap-1 px-3 py-1 rounded-lg text-sm
+                           bg-zinc-700/50 text-zinc-400 hover:bg-zinc-700 transition-colors"
                 >
-                  <div className="text-[10px]">댓글 작성</div>
-                </button>
-              </div>
+                  <HiOutlineReply className="w-4 h-4" />
+                  <span>답글</span>
+                </motion.button>
+              )}
             </div>
-            <div className="flex justify-end items-center mt-2">
-              <button
-                className="hover:bg-gray-700 rounded-lg text-gray-400 mt-1"
-                onClick={() => setCommentModal(false)}
-              >
-                <span className="p-3">닫기</span>
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex justify-end">
-            <button
-              className="text-gray-400 hover:bg-gray-700 rounded-lg"
-              onClick={() => setCommentModal(true)}
-            >
-              <span className="p-3">답글</span>
-            </button>
-          </div>
-        )
-      ) : null}
+          )}
+        </motion.div>
+      ))}
     </div>
   );
 };

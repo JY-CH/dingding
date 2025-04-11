@@ -47,17 +47,21 @@ export interface Category {
   color: string;
   count: number;
 }
+
 export interface Post {
-  articleId: number; // Int
-  userId: number; // Int
-  username: string; // String
-  title: string; // String
-  createdAt: string; // Date (ISO 형식 문자열)
+  articleId: number;
+  userId: number;
+  username: string;
+  userProfile?: string;
+  title: string;
+  content: string;
+  category: string;
+  createdAt: string;
   updatedAt: string;
-  category: string; // String
-  popularPost: boolean; // Boolean
-  recommend: number; // Int
-  isLike: boolean; // Boolean
+  recommend: number;
+  isLike: boolean;
+  commentCount: number;
+  comments: Comment[];
 }
 
 export interface NestedComment {
@@ -75,29 +79,20 @@ export interface Comment {
   commentId: number;
   userId: number;
   username: string;
+  userProfile?: string;
   content: string;
   createdAt: string;
   updateAt: string;
-  userProfile: string;
   isDeleted: boolean;
-  comments: Comment[]; // 대댓글
+  comments: Comment[];
 }
 
 export interface CommunityListProps {
   post: Post;
 }
 
-export interface CommunityPost {
-  articleId: number;
-  userId: number;
-  username: string;
-  title: string;
-  createdAt: string;
-  content?: string;
-  category?: string;
-  isLike?: boolean;
-  recommend?: number;
-  popularPost?: boolean;
+export interface CommunityPost extends Post {
+  popularPost: boolean;
 }
 
 export interface SearchCommunityPost {

@@ -2,6 +2,7 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 import { BookHeadphones } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface GenreCard {
   id: number;
@@ -18,6 +19,16 @@ interface GenreCardsProps {
 }
 
 const GenreCards: React.FC<GenreCardsProps> = ({ genres }) => {
+  const navigate = useNavigate();
+
+  // 장르 카드 클릭 시 해당 장르에 맞는 검색 결과로 이동
+  const handleGenreClick = (genre: string) => {
+    navigate({
+      pathname: '/search',
+      search: `?q=${encodeURIComponent(genre)}`
+    });
+  };
+
   return (
     <div className="px-6 py-6">
       <motion.div
@@ -39,7 +50,13 @@ const GenreCards: React.FC<GenreCardsProps> = ({ genres }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className={`relative rounded-xl p-5 flex flex-col justify-between cursor-pointer transform transition hover:scale-105 shadow-lg bg-gradient-to-br ${genre.color}`}
+            className={`relative rounded-xl p-5 flex flex-col justify-between cursor-pointer transform transition hover:scale-105 shadow-lg bg-gradient-to-br ${genre.color} hover:shadow-xl`}
+            onClick={() => handleGenreClick(genre.name)}
+            whileHover={{ 
+              y: -5,
+              filter: 'brightness(110%)'
+            }}
+            whileTap={{ scale: 0.98 }}
           >
             {/* 아이콘 */}
             {genre.icon && <div className="text-4xl text-white mb-4">{genre.icon}</div>}
@@ -57,6 +74,13 @@ const GenreCards: React.FC<GenreCardsProps> = ({ genres }) => {
             </div>
             {/* 곡 수 */}
             <div className="text-sm text-white mt-4">{genre.songs} 곡</div>
+            
+            {/* 검색 버튼 효과 */}
+            <div className="absolute inset-0 bg-black/0 hover:bg-black/10 rounded-xl flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+              <span className="bg-white/20 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
+                탐색하기
+              </span>
+            </div>
           </motion.div>
         ))}
       </div>
