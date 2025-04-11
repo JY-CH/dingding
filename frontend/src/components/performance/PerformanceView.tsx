@@ -11,7 +11,7 @@ import {
   calculateScore,
   findNearestNote,
   findChordChange,
-  calculateChordHitResult
+  calculateChordHitResult,
 } from '../../utils/hitDetection';
 import WebcamView from './WebcamView';
 
@@ -26,14 +26,16 @@ const PerformanceView: React.FC = () => {
     combo: 0,
     score: 0,
     accuracy: 100,
-    maxCombo: 0
+    maxCombo: 0,
   });
-  const [hitEffects, setHitEffects] = useState<Array<{
-    id: number;
-    stringNumber: number;
-    position: number;
-    type: 'perfect' | 'good' | 'miss';
-  }>>([]);
+  const [hitEffects, setHitEffects] = useState<
+    Array<{
+      id: number;
+      stringNumber: number;
+      position: number;
+      type: 'perfect' | 'good' | 'miss';
+    }>
+  >([]);
   const [showCombo, setShowCombo] = useState(false);
   const startTimeRef = useRef<number>(0);
   const [pressedStrings, setPressedStrings] = useState<number[]>([]);
@@ -56,11 +58,11 @@ const PerformanceView: React.FC = () => {
       good: 0,
       miss: 0,
       accuracy: 100,
-      maxCombo: 0
+      maxCombo: 0,
     });
     setHitEffects([]);
     setShowCombo(false);
-    
+
     // 노트 데이터 확인 및 설정
     if (song.notes && Array.isArray(song.notes) && song.notes.length > 0) {
       console.log('노트 데이터 설정:', song.notes);
@@ -85,48 +87,61 @@ const PerformanceView: React.FC = () => {
 
       const key = event.key;
       const stringNumber = parseInt(key);
-      
+
       if (stringNumber >= 1 && stringNumber <= 6) {
-        setPressedStrings(prev => [...prev, stringNumber]);
-        
+        setPressedStrings((prev) => [...prev, stringNumber]);
+
         const currentTime = Date.now() - startTimeRef.current;
-        const hitWindow = currentSong?.difficulty ? HIT_WINDOWS[currentSong.difficulty] : HIT_WINDOWS['medium'];
-        
+        const hitWindow = currentSong?.difficulty
+          ? HIT_WINDOWS[currentSong.difficulty]
+          : HIT_WINDOWS['medium'];
+
         // 코드 변경 확인
         const chord = findChordChange(notes, currentTime, hitWindow);
         if (chord) {
           setCurrentChord(chord);
-          const hitType = calculateChordHitResult(chord, [...pressedStrings, stringNumber], currentTime, hitWindow);
-          
+          const hitType = calculateChordHitResult(
+            chord,
+            [...pressedStrings, stringNumber],
+            currentTime,
+            hitWindow,
+          );
+
           if (hitType !== 'miss') {
             // 코드 변경 성공 처리
-            setHitEffects(prev => [...prev, {
-              id: Date.now(),
-              stringNumber,
-              position: getStringPosition(stringNumber - 1),
-              type: hitType
-            }]);
+            setHitEffects((prev) => [
+              ...prev,
+              {
+                id: Date.now(),
+                stringNumber,
+                position: getStringPosition(stringNumber - 1),
+                type: hitType,
+              },
+            ]);
 
             setShowCombo(true);
             setTimeout(() => setShowCombo(false), 1000);
 
-            setHitResult(prev => {
+            setHitResult((prev) => {
               const newCombo = prev.combo + 1;
               const newMaxCombo = Math.max(prev.maxCombo, newCombo);
               const score = calculateScore(hitType, newCombo);
-              
+
               return {
                 ...prev,
                 [hitType]: prev[hitType] + 1,
                 combo: newCombo,
                 maxCombo: newMaxCombo,
                 score: prev.score + score,
-                accuracy: Math.round((prev.accuracy * (prev.perfect + prev.good + prev.miss) + 100) / (prev.perfect + prev.good + prev.miss + 1))
+                accuracy: Math.round(
+                  (prev.accuracy * (prev.perfect + prev.good + prev.miss) + 100) /
+                    (prev.perfect + prev.good + prev.miss + 1),
+                ),
               };
             });
 
             // 코드 노트 제거
-            setNotes(prev => prev.filter(note => note.chordId !== chord.id));
+            setNotes((prev) => prev.filter((note) => note.chordId !== chord.id));
             setCurrentChord(null);
           }
         } else {
@@ -137,14 +152,17 @@ const PerformanceView: React.FC = () => {
             const timingDiff = calculateTimingDifference(nearestNote, currentTime);
             const hitType = calculateHitResult(timingDiff, hitWindow);
             const accuracy = calculateAccuracy(timingDiff, hitWindow);
-            
+
             // 히트 효과 추가
-            setHitEffects(prev => [...prev, {
-              id: Date.now(),
-              stringNumber,
-              position: getStringPosition(stringNumber - 1),
-              type: hitType
-            }]);
+            setHitEffects((prev) => [
+              ...prev,
+              {
+                id: Date.now(),
+                stringNumber,
+                position: getStringPosition(stringNumber - 1),
+                type: hitType,
+              },
+            ]);
 
             // 콤보 표시
             if (hitType !== 'miss') {
@@ -153,37 +171,46 @@ const PerformanceView: React.FC = () => {
             }
 
             // 결과 업데이트
-            setHitResult(prev => {
+            setHitResult((prev) => {
               const newCombo = hitType === 'miss' ? 0 : prev.combo + 1;
               const newMaxCombo = Math.max(prev.maxCombo, newCombo);
               const score = calculateScore(hitType, newCombo);
-              
+
               return {
                 ...prev,
                 [hitType]: prev[hitType] + 1,
                 combo: newCombo,
                 maxCombo: newMaxCombo,
                 score: prev.score + score,
-                accuracy: Math.round((prev.accuracy * (prev.perfect + prev.good + prev.miss) + accuracy) / (prev.perfect + prev.good + prev.miss + 1))
+                accuracy: Math.round(
+                  (prev.accuracy * (prev.perfect + prev.good + prev.miss) + accuracy) /
+                    (prev.perfect + prev.good + prev.miss + 1),
+                ),
               };
             });
 
             // 히트한 노트 제거
-            setNotes(prev => prev.filter(note => note.id !== nearestNote.id));
+            setNotes((prev) => prev.filter((note) => note.id !== nearestNote.id));
           } else {
             // 미스 처리
-            setHitEffects(prev => [...prev, {
-              id: Date.now(),
-              stringNumber,
-              position: getStringPosition(stringNumber - 1),
-              type: 'miss'
-            }]);
+            setHitEffects((prev) => [
+              ...prev,
+              {
+                id: Date.now(),
+                stringNumber,
+                position: getStringPosition(stringNumber - 1),
+                type: 'miss',
+              },
+            ]);
 
-            setHitResult(prev => ({
+            setHitResult((prev) => ({
               ...prev,
               miss: prev.miss + 1,
               combo: 0,
-              accuracy: Math.round((prev.accuracy * (prev.perfect + prev.good + prev.miss)) / (prev.perfect + prev.good + prev.miss + 1))
+              accuracy: Math.round(
+                (prev.accuracy * (prev.perfect + prev.good + prev.miss)) /
+                  (prev.perfect + prev.good + prev.miss + 1),
+              ),
             }));
           }
         }
@@ -193,9 +220,9 @@ const PerformanceView: React.FC = () => {
     const handleKeyUp = (event: KeyboardEvent) => {
       const key = event.key;
       const stringNumber = parseInt(key);
-      
+
       if (stringNumber >= 1 && stringNumber <= 6) {
-        setPressedStrings(prev => prev.filter(num => num !== stringNumber));
+        setPressedStrings((prev) => prev.filter((num) => num !== stringNumber));
       }
     };
 
@@ -210,7 +237,7 @@ const PerformanceView: React.FC = () => {
   // 히트 효과 제거
   useEffect(() => {
     const timer = setInterval(() => {
-      setHitEffects(prev => prev.filter(effect => Date.now() - effect.id < 500));
+      setHitEffects((prev) => prev.filter((effect) => Date.now() - effect.id < 500));
     }, 100);
 
     return () => clearInterval(timer);
@@ -220,7 +247,7 @@ const PerformanceView: React.FC = () => {
     const basePosition = 8;
     let position = basePosition;
     for (let i = 0; i < index; i++) {
-      position += 8 + (i * 2);
+      position += 8 + i * 2;
     }
     return position;
   };
@@ -235,14 +262,11 @@ const PerformanceView: React.FC = () => {
             <Playlist onSongSelect={handleSongSelect} initialSongs={[]} />
           </div>
         </div>
-        
+
         {/* 오른쪽 영역 (웹캠) */}
         <div className="w-2/3 p-4">
           <div className="h-full bg-gray-800/50 rounded-lg overflow-hidden">
-            <WebcamView 
-              isWebcamOn={isWebcamOn} 
-              setIsWebcamOn={setIsWebcamOn} 
-            />
+            <WebcamView isWebcamOn={isWebcamOn} setIsWebcamOn={setIsWebcamOn} />
           </div>
         </div>
       </div>
@@ -260,7 +284,7 @@ const PerformanceView: React.FC = () => {
             songDetail={null}
             onSheetIndexChange={() => {}}
           />
-          {hitEffects.map(effect => (
+          {hitEffects.map((effect) => (
             <HitEffect
               key={effect.id}
               stringNumber={effect.stringNumber}
@@ -268,10 +292,7 @@ const PerformanceView: React.FC = () => {
               type={effect.type}
             />
           ))}
-          <ComboText
-            combo={hitResult.combo}
-            isVisible={showCombo}
-          />
+          <ComboText combo={hitResult.combo} isVisible={showCombo} />
         </div>
 
         {/* 점수 및 컨트롤 오버레이 */}
@@ -314,4 +335,4 @@ const PerformanceView: React.FC = () => {
   );
 };
 
-export default PerformanceView; 
+export default PerformanceView;
