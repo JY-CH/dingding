@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useRef, memo } from 'react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiPlay, HiStop } from 'react-icons/hi2';
 
-import { Song, Note, ChordChange, SongDetailResponse } from '../../types/performance';
 import {
   createChordNoteWithTiming,
   createChordNoteWithoutShadow,
   createChordNoteWithTimingWithoutShadow,
   chordData,
 } from './chords/ChordUtils';
+import { Song, Note, ChordChange, SongDetailResponse } from '../../types/performance';
 
 interface FeedbackMessage {
   id: number;
@@ -1085,20 +1086,11 @@ const ChordTimeline: React.FC<ChordTimelineProps> = ({
     // 코드와 순서를 관리하기 위한 변수
     let currentIndex = 0;
     const chordCount = songDetail.sheetMusicResponseDtos.length;
-<<<<<<< HEAD
-    const allChords = [...songDetail.sheetMusicResponseDtos]
-      .sort((a, b) => a.sheetOrder - b.sheetOrder);
-    
-    const INTERVAL_SECONDS = 2.2;
-    
-=======
     const allChords = [...songDetail.sheetMusicResponseDtos].sort(
       (a, b) => a.sheetOrder - b.sheetOrder,
     );
 
     const INTERVAL_SECONDS = 3;
-
->>>>>>> 086ad75c0ddedcc1459b2b000f6c700013f9e333
     const createNextChord = () => {
       if (!isActive) return;
       if (currentIndex < chordCount) {
